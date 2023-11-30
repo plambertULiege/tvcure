@@ -1,0 +1,21 @@
+exportPattern("^[[:alpha:]]+")
+
+S3method(plot,tvcure)
+S3method(print,tvcure)
+export(tvcure)
+export(Pcal.fun)
+export(s)
+export(testStat)
+
+importFrom("grDevices", "dev.new")
+importFrom("graphics", "lines", "par", "polygon")
+importFrom("stats", "dgamma", "na.omit", "nlm", "nlminb", "pchisq",
+           "pf", "printCoefmat", "qnorm", "quantile", "sd",
+           "splinefun", "model.matrix", "model.frame")
+importFrom("utils", "tail", "head")
+importFrom("cubicBsplines", "Bsplines", "D2Bsplines")
+importFrom("Rfast", "colsums", "colCumSums", "Crossprod")
+importFrom("Matrix", "bdiag")
+importFrom("mgcv","psum.chisq")
+importFrom("Rfast","colsums", "colCumSums", "Crossprod")
+importFrom("MASS", "ginv")

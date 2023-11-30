@@ -1,0 +1,21 @@
+Package: tvcure
+Type: Package
+Title: Additive cure survival model with exogenous time-varying covariates
+Version: 0.5.0
+Authors@R: person("Philippe","Lambert", 
+ email="p.lambert@uliege.be", role=c("aut","cre"),
+ comment=c(ORCID ="0000-0002-3670-3328"))
+Maintainer: Philippe Lambert <p.lambert@uliege.be>
+BugReports: https://github.com/plambertULiege/tvcure/issues 
+Description: Fit of a double additive cure survival model with exogenous time-varying covariates.
+License: GPL-3
+URL: <https://github.com/plambertULiege/tvcure>
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    cubicBsplines,
+    Rfast,
+    MASS,
+    Matrix,
+    mgcv
+RoxygenNote: 7.2.3
