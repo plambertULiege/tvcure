@@ -2,14 +2,14 @@
 % Please edit documentation in R/additive.tvcure2.R
 \name{additive.tvcure}
 \alias{additive.tvcure}
-\title{Extract additive term estimates from a tvcure object}
+\title{Extract additive term estimates from a tvcure object.}
 \usage{
 additive.tvcure(obj.tvcure, ngrid = 300, ci.level = 0.95)
 }
 \arguments{
-\item{obj.tvcure}{tvcure object.}
+\item{obj.tvcure}{a \code{\link{tvcure.object}}.}
 
-\item{ngrid}{number of gridpoints to evaluate the fitted additive terms.}
+\item{ngrid}{number of gridpoints where the fitted additive terms are evaluated.}
 
 \item{ci.level}{confidence level for the pointwise credible intervals of the additive terms.}
 }
@@ -23,7 +23,7 @@ A list with following elements:
 \item{\code{J1} : \verb{ }}{number of additive terms in the long-term term (or quantum) submodel.}
 \item{\code{additive.lab1} : \verb{ }}{labels of the additive terms in the long-term term (or quantum) submodel.}
 \item{\code{K1} : \verb{ }}{number of P-spline parameters per additive term in the long-term term (or quantum) submodel.}
-\item{\code{knots.1} : \verb{ }}{list of length J1 containing the knots of the additive term in the long-term term (or quantum) submodel.}
+\item{\code{knots1} : \verb{ }}{list of length J1 containing the knots of the additive term in the long-term term (or quantum) submodel.}
 \item{\code{f1.grid} : \verb{ }}{list of length J1 containing for each additive term in the long-term term (or quantum) submodel, a list of length 2 with elements <x> and <y.mat>. 
 Element <x> is a vector of \code{ngrid} equidistant values covering the range of values for the covariate ; 
 <y.mat> is (ngrid x 3) matrix containing in column 1 the estimated values of the additive term at <x> and the bounds of the credible interval for it in the other 2 columns.}
@@ -34,5 +34,5 @@ The same definitions applies for \code{nfixed2}, \code{J2}, \code{additive.lab2}
 \code{f2.grid}, \code{f2}, \code{f2.se} with the additive terms in the short-term (or timing) submodel.
 }
 \description{
-Extract additive term estimates from a tvcure object
+Extract additive term estimates from a tvcure object.
 }

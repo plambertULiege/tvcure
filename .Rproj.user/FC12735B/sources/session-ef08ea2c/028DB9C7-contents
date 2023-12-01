@@ -11,7 +11,8 @@ importFrom("grDevices", "dev.new")
 importFrom("graphics", "lines", "par", "polygon")
 importFrom("stats", "dgamma", "na.omit", "nlm", "nlminb", "pchisq",
            "pf", "printCoefmat", "qnorm", "quantile", "sd",
-           "splinefun", "model.matrix", "model.frame")
+           "splinefun", "model.matrix", "model.frame",
+           "dweibull", "pweibull", "rbinom", "rexp", "rnorm", "rpois", "runif")
 importFrom("utils", "tail", "head")
 importFrom("cubicBsplines", "Bsplines", "D2Bsplines")
 importFrom("Rfast", "colsums", "colCumSums", "Crossprod")

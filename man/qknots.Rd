@@ -36,3 +36,10 @@ Specification of the knots of a cubic B-spline basis for given data.
 x = rnorm(100)
 qknots(x)
 }
+\references{
+Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
+with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, in press.
+}
+\author{
+Philippe Lambert \email{p.lambert@uliege.be}
+}

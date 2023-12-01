@@ -1,4 +1,35 @@
-predict.tvcure <- function(obj.tvcure, df.new, ci.level=.95){
+#' Predict method for tvcure model fits
+#' @description
+#' Predicted values based on a tvcure object.
+#' 
+#'
+#' @param x A \code{\link{tvcure.object}}. 
+#' @param df.new An optional data frame in which to look for the 'id' (distinguishing the different units), 'time' and covariate values for which 'predictions' should be made. Time values for a given 'id' should be a series of consecutive integers starting with 1. If \code{df.new} is NULL, then predictions are assumed to concern a single unit with consecutive time values starting with 1.
+#' @param ci.level Credible level for the reported estimates. (Default: 0.95). 
+#'
+#' @return A list containing, in addition to the optional \code{df.new} entries, the following elements:
+#' \itemize{
+#' \item{\code{Hp} : \verb{ }}{Matrix containing estimates of the cumulative population hazard \eqn{H_p(t|x)} with its credible interval bounds at time \eqn{t} given the history of covariates.}
+#' \item{\code{lHp} : \verb{ }}{Matrix containing estimates of the log cumulative population hazard \eqn{\log H_p(t|x)} with its standard error and credible interval bounds at time \eqn{t} given the history of covariates.}
+#' \item{\code{se.lHp} : \verb{ }}{Vector containing the standard errors of the estimated log cumulative population hazard at time \eqn{t} given the history of covariates.}
+#' \item{\code{hp} : \verb{ }}{Matrix containing estimates of the population hazard \eqn{h_p(t|x)} with its credible interval bounds at time \eqn{t} given the history of covariates.}
+#' \item{\code{lhp} : \verb{ }}{Matrix containing estimates of the log population hazard \eqn{\log h_p(t|x)} with its standard error and credible interval bounds at time \eqn{t} given the history of covariates.}
+#' \item{\code{se.lhp} : \verb{ }}{Vector containing the standard errors of the estimated log population hazard at time \eqn{t} given the history of covariates.}
+#' \item{\code{Sp} : \verb{ }}{Matrix containing estimates of the population survival fuction \eqn{S_p(t|x)=\exp(-H_p(t|x))} with its credible interval bounds at time \eqn{t} given the history of covariates.}
+#' \item{\code{pcure} : \verb{ }}{Matrix containing estimates of the cure probability \eqn{P(cure|x)} with its credible interval bounds at time \eqn{t} if covariates keep their current values.}
+#' \item{\code{llpcure} : \verb{ }}{Matrix containing estimates of the log-log cure probability \eqn{\log(-\log(P(cure|x)))}, with its standard error and credible interval bounds at time \eqn{t} if covariates keep their current values.}
+#' \item{\code{se.llpcure} : \verb{ }}{Vector containing the standard errors of the estimated log-log cure probability \eqn{\log(-\log P(cure|x))} given the history of covariates.}
+#' }
+#' 
+#' @author Philippe Lambert \email{p.lambert@uliege.be}
+#' @references Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
+#' with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, in press.
+#' 
+#' @export
+#'
+#' @examples
+predict.tvcure <- function(x, df.new, ci.level=.95){
+    obj.tvcure = x
     ## Check that <id> entry in df.new. If missing, create one
     if (is.null(df.new$id)) df.new$id = rep(1,nrow(df.new))
     ##
@@ -17,7 +48,7 @@ predict.tvcure <- function(obj.tvcure, df.new, ci.level=.95){
     id = df.new$id
     ids = unique(id)
     ans = df.new
-    ans$Sp = ans$Su = ans$lhp = ans$se.lhp = ans$Hp = ans$se.lHp = numeric(nrow(df.new))
+    ans$Sp = ans$lhp = ans$se.lhp = ans$Hp = ans$se.lHp = numeric(nrow(df.new))
     ans$llpcure = ans$pcure = ans$se.llpcure = numeric(nrow(df.new))
     for (ii in 1:length(ids)){ ## Loop over df.new$id values
         df.sub = subset(df.new, id==ids[ii])

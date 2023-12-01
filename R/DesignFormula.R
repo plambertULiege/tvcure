@@ -6,15 +6,15 @@
 #' Internal function extracting design matrices from formulas in the tvcure function and computing penalty related matrices
 #' @description Internal function extracting design matrices from formulas in the tvcure function and computing penalty related matrices.
 #'
-#' @param formula a formula describing the fixed effects and the additive terms in a regression model.
-#' @param data a dataframe containing the data.
-#' @param K number of B-splines to describe an additive term.
-#' @param pen.order desired penalty order for the spline parameters in the additive terms.
+#' @param formula A formula describing the fixed effects and the additive terms in a regression model.
+#' @param data A dataframe containing the data.
+#' @param K Number of B-splines to describe an additive term.
+#' @param pen.order Desired penalty order for the spline parameters in the additive terms.
 #' @param knots.x (Optional) list of length J with the knots associated to each of the J additive terms. Automatically specified from the data by default.
-#' @param n number of units (Default: number of rows in the design matrix constructed from the formula and the data frame).
+#' @param n Number of units (Default: number of rows in the design matrix constructed from the formula and the data frame).
 #' @param nointercept Logical indicating if the intercept should be set to zero (Default: FALSE).
 #'
-#' @return a list with
+#' @return A list with
 #' \itemize{
 #' \item{\code{J} : \verb{ }}{number of additive terms.}
 #' \item{\code{K} : \verb{ }}{number of B-splines in a basis used to estimate an additive term.}
@@ -38,9 +38,8 @@
 #' }
 #'
 #' @author Philippe Lambert \email{p.lambert@uliege.be}
-#' @references Lambert, P. and Kreyenfeld, M. (2023). Exogenous time-varying covariates in double additive cure survival model
-#' with application to fertility.
-#' \emph{Journal of the Royal Statistical Society, Series A}, in press.
+#' @references Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
+#' with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, in press.
 #'
 #' @keywords internal
 #'

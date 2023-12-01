@@ -9,26 +9,26 @@ tvcure(
   formula2,
   df,
   method = c("S0", "F0"),
-  K1 = 10,
-  K2 = 10,
-  pen.order1 = 2,
-  pen.order2 = 2,
-  b.tau = 1e-06,
   K0 = 20,
   pen.order0 = 2,
-  tau.0 = 1,
-  tau.method = c("Laplace", "Schall", "grid", "none"),
-  tau.min = 1,
-  lambda1.min = 1,
-  lambda2.min = 1,
+  K1 = 10,
+  pen.order1 = 2,
+  K2 = 10,
+  pen.order2 = 2,
   phi.0 = NULL,
   beta.0 = NULL,
   gamma.0 = NULL,
-  lambda1.0 = NULL,
-  lambda2.0 = NULL,
-  lambda.method = c("LPS", "LPS2", "Schall", "nlminb", "none"),
+  b.tau = 1e-06,
   a = 1,
   b = 1e-04,
+  tau.0 = 1,
+  tau.min = 1,
+  tau.method = c("Laplace", "Schall", "grid", "none"),
+  lambda1.0 = NULL,
+  lambda1.min = 1,
+  lambda2.0 = NULL,
+  lambda2.min = 1,
+  lambda.method = c("LPS", "LPS2", "Schall", "nlminb", "none"),
   observed.hessian = TRUE,
   use.Rfast = TRUE,
   Wood.test = TRUE,
@@ -53,32 +53,20 @@ tvcure(
 \item{\code{event} : \verb{ }}{a sequence of 0-1 of event indicators. For the lines corresponding to a given unit, it starts with 0 values concluded by a 0 in case of right-censoring or by a 1 if the event is observed at the end of the follow-up.}
 }}
 
-\item{method}{method "S0" or "F0" used to specify the dependence of the cumulative hazard dynamics on covariates. 
+\item{method}{Method ("S0" or "F0") used to specify the dependence of the cumulative hazard dynamics on covariates (Default: "S0"):
 Method S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Method F0: \eqn{F(t|x) = F_0(t)^{\exp{\gamma'x}}}}
-
-\item{K1}{Number of P-splines for a given additive term in the long-term (or quantum) survival sumbodel (Default: 10).}
-
-\item{K2}{Number of P-splines for a given additive term in the short-term (or timing) survival sumbodel (Default: 10).}
-
-\item{pen.order1}{Penalty order for P-splines in the long-term survival (or quantum) sumbodel (Default: 2).}
-
-\item{pen.order2}{Penalty order for P-splines in the short-term survival (or timing) sumbodel (Default: 2).}
-
-\item{b.tau}{Hyperprior parameter in the \eqn{Gamma(1,b.tau)} prior for the penalty parameter \eqn{\tau_0} tuning the smoothness of \eqn{\log f_0(t)} (Default: 1e-6).}
 
 \item{K0}{Number of B-splines used to specify \eqn{\log f_0(t)} (Default: 20).}
 
-\item{pen.order0}{Penalty order for P-splines used to specify \eqn{\log f_0(t)} (Default: 2).}
+\item{pen.order0}{Penalty order for the P-splines used to specify \eqn{\log f_0(t)} (Default: 2).}
 
-\item{tau.0}{Starting value for \eqn{\tau_0} (Default: 1).}
+\item{K1}{Number of P-splines for a given additive term in the long-term (or quantum) survival sumbodel (Default: 10).}
 
-\item{tau.method}{Method used to calculate the posterior mode of \eqn{p(\tau_0|data)}: "Laplace" (Laplace P-splines), "Schall" (Fellner-Schall algorithm), "grid" (best choice in a regular grid on the log-scale) or "none" (stick to the initial value tau.0). (Default: "Laplace").}
+\item{pen.order1}{Penalty order for the P-splines in the long-term survival (or quantum) sumbodel (Default: 2).}
 
-\item{tau.min}{Minimal value for the penalty parameter \eqn{tau_0}.}
+\item{K2}{Number of P-splines for a given additive term in the short-term (or timing) survival sumbodel (Default: 10).}
 
-\item{lambda1.min}{Minimal value for the J1 penalty parameters \eqn{\lambda_1} of the additive terms in the long-term survival (or quantum) submodel. (Default: 1.0).}
-
-\item{lambda2.min}{Minimal value for the J2 penalty parameters \eqn{\lambda_2} of the additive terms in the short-term survival (or timing) submodel. (Default: 1.0).}
+\item{pen.order2}{Penalty order for the P-splines in the short-term survival (or timing) sumbodel (Default: 2).}
 
 \item{phi.0}{(Optional) vector of length \code{K0} with starting values for the P-spline parameters in \eqn{\log f_0(t)}.}
 
@@ -86,21 +74,33 @@ Method S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Method F0: \eqn{F(t|x) = F
 
 \item{gamma.0}{(Optional) starting value for the regression and spline parameters in the short-term survival (or timing) submodel.}
 
+\item{b.tau}{Hyperprior parameter in the \eqn{Gamma(1,b.tau)} prior for the penalty parameter \eqn{\tau_0} tuning the smoothness of \eqn{\log f_0(t)} (Default: 1e-6).}
+
+\item{a}{Hyperprior parameter in the \eqn{Gamma(a,b)} priors for the penalty parameters \eqn{\lambda_1} and \eqn{\lambda_2} tuning the smoothness of the additive terms in the long-term (quantum) and short-term (timing) survival submodels. (Default: 1.0).}
+
+\item{b}{Hyperprior parameter in the \eqn{Gamma(a,b)} priors for the penalty parameters \eqn{\lambda_1} and \eqn{\lambda_2} tuning the smoothness of the additive terms in the long-term (quantum) and short-term (timing) survival submodels. (Default: 1e-6).}
+
+\item{tau.0}{Starting value for \eqn{\tau_0} (Default: 1).}
+
+\item{tau.min}{Minimal value for the penalty parameter \eqn{tau_0}. (Default: 1.0).}
+
+\item{tau.method}{Method used to calculate the posterior mode of \eqn{p(\tau_0|data)}: "Laplace" (Laplace P-splines), "Schall" (Fellner-Schall algorithm), "grid" (best choice in a regular grid on the log-scale) or "none" (stick to the initial value tau.0). (Default: "Laplace").}
+
 \item{lambda1.0}{(Optional) J1-vector with starting values for the penalty parameters of the additive terms in the long-term survival (or quantum) submodel.}
+
+\item{lambda1.min}{Minimal value for the J1 penalty parameters \eqn{\lambda_1} of the additive terms in the long-term survival (or quantum) submodel. (Default: 1.0).}
 
 \item{lambda2.0}{(Optional) J2-vector with starting values for the penalty parameters of the additive terms in the short-term survival (or timing) submodel.}
 
-\item{lambda.method}{Method used ("LPS", "LPS2", "Schall", "nlminb" or "none") to select the the penalty parameters of the additive terms in in the long-term survival (or quantum) submodel:
+\item{lambda2.min}{Minimal value for the J2 penalty parameters \eqn{\lambda_2} of the additive terms in the short-term survival (or timing) submodel. (Default: 1.0).}
+
+\item{lambda.method}{Method used ("LPS", "LPS2", "Schall", "nlminb" or "none") to select the penalty parameters of the additive terms in the long-term survival (or quantum) submodel:
 \itemize{
 \item{\code{LPS} or \code{LPS2} : \verb{ }}{based on Laplace P-splines where the marginal posterior of the penalty parameters is maximized using a fixed-point method ;} 
 \item{\code{Schall} : \verb{ }}{Fellner-Schall method ;}
 \item{\code{nlminb} : \verb{ }}{nonlinear maximization of the marginal posterior of the penalty parameters using the R function <nlminb> ;}
 \item{\code{none} : \verb{ }}{penalty parameters are set at their initial values.}
 }}
-
-\item{a}{Hyperprior parameter in the \eqn{Gamma(a,b)} priors for the penalty parameters \eqn{\lambda_1} and \eqn{\lambda_2} tuning the smoothness of the additive terms in the long-term (quantum) and short-term (timing) survival submodels. (Default: 1.0).}
-
-\item{b}{Hyperprior parameter in the \eqn{Gamma(a,b)} priors for the penalty parameters \eqn{\lambda_1} and \eqn{\lambda_2} tuning the smoothness of the additive terms in the long-term (quantum) and short-term (timing) survival submodels. (Default: 1e-6).}
 
 \item{observed.hessian}{Logical indicating if a fast approximation of the Hessian matrix based on cross-products is preferred over its expected value. (Default: TRUE).}
 
@@ -134,4 +134,19 @@ An object of type \code{\link{tvcure.object}}.
 }
 \description{
 Fit of a double additive cure survival model with exogenous time-varying covariates.
+}
+\examples{
+require(tvcure)
+## data(tvcure_Data)
+## fit = tvcure(...)
+## print(fit) ; plot(fit)
+ 
+}
+\references{
+Lambert, P. and Kreyenfeld, M. (2023). Exogenous time-varying covariates in double additive cure survival model
+with application to fertility.
+\emph{Journal of the Royal Statistical Society, Series A}, in press.
+}
+\author{
+Philippe Lambert \email{p.lambert@uliege.be}
 }

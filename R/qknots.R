@@ -15,7 +15,11 @@
 #' \item{\code{Pd} : \verb{ }}{penalty matrix for the B-spline coefficients.}
 #' \item{\code{pen.order} : \verb{ }}{penalty order for the P-spline model.}
 #' }
-
+#' 
+#' @author Philippe Lambert \email{p.lambert@uliege.be}
+#' @references Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
+#' with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, in press.
+#' 
 #' @export
 #'
 #' @examples

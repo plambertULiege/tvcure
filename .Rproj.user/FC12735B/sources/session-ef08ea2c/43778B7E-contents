@@ -1,7 +1,7 @@
-#' Extract additive term estimates from a tvcure object
+#' Extract additive term estimates from a tvcure object.
 #'
-#' @param obj.tvcure tvcure object.
-#' @param ngrid number of gridpoints to evaluate the fitted additive terms.
+#' @param obj.tvcure a \code{\link{tvcure.object}}.
+#' @param ngrid number of gridpoints where the fitted additive terms are evaluated.
 #' @param ci.level confidence level for the pointwise credible intervals of the additive terms.
 #'
 #' @return A list with following elements:
@@ -13,7 +13,7 @@
 #' \item{\code{J1} : \verb{ }}{number of additive terms in the long-term term (or quantum) submodel.}
 #' \item{\code{additive.lab1} : \verb{ }}{labels of the additive terms in the long-term term (or quantum) submodel.}
 #' \item{\code{K1} : \verb{ }}{number of P-spline parameters per additive term in the long-term term (or quantum) submodel.}
-#' \item{\code{knots.1} : \verb{ }}{list of length J1 containing the knots of the additive term in the long-term term (or quantum) submodel.}
+#' \item{\code{knots1} : \verb{ }}{list of length J1 containing the knots of the additive term in the long-term term (or quantum) submodel.}
 #' \item{\code{f1.grid} : \verb{ }}{list of length J1 containing for each additive term in the long-term term (or quantum) submodel, a list of length 2 with elements <x> and <y.mat>. 
 #' Element <x> is a vector of \code{ngrid} equidistant values covering the range of values for the covariate ; 
 #' <y.mat> is (ngrid x 3) matrix containing in column 1 the estimated values of the additive term at <x> and the bounds of the credible interval for it in the other 2 columns.}
@@ -139,15 +139,15 @@ additive.tvcure <- function(obj.tvcure,ngrid=300, ci.level=.95){
     return(ans)
 }
 
-## Generic function to plot credible region
-plotRegion = function(x,mat,add=FALSE,xlim=range(x),ylim=range(mat),
-                      lwd=2,xlab="",ylab="",main="",...){
-  f = mat[,1] ; f.low = mat[,2] ; f.up = mat[,3]
-  if (add==FALSE) plot(x,f,type="n",ylim=ylim,xlim=xlim,
-                       lwd=lwd,xlab=xlab,ylab=ylab,main=main,...)
-  polygon(c(x,rev(x)),c(f.low,rev(f.up)),col="grey",border=F)
-  lines(x,f,lwd=lwd)
-}
+# ## Generic function to plot credible region
+# plotRegion = function(x,mat,add=FALSE,xlim=range(x),ylim=range(mat),
+#                       lwd=2,xlab="",ylab="",main="",...){
+#   f = mat[,1] ; f.low = mat[,2] ; f.up = mat[,3]
+#   if (add==FALSE) plot(x,f,type="n",ylim=ylim,xlim=xlim,
+#                        lwd=lwd,xlab=xlab,ylab=ylab,main=main,...)
+#   polygon(c(x,rev(x)),c(f.low,rev(f.up)),col="grey",border=F)
+#   lines(x,f,lwd=lwd)
+# }
 
 
 

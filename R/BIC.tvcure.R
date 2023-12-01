@@ -5,17 +5,16 @@
 #'
 #' @usage \method{BIC}{tvcure}(x, ...)
 #'
-#' @param x an object of class \code{\link{tvcure.object}}.
-#' @param ... optionally more fitted objects.
+#' @param x An object of class \code{\link{tvcure.object}}.
+#' @param ... Optionally more fitted objects.
 #'
-#' @details Provides the BIC of the fitted tvcure model in a given \code{\link{tvcure.object}}.
+#' @details Bayesian (Schwarz) information criterion in a tvcure object, with a penalty calculated using the total effective degrees of freedom and the total number of observed events, -2log(L) + log(d)*ED.tot, smaller values being preferred during model selection.
 #'
-#' @return The BIC of the tvcure model in \code{x}.
+#' @return The BIC of the fitted tvcure model in \code{x}.
 #'
 #' @author Philippe Lambert \email{p.lambert@uliege.be}
-#' @references Lambert, P. and Kreyenfeld, M. (2023). Exogenous time-varying covariates in double additive cure survival model
-#' with application to fertility.
-#' \emph{Journal of the Royal Statistical Society, Series A}, in press.
+#' @references Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
+#' with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, in press.
 #'
 #' @examples
 #' require(tvcure)

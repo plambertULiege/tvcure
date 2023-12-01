@@ -2,27 +2,25 @@
 % Please edit documentation in R/centeredBasis_gen.R
 \name{centeredBasis.gen}
 \alias{centeredBasis.gen}
-\title{Generation of a recentered cubic B-spline basis matrix in additive models.}
+\title{Generation of a recentered cubic B-spline basis matrix.}
 \usage{
-centeredBasis.gen(x, knots, cm = NULL, pen.order = 2, ref = NULL)
+centeredBasis.gen(x, knots, cm = NULL, pen.order = 2)
 }
 \arguments{
-\item{x}{vector of values where to compute the "recentered" B-spline basis.}
+\item{x}{Vector of values where the "recentered" B-spline basis is evaluated.}
 
-\item{knots}{vector of knots (that should cover the values in <x>).}
+\item{knots}{Vector of knots that must cover the values in \code{x}.}
 
 \item{cm}{(Optional) values subtracted from each column of the original B-spline matrix.}
 
-\item{pen.order}{penalty order for the B-spline parameters (Default: 2).}
-
-\item{ref}{optional reference value for <x> (Default: NULL).}
+\item{pen.order}{Order of the penalty applied on B-spline parameters. (Default: 2).}
 }
 \value{
 List containing
 \itemize{
-\item{\code{B} : \verb{ }}{centered cubic B-spline matrix (with columns recentered to have mean 0 over equi-spaced x values on the range of the knots).}
-\item{\code{Dd} : \verb{ }}{difference matrix (of order <pen.order>) for the associated centered B-spline matrix.}
-\item{\code{Pd} : \verb{ }}{penalty matrix (of order <pen.order>) for the associated centered B-spline matrix.}
+\item{\code{B} : \verb{ }}{centered cubic B-spline matrix obtained by subtracting \code{cm[j]} from the jth B-spline in column j of the original B-spline matrix evaluated at \code{x}.}
+\item{\code{Dd} : \verb{ }}{difference matrix (of order \code{pen.order}) for the associated centered B-spline matrix.}
+\item{\code{Pd} : \verb{ }}{penalty matrix (of order \code{pen.order}) for the associated centered B-spline matrix.}
 \item{\code{K} : \verb{ }}{number of centered B-splines in the basis.}
 \item{\code{cm} : \verb{ }}{values subtracted from each column of the original B-spline matrix. By default, this is a vector containing the mean of each column in the original B-spline matrix.}
 }
@@ -39,9 +37,8 @@ matplot(x,obj$B,type="l",ylab="Centered B-splines")
 colMeans(obj$B)
 }
 \references{
-Lambert, P. and Kreyenfeld, M. (2023). Exogenous time-varying covariates in double additive cure survival model
-with application to fertility.
-\emph{Journal of the Royal Statistical Society, Series A}, in press.
+Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
+with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, in press.
 }
 \author{
 Philippe Lambert \email{p.lambert@uliege.be}

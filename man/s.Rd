@@ -7,10 +7,12 @@
 s(x, ref = NULL)
 }
 \arguments{
-\item{x}{Name of the variable for which an additive term is requested}
+\item{x}{Name of the variable for which an additive term is requested.}
+
+\item{(Optional)}{reference value for \code{x} where the additive term is zero.}
 }
 \value{
-The submitted variable for which an additive term is required
+The submitted variable for which an additive term is required.
 }
 \description{
 Specification of smooth terms in formulas in the tvcure function.

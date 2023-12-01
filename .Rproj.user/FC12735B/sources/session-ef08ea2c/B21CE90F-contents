@@ -1,15 +1,15 @@
-#' Akaike Information Criterion (AIC) of a \code{tvcure.object}.
+#' Akaike Information Criterion (AIC) of a tvcure object.
 #'
 #' @description
 #' Akaike Information Criterion (AIC) for the fitted tvcure model in a \code{tvcure.object}.
 #'
 #' @usage \method{AIC}{tvcure}(x, ..., k=2)
 #'
-#' @param x an object of class \code{\link{tvcure.object}}.
+#' @param x a \code{\link{tvcure.object}}.
 #' @param k the penalty per parameter to be used (Default: k=2 for the classical AIC).
-#' @param ... optionally more fitted objects.
+#' @param ... other optional tvcure objects.
 #'
-#' @details Provides the AIC of the fitted tvcure model in a given \code{\link{tvcure.object}}.
+#' @details Akaike information criterion for the fitted model in a tvcure object, with a penalty calculated using the total effective degrees of freedom, -2log(L) + 2*ED.tot, larger values being preferred during model selection.
 #'
 #' @return The AIC of the tvcure model in \code{x}.
 #'

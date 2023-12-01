@@ -1,22 +1,22 @@
-#' Akaike Information Criterion (AIC) of a \code{tvcure.object}.
+#' Akaike Information Criterion (AIC) of a tvcure object.
 #'
 #' @description
 #' Akaike Information Criterion (AIC) for the fitted tvcure model in a \code{tvcure.object}.
 #'
 #' @usage \method{AIC}{tvcure}(x, ..., k=2)
 #'
-#' @param x an object of class \code{\link{tvcure.object}}.
-#' @param k the penalty per parameter to be used (Default: k=2 for the classical AIC).
-#' @param ... optionally more fitted objects.
+#' @param x A \code{\link{tvcure.object}}.
+#' @param k The penalty per parameter to be used. (Default: k=2 for the classical AIC).
+#' @param ... Other optional tvcure objects.
 #'
-#' @details Provides the AIC of the fitted tvcure model in a given \code{\link{tvcure.object}}.
+#' @details Akaike information criterion for the fitted model in a tvcure object, with a penalty calculated using the total effective degrees of freedom, -2log(L) + 2*ED.tot, larger values being preferred during model selection.
 #'
-#' @return The AIC of the tvcure model in \code{x}.
+#' @return The AIC of the fitted tvcure model in \code{x}.
 #'
 #' @author Philippe Lambert \email{p.lambert@uliege.be}
-#' @references Lambert, P. and Kreyenfeld, M. (2023). Exogenous time-varying covariates in double additive cure survival model
-#' with application to fertility.
-#' \emph{Journal of the Royal Statistical Society, Series A}, in press.
+#' @references Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
+#' with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, in press.
+
 #'
 #' @examples
 #' require(tvcure)

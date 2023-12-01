@@ -2,19 +2,20 @@
 % Please edit documentation in R/Pcal_fun.R
 \name{Pcal.fun}
 \alias{Pcal.fun}
-\title{Function to generate Penalty matrix for additive terms.}
+\title{Function to generate a penalty matrix for additive terms.}
 \usage{
 Pcal.fun(nfixed, lambda, Pd.x)
 }
 \arguments{
-\item{nfixed}{the number of fixed (i.e. non-penalized) parameters}
+\item{nfixed}{the number of fixed (i.e. non-penalized) parameters.}
 
-\item{lambda}{a vector of \code{p} penalty parameters where each component is associated to a sub-vector of spline parameters of length \code{J}}
+\item{lambda}{a vector of \code{p} penalty parameters where each component is associated to a sub-vector of spline parameters of length \code{J}.}
 
-\item{Pd.x}{a penalty matrix of size \code{J} associated to a given sub-vector of spline parameters}
+\item{Pd.x}{a penalty matrix of size \code{J} associated to a given sub-vector of spline parameters.
+.}
 }
 \value{
-A block diagonal penalty matrix of size \code{(nfixed+pJ)} given by Blockdiag(diag(0,\code{nfixed}), diag(\code{lambda}).kron.\code{Pd.x})
+A block diagonal penalty matrix of size \code{(nfixed+pJ)} given by Blockdiag(diag(0,\code{nfixed}), diag(\code{lambda}).kron.\code{Pd.x}).
 }
 \description{
 Compute the penalty matrix associated to a vector containing fixed (non-penalized) parameters and equal-size sub-vectors of penalized spline parameters.
@@ -26,4 +27,11 @@ nfixed = 2 ## 2 unpenalized parameters
 ## Global penalty matrix when 2 unpenalized parameters and 2 additive terms with
 ##   2 vectors of 5 P-splines coefficients with lambda values 10 and 100 respectively.
 Pcal.fun(nfixed=2,lambda=c(10,100),Pd)
+}
+\references{
+Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
+with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, in press.
+}
+\author{
+Philippe Lambert \email{p.lambert@uliege.be}
 }

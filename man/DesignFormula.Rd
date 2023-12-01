@@ -15,22 +15,22 @@ DesignFormula(
 )
 }
 \arguments{
-\item{formula}{a formula describing the fixed effects and the additive terms in a regression model.}
+\item{formula}{A formula describing the fixed effects and the additive terms in a regression model.}
 
-\item{data}{a dataframe containing the data.}
+\item{data}{A dataframe containing the data.}
 
-\item{K}{number of B-splines to describe an additive term.}
+\item{K}{Number of B-splines to describe an additive term.}
 
-\item{pen.order}{desired penalty order for the spline parameters in the additive terms.}
+\item{pen.order}{Desired penalty order for the spline parameters in the additive terms.}
 
 \item{knots.x}{(Optional) list of length J with the knots associated to each of the J additive terms. Automatically specified from the data by default.}
 
-\item{n}{number of units (Default: number of rows in the design matrix constructed from the formula and the data frame).}
+\item{n}{Number of units (Default: number of rows in the design matrix constructed from the formula and the data frame).}
 
 \item{nointercept}{Logical indicating if the intercept should be set to zero (Default: FALSE).}
 }
 \value{
-a list with
+A list with
 \itemize{
 \item{\code{J} : \verb{ }}{number of additive terms.}
 \item{\code{K} : \verb{ }}{number of B-splines in a basis used to estimate an additive term.}
@@ -57,9 +57,8 @@ If additive terms are specified in the formula, the following elements also appe
 Internal function extracting design matrices from formulas in the tvcure function and computing penalty related matrices.
 }
 \references{
-Lambert, P. and Kreyenfeld, M. (2023). Exogenous time-varying covariates in double additive cure survival model
-with application to fertility.
-\emph{Journal of the Royal Statistical Society, Series A}, in press.
+Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
+with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, in press.
 }
 \author{
 Philippe Lambert \email{p.lambert@uliege.be}
