@@ -28,7 +28,7 @@ tvcure(
   lambda1.min = 1,
   lambda2.0 = NULL,
   lambda2.min = 1,
-  lambda.method = c("LPS", "LPS2", "Schall", "nlminb", "none"),
+  lambda.method = c("LPS2", "LPS", "Schall", "nlminb", "none"),
   observed.hessian = TRUE,
   use.Rfast = TRUE,
   Wood.test = TRUE,
@@ -94,9 +94,9 @@ Method S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Method F0: \eqn{F(t|x) = F
 
 \item{lambda2.min}{Minimal value for the J2 penalty parameters \eqn{\lambda_2} of the additive terms in the short-term survival (or timing) submodel. (Default: 1.0).}
 
-\item{lambda.method}{Method used ("LPS", "LPS2", "Schall", "nlminb" or "none") to select the penalty parameters of the additive terms in the long-term survival (or quantum) submodel:
+\item{lambda.method}{Method used ("LPS2", "LPS", "Schall", "nlminb" or "none") to select the penalty parameters of the additive terms in the long-term survival (or quantum) submodel:
 \itemize{
-\item{\code{LPS} or \code{LPS2} : \verb{ }}{based on Laplace P-splines where the marginal posterior of the penalty parameters is maximized using a fixed-point method ;} 
+\item{\code{LPS2} or \code{LPS} : \verb{ }}{based on Laplace P-splines where the marginal posterior of the penalty parameters is maximized using a fixed-point method ;} 
 \item{\code{Schall} : \verb{ }}{Fellner-Schall method ;}
 \item{\code{nlminb} : \verb{ }}{nonlinear maximization of the marginal posterior of the penalty parameters using the R function <nlminb> ;}
 \item{\code{none} : \verb{ }}{penalty parameters are set at their initial values.}
@@ -137,9 +137,14 @@ Fit of a double additive cure survival model with exogenous time-varying covaria
 }
 \examples{
 require(tvcure)
-## data(tvcure_Data)
-## fit = tvcure(...)
-## print(fit) ; plot(fit)
+## Simulated data generation
+beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2) 
+df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
+                          RC.dist="exponential",mu.cens=550)$df.raw
+## TVcure model fitting
+model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), df=df.raw)
+print(model)
+plot(model)
  
 }
 \references{

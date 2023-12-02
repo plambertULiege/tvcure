@@ -3,17 +3,23 @@
 #' @description
 #' Simulation of cure survival data in a counting process format with time-varying covariates.
 #' The population hazard at time t  underlying the tvcure model is, for given covariate values,
-#' \eqn{h_p(t|{\bf v}(t),\tilde{\bf v}(t)) = \mathrm{e}^{\eta_\vartheta({\bf v}(t))+\eta_F(\tilde{\bf v}(t))}
+#' \deqn{h_p(t|{\bf v}(t),\tilde{\bf v}(t)) = \mathrm{e}^{\eta_\vartheta({\bf v}(t))+\eta_F(\tilde{\bf v}(t))}
 #' f_0(t)S_0(t)^{\exp(\eta_F(\tilde{\bf v}(t)))-1}}
 #' with linear predictors
-#' 
-#' \eqn{\eta_\vartheta({\bf v}(t)) = \beta_0 + \beta_1 z_1(t) + \beta_2 z_2 + f_1(x_1(t)) + f_2(x_2(t))}
-#' and \eqn{\eta_F(\tilde{{\bf v}}(t)) = \gamma_1 z_3(t) +  \gamma_2 z_4 +  \tilde{f}_1(x_3(t)) + \tilde{f}_2(x_4(t))}
-#' 
-#' where \eqn{{\bf v}(t)=(z_1(t),z_2,x_1(t),x_2(t))}
-#' and \eqn{\tilde{\bf v}(t)=(z_3(t),z_4,x_3(t),x_4(t))},
+#' \deqn{\eta_\vartheta({\bf v}(t)) = \beta_0 + \beta_1 z_1(t) + \beta_2 z_2 + f_1(x_1(t)) + f_2(x_2(t)) ~;~
+#'  \eta_F(\tilde{{\bf v}}(t)) = \gamma_1 z_3(t) +  \gamma_2 z_4 +  \tilde{f}_1(x_3(t)) + \tilde{f}_2(x_4(t))}
+#' where \eqn{{\bf v}(t)=(z_1(t),z_2,x_1(t),x_2(t))}, \eqn{\tilde{\bf v}(t)=(z_3(t),z_4,x_3(t),x_4(t))},
 #' with \eqn{x_3(t)=x_1(t)} a time-varying covariate shared by the 2 submodels.
 #' 
+#' The density \eqn{f_0(t)} governing the reference cumulative hazard dynamic is, 
+#' by default, a Weibull with shape parameter 2.65 and scale parameter 100, 
+#' ensuring that all susceptible units will experience the monitored event by time Tmax=300.
+#' 
+#' The functions defining the additive terms are
+#'  \deqn{f_1(x_1)= -.63 + .57\arctan(4x_1) ~;~f_2(x_2)= -.5 \cos(2\pi x_2)}
+#'  \deqn{\tilde{f}_1(\tilde{x}_3) = .15 - .5 \cos\big(\pi(\tilde{x}_3-.75)\big)~;~
+#'  \tilde{f}_2(\tilde{x}_4) = .8\big(\tilde{x}_4-.5\big)}
+#'  
 #' Covariates are generated as follows:
 #' \itemize{
 #'  \item{ } \eqn{z_1(t), z_3(t)} are recentered time-varying Bernoulli(0.5) on \eqn{(0,T_{max})} ;
@@ -22,14 +28,20 @@
 #' }
 #' More details can be found in Lambert and Kreyenfeld (2024).
 #' 
+#' @usage simulateTVcureData(n, seed, Tmax=300,
+#'        f0F0 = list(f0=function(x) dweibull(x, 2.65, 100), 
+#'                    F0=function(x) pweibull(x, 2.65, 100)),
+#'        beta, gam, RC.dist=c("uniform","exponential","Tmax"),
+#'        tRC.min = 120, mu.cens=40, get.details=TRUE)
 #' @param n Number of units.
 #' @param seed Seed (integer) for the random TVcure data generator.
+#' @param Tmax Maximum follow-up time after which a unit is considered cured in the absence of a previous event. (Default: 300).
+#' @param f0F0 List of length 2 providing the density \eqn{f_0(t)} and associated cdf \eqn{F_0(t)} governing the bounded hazard dynamic on (0,Tmax), with \eqn{F_0}(Tmax)=1.0. (Default: f0F0 = list(f0=function(x) dweibull(x, 2.65, 100), F0=function(x) pweibull(x, 2.65, 100))).
 #' @param beta 3-vector with the regression coefficients <beta> in the long-term (cure) survival (or quantum) submodel.
 #' @param gam 2-vector with the regression coefficients <gamma> in the short-term (cure) survival (or timing) submodel.
+#' @param RC.dist Right-censoring distribution: "uniform" (Uniform on (\code{tRC.min},\code{Tmax})),"exponential" (with mean \code{mu.cens}) or "Tmax" (when right-censoring occurs at Tmax)
 #' @param tRC.min Minimum right-censoring time value if the right-censoring time distribution is Uniform. (Default: 120).
 #' @param mu.cens Mean of the right-censoring time distribution if it is Exponential. (Default: 40).
-#' @param Tmax Maximum follow-up time after which a unit is assumed cured in the absence of an event before that. (Default: 300).
-#' @param RC.dist Right-censoring distribution: "uniform" (Uniform on (\code{tRC.min},\code{Tmax})),"exponential" (with mean \code{mu.cens}) or "Tmax" (when right-censoring occurs at Tmax)
 #' @param get.details Logical indicating if a detailed data frame \code{df.raw} including the sequence of time-varying covariate values should also be reported. (Default: TRUE).
 #'
 #' @return A list with following elements:
@@ -61,7 +73,10 @@
 #'   \item{\code{gam} : \verb{ }}{The regression parameters in the short-term survival (or timing) submodel.}
 #'   \item{\code{f.theta} : \verb{ }}{A list of length 2 containing the functions defining the additive terms in the long-term survival (or quantum) submodel.}
 #'   \item{\code{f.gam} : \verb{ }}{A list of length 2 containing the functions defining the additive terms in the short-term survival (or timing) submodel.}
+#'   \item{\code{f0} : \verb{ }}{Density function governing the dynamic of the reference cumulative hazard on (0,Tmax).}
+#'   \item{\code{F0} : \verb{ }}{CDF governing the dynamic of the reference cumulative hazard on (0,Tmax).}
 #'   }
+#' \item{\code{call} : \verb{ }}{Function call.}
 #' }
 #' 
 #' @author Philippe Lambert \email{p.lambert@uliege.be}
@@ -71,11 +86,22 @@
 #' @export
 #'
 #' @examples
-simulateTVcureData = function(n, seed,
-                        beta, gam,
-                        tRC.min = 120, mu.cens=40, Tmax=300,
-                        RC.dist=c("uniform","exponential","Tmax"),
-                        get.details=TRUE){
+#' require(tvcure)
+#' ## Regression parameters
+#' beta = c(beta0=.4, beta1=-.2, beta2=.15) ##  beta0 tunes the cure rate
+#' gam = c(gam1=.2, gam2=.2) 
+#' ## Data simulation
+#' temp = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
+#'                           RC.dist="exponential",mu.cens=550)
+#' head(temp$df.raw) ## Overview of the simulated raw data 
+#' head(temp$df.summary) ## Overview of the summarized data
+#' with(temp, c(cure.rate=cure.rate,RC.rate=RC.rate)) ## Cure and RC rates
+#' 
+simulateTVcureData = function(n, seed, Tmax=300,
+                        f0F0 = list(f0=function(x) dweibull(x, 2.65, 100), F0=function(x) pweibull(x, 2.65, 100)),
+                        beta, gam, RC.dist=c("uniform","exponential","Tmax"),
+                        tRC.min = 120, mu.cens=40, get.details=TRUE){
+    cl <- match.call()
     ## --------------------
     ## Covariate generation
     ## --------------------
@@ -158,9 +184,11 @@ simulateTVcureData = function(n, seed,
         ## Baseline (standardized) hazard
         ## ------------------------------
         ## Cure suvival model: Sp(t) = exp(-theta(x) F(t|x))
-        ##  with 1-F(t|x) = (1-F0(t))^exp(eta2(x))
-        f0 = function(x) dweibull(x, 2.65, 100)
-        F0 = function(x) pweibull(x, 2.65, 100)
+        ##  with theta(x) = exp(eta1(x))  &  1-F(t|x) = (1-F0(t))^exp(eta2(x))
+        ## 
+        ## f0 = function(x) dweibull(x, 2.65, 100)
+        ## F0 = function(x) pweibull(x, 2.65, 100)
+        f0 = f0F0[[1]] ; F0 = f0F0[[2]]
         f0.t = f0(t) ; F0.t = F0(t)
         ## Covariates for cure prob ("long-term survival")
         ## -----------------------------------------------
@@ -208,7 +236,7 @@ simulateTVcureData = function(n, seed,
                    gam=gam,
                    f.theta=c(f1=f1.theta,f2=f2.theta),
                    f.gam=c(f1=f1.gam,f2=f2.gam),
-                   f0.t=f0, F0.t=F0)
+                   f0=f0, F0=F0)
         return(ans)
     } ## End of loghaz
     ##
@@ -326,6 +354,7 @@ simulateTVcureData = function(n, seed,
                    RC.rate = sum(t.obs==t.cens)/n,
                    df.raw=df.raw,
                    df.summary=df.summary,
-                   parameters=obj.i$parameters)
+                   parameters=obj.i$parameters,
+                   call=cl)
     return(donnees)
 }

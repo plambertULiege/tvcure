@@ -23,6 +23,14 @@
 #' @export
 #'
 #' @examples
+#' require(tvcure)
+#' ## Simulated data generation
+#' beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2) 
+#' df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
+#'                           RC.dist="exponential",mu.cens=550)$df.raw
+#' ## TVcure model fitting
+#' model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), df=df.raw)
+#' 
 plotRegion = function(x,mat,add=FALSE,xlim=range(x),ylim=range(mat),
                       lwd=2,xlab="",ylab="",main="",...){
   f = mat[,1] ; f.low = mat[,2] ; f.up = mat[,3]
