@@ -3,9 +3,9 @@
 #' @description
 #' Bayesian Information Criterion (BIC) for the fitted tvcure model in a \code{tvcure.object}.
 #'
-#' @usage \method{BIC}{tvcure}(x, ...)
+#' @usage \method{BIC}{tvcure}(object, ...)
 #'
-#' @param x An object of class \code{\link{tvcure.object}}.
+#' @param object An object of class \code{\link{tvcure.object}}.
 #' @param ... Optionally more fitted objects.
 #'
 #' @details Bayesian (Schwarz) information criterion in a tvcure object, with a penalty calculated using the total effective degrees of freedom and the total number of observed events, -2log(L) + log(d)*ED.tot, smaller values being preferred during model selection.
@@ -14,20 +14,24 @@
 #'
 #' @author Philippe Lambert \email{p.lambert@uliege.be}
 #' @references Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
-#' with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, in press.
+#' with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, under review.
 #'
 #' @examples
 #' require(tvcure)
-#' ## data(tvcure_Data)
-#' ## fit = tvcure(...)
-#' ## BIC(fit)
+#' ## Simulated data generation
+#' beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2) 
+#' df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
+#'                           RC.dist="exponential",mu.cens=550)$df.raw
+#' ## TVcure model fitting
+#' model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), df=df.raw) 
+#' BIC(model)
 #'
 #' @seealso \code{\link{tvcure}}, \code{\link{tvcure.object}}, \code{\link{AIC.tvcure}}
 #'
 #' @export
 #' 
-BIC.tvcure <- function(x, ...){
-    obj = x
+BIC.tvcure <- function(object, ...){
+    obj = object
     lls = function(obj) return(ans = c(dev=obj$fit$dev, edf=obj$fit$ED.tot, d=obj$fit$d))
     ## lls = function(obj) return(ans = c(dev=obj$fit$dev, edf=obj$fit$ED.tot, nobs=obj$fit$nobs))
     if (!missing(...)) {

@@ -16,17 +16,17 @@
 #'}
 #' @author Philippe Lambert \email{p.lambert@uliege.be}
 #' @references Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
-#' with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, in press.
-
-#'
-#' @export
-#'
+#' with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, under review.
+#' 
 #' @examples
 #' x = seq(0,1,by=.01)
 #' knots = seq(0,1,length=5)
 #' obj = centeredBasis.gen(x,knots)
 #' matplot(x,obj$B,type="l",ylab="Centered B-splines")
 #' colMeans(obj$B)
+#' 
+#' @export
+#' 
 centeredBasis.gen = function(x,knots,cm=NULL,pen.order=2){
   if ((max(x)>max(knots))|(min(x)<min(knots))){
     cat("The knots do no cover the values of x !!\n")

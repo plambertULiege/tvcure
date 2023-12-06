@@ -85,7 +85,7 @@
 #'
 #' @author Philippe Lambert \email{p.lambert@uliege.be}
 #' @references Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
-#' with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, in press.
+#' with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, under review.
 #'
 #' @seealso \code{\link{tvcure}}, \code{\link{print.tvcure}}, \code{\link{plot.tvcure}}
 #'

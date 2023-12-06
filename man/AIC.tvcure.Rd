@@ -4,10 +4,10 @@
 \alias{AIC.tvcure}
 \title{Akaike Information Criterion (AIC) of a tvcure object.}
 \usage{
-\method{AIC}{tvcure}(x, ..., k=2)
+\method{AIC}{tvcure}(object, ..., k=2)
 }
 \arguments{
-\item{x}{A \code{\link{tvcure.object}}.}
+\item{object}{A \code{\link{tvcure.object}}.}
 
 \item{...}{Other optional tvcure objects.}
 
@@ -24,14 +24,18 @@ Akaike information criterion for the fitted model in a tvcure object, with a pen
 }
 \examples{
 require(tvcure)
-## data(tvcure_Data)
-## fit = tvcure(...)
-## AIC(fit)
+## Simulated data generation
+beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2) 
+df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
+                          RC.dist="exponential",mu.cens=550)$df.raw
+## TVcure model fitting
+model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), df=df.raw) 
+AIC(model)
 
 }
 \references{
 Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
-with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, in press.
+with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, under review.
 }
 \seealso{
 \code{\link{tvcure}}, \code{\link{tvcure.object}}, \code{\link{BIC.tvcure}}

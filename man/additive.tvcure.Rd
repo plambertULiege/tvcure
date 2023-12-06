@@ -36,3 +36,25 @@ The same definitions applies for \code{nfixed2}, \code{J2}, \code{additive.lab2}
 \description{
 Extract additive term estimates from a tvcure object.
 }
+\examples{
+require(tvcure)
+## Simulated data generation
+beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2) 
+df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
+                          RC.dist="exponential",mu.cens=550)$df.raw
+## TVcure model fitting
+model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), df=df.raw)
+
+## Extract additive term estimates from tvcure object
+obj = additive.tvcure(model)
+names(obj)
+
+}
+\references{
+Lambert, P. and Kreyenfeld, M. (2023). Exogenous time-varying covariates in double additive cure survival model
+with application to fertility.
+\emph{Journal of the Royal Statistical Society, Series A}, under review.
+}
+\author{
+Philippe Lambert \email{p.lambert@uliege.be}
+}

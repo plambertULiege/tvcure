@@ -43,7 +43,7 @@
 #' @param b Hyperprior parameter in the \eqn{Gamma(a,b)} priors for the penalty parameters \eqn{\lambda_1} and \eqn{\lambda_2} tuning the smoothness of the additive terms in the long-term (quantum) and short-term (timing) survival submodels. (Default: 1e-6).
 #' @param tau.0 Starting value for \eqn{\tau_0} (Default: 1).
 #' @param tau.min Minimal value for the penalty parameter \eqn{tau_0}. (Default: 1.0).
-#' @param tau.method Method used to calculate the posterior mode of \eqn{p(\tau_0|data)}: "Laplace" (Laplace P-splines), "Schall" (Fellner-Schall algorithm), "grid" (best choice in a regular grid on the log-scale) or "none" (stick to the initial value tau.0). (Default: "Laplace").
+#' @param tau.method Method used to calculate the posterior mode of \eqn{p(\tau_0|data)}: "LPS" (Laplace P-splines), "Schall" (Fellner-Schall algorithm), "grid" (best choice in a regular grid on the log-scale) or "none" (stick to the initial value tau.0). (Default: "LPS").
 #' @param lambda1.0 (Optional) J1-vector with starting values for the penalty parameters of the additive terms in the long-term survival (or quantum) submodel.
 #' @param lambda1.min Minimal value for the J1 penalty parameters \eqn{\lambda_1} of the additive terms in the long-term survival (or quantum) submodel. (Default: 1.0).
 #' @param lambda2.0 (Optional) J2-vector with starting values for the penalty parameters of the additive terms in the short-term survival (or timing) submodel.
@@ -78,7 +78,7 @@
 #' @author Philippe Lambert \email{p.lambert@uliege.be}
 #' @references Lambert, P. and Kreyenfeld, M. (2023). Exogenous time-varying covariates in double additive cure survival model
 #' with application to fertility.
-#' \emph{Journal of the Royal Statistical Society, Series A}, in press.
+#' \emph{Journal of the Royal Statistical Society, Series A}, under review.
 #'
 #' @examples
 #' require(tvcure)
@@ -89,11 +89,10 @@
 #' ## TVcure model fitting
 #' model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), df=df.raw)
 #' print(model)
-#' plot(model)
+#' plot(model, mfrow=c(1,2))
 #'  
 #' @export
 #'
-#' @examples
 tvcure = function(formula1, formula2, df,
                   method=c("S0","F0"),
                   K0=20, pen.order0=2,
@@ -103,9 +102,9 @@ tvcure = function(formula1, formula2, df,
                   b.tau=1e-6,  ## Prior on penalty parameter <tau> for log f0(t): Gamma(1,b.tau) 
                   a=1, b=1e-4, ## Prior on penalty parameters for the additive terms: Gamma(a,b) 
                   tau.0=1, tau.min=1,
-                  tau.method = c("Laplace","Schall","grid","none"),
+                  tau.method = c("LPS","Schall","grid","none"),
                   lambda1.0=NULL, lambda1.min=1, lambda2.0=NULL, lambda2.min=1,
-                  lambda.method=c("LPS2","LPS","Schall","nlminb","none"), ## Penalty selection method for additive terms
+                  lambda.method=c("LPS","LPS2","Schall","nlminb","none"), ## Penalty selection method for additive terms
                   observed.hessian=TRUE,  ## TRUE: X[event==1,]'X[event==1,] ; FALSE: X'diag(mu.ij)X
                   use.Rfast=TRUE,
                   Wood.test=TRUE,
@@ -495,7 +494,7 @@ tvcure = function(formula1, formula2, df,
                     idx = nfixed1 + (j-1)*K1 + (1:K1)
                     theta.j = beta.cur[idx]
                     quad.j = sum(theta.j*c(Pd1.x%*%theta.j))
-                    ttr = max(sum(t(Sigma[idx,idx]) * Pd1.x),1)
+                    ttr = max(sum(t(Sigma[idx,idx]) * Pd1.x), 1e-6) ## max(sum(t(Sigma[idx,idx]) * Pd1.x),1)
                     ## Note: rank(Pd1.x) = (K1-pen.order1+1)
                     lambda1.cur[j] = ((aa-1) + K1-pen.order1+1) / (bb + quad.j + ttr)
                 }
@@ -510,7 +509,7 @@ tvcure = function(formula1, formula2, df,
                     idx = nfixed2 + (j-1)*K2 + (1:K2)
                     theta.j = gamma.cur[idx]
                     quad.j = sum(theta.j*c(Pd2.x%*%theta.j))
-                    ttr = max(sum(t(Sigma[q1+idx, q1+idx]) * Pd2.x),1)
+                    ttr = max(sum(t(Sigma[q1+idx, q1+idx]) * Pd2.x),1e-6) ## max(sum(t(Sigma[q1+idx, q1+idx]) * Pd2.x),1)
                     ## Note: rank(Pd2.x) = (K2-pen.order2+1)
                     lambda2.cur[j] = ((aa-1) + K2-pen.order2+1) / (bb + quad.j + ttr)
                 }
@@ -860,7 +859,7 @@ tvcure = function(formula1, formula2, df,
         ## Selection of <tau> (Penalty parameter to estimate <phi> in F0)
         ## ------------------
         switch(tau.method,
-               "Laplace" = {
+               "LPS" = {
                    obj.cur = ff(phi=phi.cur, beta=beta.cur, gamma=gamma.cur,
                                 tau=tau.cur, lambda1=lambda1.cur, lambda2=lambda2.cur,
                                 Dphi=TRUE, D2phi=TRUE, Dbeta=FALSE, Dgamma=FALSE)
@@ -1042,7 +1041,7 @@ tvcure = function(formula1, formula2, df,
                     for (j in 1:J1){
                         idx = nfixed1 + (j-1)*K1 + (1:K1)
                         beta.j = beta.cur[idx] ## Centered B-splines coefs for jth additive term
-                        quad = sum(beta.j* c(Pd1.x %*% beta.j))
+                        quad = sum(beta.j * c(Pd1.x %*% beta.j))
                         ed = ED.cur$ED1[j,1]
                         tau2 = quad / (ed-pen.order1)
                         sigma2 = sum(obj.cur$res^2) / (length(obj.cur$res)-ED.tot)
@@ -1064,7 +1063,6 @@ tvcure = function(formula1, formula2, df,
                         lambda2.cur[j] = max(lambda2.min, sigma2/tau2)
                     }
                 }
-
             } ## Endif update.lambda
         } ## Endif lambda.method == "Schall"
         ##
@@ -1099,7 +1097,8 @@ tvcure = function(formula1, formula2, df,
             lambda.cur = exp(obj.ml$par) ## Selected <lambda> --> lambda.hat
             if (J1 > 0) lambda1.cur = lambda.cur[1:J1]
             if (J2 > 0) lambda2.cur = lambda.cur[(J1+1):(J1+J2)]
-        }
+        } ## Endif lambda.method == "nlminb"
+        ##
         ## toc() ; cat("\n")
         ##
         ## ======================================

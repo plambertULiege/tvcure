@@ -4,10 +4,10 @@
 \alias{BIC.tvcure}
 \title{Bayesian Information Criterion (BIC) of a \code{tvcure.object}.}
 \usage{
-\method{BIC}{tvcure}(x, ...)
+\method{BIC}{tvcure}(object, ...)
 }
 \arguments{
-\item{x}{An object of class \code{\link{tvcure.object}}.}
+\item{object}{An object of class \code{\link{tvcure.object}}.}
 
 \item{...}{Optionally more fitted objects.}
 }
@@ -22,14 +22,18 @@ Bayesian (Schwarz) information criterion in a tvcure object, with a penalty calc
 }
 \examples{
 require(tvcure)
-## data(tvcure_Data)
-## fit = tvcure(...)
-## BIC(fit)
+## Simulated data generation
+beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2) 
+df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
+                          RC.dist="exponential",mu.cens=550)$df.raw
+## TVcure model fitting
+model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), df=df.raw) 
+BIC(model)
 
 }
 \references{
 Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
-with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, in press.
+with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, under review.
 }
 \seealso{
 \code{\link{tvcure}}, \code{\link{tvcure.object}}, \code{\link{AIC.tvcure}}

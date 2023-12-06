@@ -43,11 +43,16 @@ df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
                           RC.dist="exponential",mu.cens=550)$df.raw
 ## TVcure model fitting
 model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), df=df.raw)
+obj = additive.tvcure(model) ## Extract additive terms
 
+## Plot some of the fitted additive terms
+## par(mfrow=c(1,2))
+with(obj$f1.grid$x1, plotRegion(x=x,mat=y.mat,xlab="x1",ylab="f(x1)"))
+with(obj$f1.grid$x2, plotRegion(x=x,mat=y.mat,xlab="x2",ylab="f(x2)"))
 }
 \references{
 Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
-with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, in press.
+with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, under review.
 }
 \author{
 Philippe Lambert \email{p.lambert@uliege.be}

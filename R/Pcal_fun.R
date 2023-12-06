@@ -9,7 +9,7 @@
 #' 
 #' @author Philippe Lambert \email{p.lambert@uliege.be}
 #' @references Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
-#' with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, in press.
+#' with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, under review.
 #' 
 #' @examples
 #' Dd = diff(diag(1,5),diff=2) ## Difference penalty matrix for a vector of length 5

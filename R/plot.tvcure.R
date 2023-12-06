@@ -16,7 +16,7 @@
 #'
 #' @author Philippe Lambert \email{p.lambert@uliege.be}
 #' @references Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
-#' with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, in press.
+#' with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, under review.
 #'
 #' @examples
 #' require(tvcure)
@@ -42,7 +42,7 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, mfrow=NULL, equal.ylims=TRUE,
     ##
     ## Plot baseline f0 & F0
     ## ---------------------
-    dev.new(width=10,height=5)
+    dev.new(width=10,height=5) ; par(mar=c(4,5,1,1))
     par(mfrow=c(1,2))
     with(fhat, curve(f0,xlim=attr(f0,"support"),xlab="time",ylab=bquote(f[0](t))))
     with(fhat, curve(F0,xlim=attr(F0,"support"),xlab="time",ylab=bquote(F[0](t))))

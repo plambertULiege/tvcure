@@ -18,7 +18,7 @@
 #'
 #' @author Philippe Lambert \email{p.lambert@uliege.be}
 #' @references Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
-#' with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, in press.
+#' with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, under review.
 #'
 #' @examples
 #' require(tvcure)
@@ -49,7 +49,7 @@ print.tvcure <- function(x,ci.level=.95,expEst=TRUE,digits=3,...){ ##,nrow=NULL,
     )
     ## cat("S.p(t|x) = exp{-theta(x) F(t|x)}\n\n")
     ##
-    cat(">> log(theta(x))  (Quantum) <<\n")
+    cat(">> log(theta(x)) - Long-term survival (Quantum) <<\n")
     cat("Formula:",deparse(obj$formula1),"\n")
     ## cat(">> log(theta(x)): ",deparse(obj$formula1),"\n")
     nfixed1 = obj$regr1$nfixed
@@ -74,7 +74,7 @@ print.tvcure <- function(x,ci.level=.95,expEst=TRUE,digits=3,...){ ##,nrow=NULL,
                      digits=digits,P.values=TRUE,has.Pvalue=TRUE,signif.legend=FALSE)
     }
     ##
-    cat("\n\n>> eta(x)  (Timing) <<\n")
+    cat("\n\n>> eta(x) - Short-term survival (Timing) <<\n")
     cat("Formula:",deparse(obj$formula2),"\n")
     nfixed2 = obj$regr2$nfixed
     cat("\nParametric coefficients:\n")
@@ -103,10 +103,10 @@ print.tvcure <- function(x,ci.level=.95,expEst=TRUE,digits=3,...){ ##,nrow=NULL,
     }
     ##
     cat("\n------------------------------------------------------------------------\n")
-    cat(" Dev:",round(obj$fit$dev,2),
+    cat(" logEvid:",round(obj$fit$levidence,2),
+        "  Dev:",round(obj$fit$dev,2),
         "  AIC:",obj$fit$AIC,
         "  BIC:",obj$fit$BIC,
-        "  logEvid:",round(obj$fit$levidence,2),
         "\n")
     cat(" edf: ",round(obj$fit$ED.tot,2),
         "  nobs: ",obj$fit$nobs,

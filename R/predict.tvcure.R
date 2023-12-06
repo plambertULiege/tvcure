@@ -2,10 +2,13 @@
 #' @description
 #' Predicted values based on a tvcure object.
 #' 
+#' @usage \method{predict}{tvcure}(x, df.new, ci.level=.95, ...)
 #'
 #' @param x A \code{\link{tvcure.object}}. 
 #' @param df.new An optional data frame in which to look for the 'id' (distinguishing the different units), 'time' and covariate values for which 'predictions' should be made. Time values for a given 'id' should be a series of consecutive integers starting with 1. If \code{df.new} is NULL, then predictions are assumed to concern a single unit with consecutive time values starting with 1.
-#' @param ci.level Credible level for the reported estimates. (Default: 0.95). 
+#' @param ci.level Credible level for the reported estimates. (Default: 0.95).
+#' @param ... additional generic arguments.
+#'  
 #'
 #' @return A list containing, in addition to the optional \code{df.new} entries, the following elements:
 #' \itemize{
@@ -23,12 +26,30 @@
 #' 
 #' @author Philippe Lambert \email{p.lambert@uliege.be}
 #' @references Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
-#' with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, in press.
+#' with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, under review.
 #' 
 #' @export
 #'
 #' @examples
-predict.tvcure <- function(x, df.new, ci.level=.95){
+#' require(tvcure)
+#' ## Simulated data generation
+#' beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2) 
+#' df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
+#'                           RC.dist="exponential",mu.cens=550)$df.raw
+#' ## TVcure model fitting
+#' model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), df=df.raw)
+#' 
+#' ## Covariate profiles for which 'predicted' values are requested
+#' df.new = subset(df.raw, id==1 | id==4)[,-3] ## Focus on units 1 & 4
+#' pred = predict(model,df.new)
+#' 
+#' ## Visualize the estimated population survival fns for units 1 & 4
+#' ## par(mfrow=c(1,2))
+#' with(subset(pred,id==1), plotRegion(time,Sp,main="Id=1",
+#'                               ylim=c(0,1),xlab="t",ylab="Sp(t)"))
+#' with(subset(pred,id==4), plotRegion(time,Sp,main="Id=4",
+#'                               ylim=c(0,1),xlab="t",ylab="Sp(t)"))
+predict.tvcure <- function(x, df.new, ci.level=.95, ...){
     obj.tvcure = x
     ## Check that <id> entry in df.new. If missing, create one
     if (is.null(df.new$id)) df.new$id = rep(1,nrow(df.new))

@@ -23,12 +23,12 @@ tvcure(
   b = 1e-04,
   tau.0 = 1,
   tau.min = 1,
-  tau.method = c("Laplace", "Schall", "grid", "none"),
+  tau.method = c("LPS", "Schall", "grid", "none"),
   lambda1.0 = NULL,
   lambda1.min = 1,
   lambda2.0 = NULL,
   lambda2.min = 1,
-  lambda.method = c("LPS2", "LPS", "Schall", "nlminb", "none"),
+  lambda.method = c("LPS", "LPS2", "Schall", "nlminb", "none"),
   observed.hessian = TRUE,
   use.Rfast = TRUE,
   Wood.test = TRUE,
@@ -84,7 +84,7 @@ Method S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Method F0: \eqn{F(t|x) = F
 
 \item{tau.min}{Minimal value for the penalty parameter \eqn{tau_0}. (Default: 1.0).}
 
-\item{tau.method}{Method used to calculate the posterior mode of \eqn{p(\tau_0|data)}: "Laplace" (Laplace P-splines), "Schall" (Fellner-Schall algorithm), "grid" (best choice in a regular grid on the log-scale) or "none" (stick to the initial value tau.0). (Default: "Laplace").}
+\item{tau.method}{Method used to calculate the posterior mode of \eqn{p(\tau_0|data)}: "LPS" (Laplace P-splines), "Schall" (Fellner-Schall algorithm), "grid" (best choice in a regular grid on the log-scale) or "none" (stick to the initial value tau.0). (Default: "LPS").}
 
 \item{lambda1.0}{(Optional) J1-vector with starting values for the penalty parameters of the additive terms in the long-term survival (or quantum) submodel.}
 
@@ -144,13 +144,13 @@ df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
 ## TVcure model fitting
 model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), df=df.raw)
 print(model)
-plot(model)
+plot(model, mfrow=c(1,2))
  
 }
 \references{
 Lambert, P. and Kreyenfeld, M. (2023). Exogenous time-varying covariates in double additive cure survival model
 with application to fertility.
-\emph{Journal of the Royal Statistical Society, Series A}, in press.
+\emph{Journal of the Royal Statistical Society, Series A}, under review.
 }
 \author{
 Philippe Lambert \email{p.lambert@uliege.be}

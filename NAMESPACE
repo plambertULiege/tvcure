@@ -2,6 +2,9 @@ exportPattern("^[[:alpha:]]+")
 
 S3method(plot,tvcure)
 S3method(print,tvcure)
+S3method(AIC,tvcure)
+S3method(BIC,tvcure)
+S3method(predict,tvcure)
 export(tvcure)
 export(Pcal.fun)
 export(s)
@@ -12,7 +15,8 @@ importFrom("graphics", "lines", "par", "polygon")
 importFrom("stats", "dgamma", "na.omit", "nlm", "nlminb", "pchisq",
            "pf", "printCoefmat", "qnorm", "quantile", "sd",
            "splinefun", "model.matrix", "model.frame",
-           "dweibull", "pweibull", "rbinom", "rexp", "rnorm", "rpois", "runif")
+           "dweibull", "pweibull", "rbinom", "rexp", "rnorm", "rpois", "runif",
+           "AIC","BIC")
 importFrom("utils", "tail", "head")
 importFrom("cubicBsplines", "Bsplines", "D2Bsplines")
 importFrom("Rfast", "colsums", "colCumSums", "Crossprod")
