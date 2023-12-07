@@ -61,7 +61,7 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, mfrow=NULL, equal.ylims=TRUE,
         dev.new() ; par(mar=c(4,5,1,1),mfrow=mfrow)
         for (j in 1:fhat$J1){
             if ((j%/%(maxPlts+1) == 1)) { ## New plotting window if ...
-                dev.new() ; par(mar=c(4,4,1,1),mfrow=mfrow)
+                dev.new() ; par(mar=c(4,5,1,1),mfrow=mfrow)
             }
             xlab = names(fhat$f1.grid)[j]
             with(fhat$f1.grid[[j]], matplot(x, y.mat,type="l",
@@ -77,7 +77,7 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, mfrow=NULL, equal.ylims=TRUE,
         dev.new() ; par(mar=c(4,5,1,1),mfrow=mfrow)
         for (j in 1:fhat$J2){
             if ((j%/%(maxPlts+1) == 1)) { ## New plotting window if ...
-                dev.new() ; par(mar=c(4,4,1,1),mfrow=mfrow)
+                dev.new() ; par(mar=c(4,5,1,1),mfrow=mfrow)
             }
             xlab = names(fhat$f2.grid)[j]
             with(fhat$f2.grid[[j]], matplot(x, y.mat,type="l",
