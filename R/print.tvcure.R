@@ -27,7 +27,9 @@
 #' df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
 #'                           RC.dist="exponential",mu.cens=550)$df.raw
 #' ## TVcure model fitting
-#' model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), df=df.raw)
+#' tau.0 = 2.5 ; lambda1.0 = c(285,15) ; lambda2.0 = c(25,1325) ## Optional
+#' model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), df=df.raw,
+#'                tau.0=tau.0, lambda1.0=lambda1.0, lambda2.0=lambda2.0)
 #' print(model)
 #'
 #' @seealso \code{\link{tvcure}}, \code{\link{tvcure.object}}, \code{\link{plot.tvcure}}
