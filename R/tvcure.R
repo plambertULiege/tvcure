@@ -567,7 +567,7 @@ tvcure = function(formula1, formula2, df,
                     idx = nfixed2 + (j-1)*K2 + (1:K2)
                     theta.j = gamma.cur[idx]
                     quad.j = sum(theta.j*c(Pd2.x%*%theta.j))
-                    ttr = max(sum(t(Sigma[q1+idx, q1+idx]) * Pd2.x),1e-6) ## max(sum(t(Sigma[q1+idx, q1+idx]) * Pd2.x),1)
+                    ttr = max(sum(t(Sigma[q1+idx, q1+idx]) * Pd2.x), 1e-6) ## max(sum(t(Sigma[q1+idx, q1+idx]) * Pd2.x),1)
                     ## Note: rank(Pd2.x) = (K2-pen.order2+1)
                     lambda2.cur[j] = ((aa-1) + K2-pen.order2+1) / (bb + quad.j + ttr)
                 }
