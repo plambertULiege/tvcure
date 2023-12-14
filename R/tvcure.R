@@ -185,8 +185,8 @@ tvcure = function(formula1, formula2, df,
     }
     ##
     ## Initial values for the penalty parameters in regression part
-    if ((J1 > 0) & is.null(lambda1.0)) lambda1.0 = rep(1000,J1)
-    if ((J2 > 0) & is.null(lambda2.0)) lambda2.0 = rep(1000,J2)
+    if ((J1 > 0) & is.null(lambda1.0)) lambda1.0 = rep(100,J1)
+    if ((J2 > 0) & is.null(lambda2.0)) lambda2.0 = rep(100,J2)
     ##
     ## Pre-evaluated IB-splines basis for F0(t)
     ## t.grid = 1:T
@@ -205,6 +205,13 @@ tvcure = function(formula1, formula2, df,
     phi.0 = phi.0 - phi.0[k.ref]
     colnames(B0.grid) = names(phi.0)
     tB0B0 = t(B0.grid[df$time,-k.ref]) %*% B0.grid[df$time,-k.ref]
+    ## ---------------------------------------------------------------------
+    ## Log-determinant of a positive definite matrix based on Choleski
+    ##  Note: faster than methods based on functions svd, qr or determinant
+    ## ---------------------------------------------------------------------
+    ldet.fun = function(x) 2*sum(log(diag(chol(x))))
+    ## End ldet.fun
+    ##
     ## -----------------------------------------------------------------------------------------
     ff = function(phi, beta, gamma,
                   tau, lambda1, lambda2,
@@ -291,9 +298,9 @@ tvcure = function(formula1, formula2, df,
         if (Dbeta & hessian){
             if (observed.hessian){
               if (use.Rfast){
-                Hes.beta = -Rfast::Crossprod(regr1$Xcal[id1,], regr1$Xcal[id1,]) ## ICI ICI
+                Hes.beta = -Rfast::Crossprod(regr1$Xcal[id1,,drop=FALSE], regr1$Xcal[id1,,drop=FALSE]) ## ICI ICI
               } else {
-                  Hes.beta = -crossprod(regr1$Xcal[id1,], regr1$Xcal[id1,]) ## ICI ICI
+                  Hes.beta = -crossprod(regr1$Xcal[id1,,drop=FALSE], regr1$Xcal[id1,,drop=FALSE]) ## ICI ICI
               }
             } else {
                 W1 = mu.ij
@@ -313,9 +320,11 @@ tvcure = function(formula1, formula2, df,
                 if (Dlambda){
                     if (observed.hessian){
                       if (use.Rfast){
-                        tZWB.1 = Rfast::Crossprod(Z1[id1,], regr1$Bcal[id1,]) ; tZWZ.1 = crossprod(Z1[id1,], Z1[id1,])
+                          tZWB.1 = Rfast::Crossprod(Z1[id1,,drop=FALSE], regr1$Bcal[id1,,drop=FALSE])
+                          tZWZ.1 = crossprod(Z1[id1,,drop=FALSE], Z1[id1,,drop=FALSE])
                       } else {
-                        tZWB.1 = crossprod(Z1[id1,], regr1$Bcal[id1,]) ; tZWZ.1 = crossprod(Z1[id1,], Z1[id1,])
+                          tZWB.1 = crossprod(Z1[id1,,drop=FALSE], regr1$Bcal[id1,,drop=FALSE])
+                          tZWZ.1 = crossprod(Z1[id1,], Z1[id1,,drop=FALSE])
                       }
                     } else {
                       if (use.Rfast){
@@ -331,9 +340,9 @@ tvcure = function(formula1, formula2, df,
                     ## Mcal.1 required to update <lambda1>
                     if (observed.hessian){
                       if (use.Rfast){
-                        Mcal.1 = Rfast::Crossprod(regr1$Bcal[id1,], regr1$Bcal[id1,])
+                        Mcal.1 = Rfast::Crossprod(regr1$Bcal[id1,,drop=FALSE], regr1$Bcal[id1,,drop=FALSE])
                       } else {
-                        Mcal.1 = crossprod(regr1$Bcal[id1,], regr1$Bcal[id1,])
+                        Mcal.1 = crossprod(regr1$Bcal[id1,,drop=FALSE], regr1$Bcal[id1,,drop=FALSE])
                       }
                     } else {
                       if (use.Rfast){
@@ -379,9 +388,9 @@ tvcure = function(formula1, formula2, df,
             W2 = (event-mu.ij)*tempo - mu.ij*(1+tempo)^2
             if (observed.hessian){
               if (use.Rfast){
-                Hes.gamma = -Rfast::Crossprod(XcalTempo[id1,], XcalTempo[id1,])
+                Hes.gamma = -Rfast::Crossprod(XcalTempo[id1,,drop=FALSE], XcalTempo[id1,,drop=FALSE])
               } else {
-                Hes.gamma = -crossprod(XcalTempo[id1,], XcalTempo[id1,])
+                Hes.gamma = -crossprod(XcalTempo[id1,,drop=FALSE], XcalTempo[id1,,drop=FALSE])
               }
             } else {
               if (use.Rfast){
@@ -476,9 +485,9 @@ tvcure = function(formula1, formula2, df,
             ## grad.phi = colSums((event-mu.ij) * dlhp)
             ## toc() ; tic("  Dphi - P2")
             if (use.Rfast){
-                grad.phi = Rfast::colsums(dlhp[id1,]) - Rfast::colsums(mu.ij * dlhp)
+                grad.phi = Rfast::colsums(dlhp[id1,,drop=FALSE]) - Rfast::colsums(mu.ij * dlhp)
             } else {
-                grad.phi = colSums(dlhp[id1,]) - colSums(mu.ij * dlhp)
+                grad.phi = colSums(dlhp[id1,,drop=FALSE]) - colSums(mu.ij * dlhp)
             }
             grad.phi = grad.phi - tau * PdPhi ## Roughness penalty correction
             ## Hessian
@@ -486,13 +495,13 @@ tvcure = function(formula1, formula2, df,
                 ## Hessian without roughness penalty
                 if (use.Rfast){
                     if (observed.hessian){
-                        Hes.phi0 = - Rfast::Crossprod(dlhp[id1,], dlhp[id1,])
+                        Hes.phi0 = - Rfast::Crossprod(dlhp[id1,,drop=FALSE], dlhp[id1,,drop=FALSE])
                     } else {
                         Hes.phi0 = - Rfast::Crossprod(dlhp, mu.ij * dlhp)
                     }
                 } else {
                     if (observed.hessian){
-                        Hes.phi0 = - crossprod(dlhp[id1,], dlhp[id1,])
+                        Hes.phi0 = - crossprod(dlhp[id1,,drop=FALSE], dlhp[id1,,drop=FALSE])
                     } else {
                         Hes.phi0 = - crossprod(dlhp, mu.ij * dlhp)
                     }
@@ -552,7 +561,7 @@ tvcure = function(formula1, formula2, df,
                     idx = nfixed1 + (j-1)*K1 + (1:K1)
                     theta.j = beta.cur[idx]
                     quad.j = sum(theta.j*c(Pd1.x%*%theta.j))
-                    ttr = max(sum(t(Sigma[idx,idx]) * Pd1.x), 1e-6) ## max(sum(t(Sigma[idx,idx]) * Pd1.x),1)
+                    ttr = max(sum(t(Sigma[idx,idx]) * Pd1.x), 1) ## max(sum(t(Sigma[idx,idx]) * Pd1.x),1)
                     ## Note: rank(Pd1.x) = (K1-pen.order1+1)
                     lambda1.cur[j] = ((aa-1) + K1-pen.order1+1) / (bb + quad.j + ttr)
                 }
@@ -567,7 +576,7 @@ tvcure = function(formula1, formula2, df,
                     idx = nfixed2 + (j-1)*K2 + (1:K2)
                     theta.j = gamma.cur[idx]
                     quad.j = sum(theta.j*c(Pd2.x%*%theta.j))
-                    ttr = max(sum(t(Sigma[q1+idx, q1+idx]) * Pd2.x), 1e-6) ## max(sum(t(Sigma[q1+idx, q1+idx]) * Pd2.x),1)
+                    ttr = max(sum(t(Sigma[q1+idx, q1+idx]) * Pd2.x), 1) ## max(sum(t(Sigma[q1+idx, q1+idx]) * Pd2.x),1)
                     ## Note: rank(Pd2.x) = (K2-pen.order2+1)
                     lambda2.cur[j] = ((aa-1) + K2-pen.order2+1) / (bb + quad.j + ttr)
                 }
@@ -665,7 +674,6 @@ tvcure = function(formula1, formula2, df,
                     xi=xi1.cur, U.xi=U.xi1, Hes.xi=Hes.xi1,
                     ok.xi=ok.xi1))
     } ## End select.lambda.LPS2
-    ##
     ##
     ## Function testStat implements Wood (2013) Biometrika 100(1), 221-228
     ## Goal: evaluate H0: fj = Xt %*% beta = 0  when  (beta | D) ~ N(p,V)
@@ -1021,9 +1029,9 @@ tvcure = function(formula1, formula2, df,
             ans = list(g=obj.cur$lpen, theta=theta, dtheta=dtheta, grad=grad)
             return(ans)
         } ## End g.regr
-        cat("Regr estimation: ")
+        ## cat("Regr estimation: ")
         regr.NR = NewtonRaphson(g=g.regr,theta=c(beta.cur,gamma.cur),tol=grad.tol)
-        cat("done in ",regr.NR$iter," iterations\n",sep="")
+        ## cat("done in ",regr.NR$iter," iterations\n",sep="")
         beta.cur = regr.NR$theta[idx1] ; gamma.cur = regr.NR$theta[-idx1]
         ##
         ## ================================
@@ -1042,8 +1050,8 @@ tvcure = function(formula1, formula2, df,
                      Dlambda=update.lambda & ((lambda.method == "LPS2")))
         ##           Dlambda=update.lambda & ((lambda.method == "LPS2")|(lambda.method == "LPS")))
         ##
-        ## Method 1: LAPLACE
-        ## -----------------
+        ## Method 1: LPS
+        ## -------------
         if (lambda.method == "LPS"){ ## Laplace's method (jointly for (lambd1,lambda2))
             if (update.lambda & !final.iteration){
                 ## -3- lambda1 & lambda2
@@ -1056,8 +1064,8 @@ tvcure = function(formula1, formula2, df,
             }
         } ## Endif lambda.method == "LPS"
         ##
-        ## Method 1b: LAPLACE2
-        ## -------------------
+        ## Method 1b: LPS2
+        ## ---------------
         if (lambda.method == "LPS2"){ ## Laplace's method (separately for <lambda1> & <lambda2>
             if (update.lambda & !final.iteration){
                 ## -3a- lambda1 (long-term survival)
@@ -1137,11 +1145,13 @@ tvcure = function(formula1, formula2, df,
                              tau=tau.cur, lambda1=lambda1, lambda2=lambda2,
                              Dphi=FALSE, Dbeta=TRUE, Dgamma=TRUE, Dlambda=FALSE)
                 ## ev.phi = svd(-obj.cur$Hes.phi)$d
-                ev.beta = svd(-obj.cur$Hes.beta)$d
-                levidence = obj.cur$lpen -.5*sum(log(ev.beta[ev.beta>1-6]))
+                ## ev.beta = svd(-obj.cur$Hes.beta)$d
+                ## levidence = obj.cur$lpen -.5*sum(log(ev.beta[ev.beta>1-6]))
+                levidence = obj.cur$lpen -.5*ldet.fun(-obj.cur$Hes.beta)
                 if (!nogamma){
-                    ev.gamma = svd(-obj.cur$Hes.gamma)$d
-                    levidence = levidence -.5*sum(log(ev.gamma[ev.gamma>1-6]))
+                    ## ev.gamma = svd(-obj.cur$Hes.gamma)$d
+                    ## levidence = levidence -.5*sum(log(ev.gamma[ev.gamma>1-6]))
+                    levidence = levidence -.5*ldet.fun(-obj.cur$Hes.gamma)
                 }
                 ## levidence = obj.cur$lpen -.5*sum(log(ev.phi[ev.phi>1-6])) -.5*sum(log(ev.beta[ev.beta>1-6])) -.5*sum(log(ev.gamma[ev.gamma>1-6]))
                 ## ev.regr = svd(-obj.cur$Hes.regr)$d
