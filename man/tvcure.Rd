@@ -4,42 +4,19 @@
 \alias{tvcure}
 \title{Fit of a tvcure model.}
 \usage{
-tvcure(
-  formula1,
-  formula2,
-  df,
-  method = c("S0", "F0"),
-  K0 = 20,
-  pen.order0 = 2,
-  K1 = 10,
-  pen.order1 = 2,
-  K2 = 10,
-  pen.order2 = 2,
-  phi.0 = NULL,
-  beta.0 = NULL,
-  gamma.0 = NULL,
-  b.tau = 1e-06,
-  a = 1,
-  b = 1e-04,
-  tau.0 = 1,
-  tau.min = 1,
-  tau.method = c("LPS", "Schall", "grid", "none"),
-  lambda1.0 = NULL,
-  lambda1.min = 1,
-  lambda2.0 = NULL,
-  lambda2.min = 1,
-  lambda.method = c("LPS", "LPS2", "Schall", "nlminb", "none"),
-  observed.hessian = TRUE,
-  use.Rfast = TRUE,
-  Wood.test = TRUE,
-  ci.level = 0.95,
-  criterion = c("levidence", "deviance", "lpen", "AIC", "BIC", "gradient"),
-  criterion.tol = 0.1,
-  grad.tol = 0.01,
-  iterlim = 50,
-  iter.verbose = TRUE,
-  verbose = FALSE
-)
+tvcure(formula1, formula2, df,
+       method=c("S0","F0"), K0=20, pen.order0=2,
+       K1=10, pen.order1=2, K2=10, pen.order2=2,
+       phi.0=NULL, beta.0=NULL, gamma.0=NULL,
+       b.tau=1e-6, a=1, b=1e-2, 
+       tau.0=1, tau.min=1, tau.method = c("LPS","Schall","grid","none"),
+       lambda1.0=NULL, lambda1.min=1, lambda2.0=NULL, lambda2.min=1,
+       lambda.method=c("LPS","LPS2","LPS3","Schall","nlminb","none"),
+       observed.hessian=TRUE, use.Rfast=TRUE, Wood.test=TRUE,
+       ci.level=.95,
+       criterion=c("levidence","deviance","lpen","AIC","BIC","gradient"),
+       criterion.tol=1e-1, grad.tol=1e-2,
+       iterlim=50, iter.verbose=TRUE, verbose=FALSE)
 }
 \arguments{
 \item{formula1}{A formula describing the linear predictor in the long-term (cure) survival (or quantum) submodel.}
@@ -78,11 +55,11 @@ Method S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Method F0: \eqn{F(t|x) = F
 
 \item{a}{Hyperprior parameter in the \eqn{Gamma(a,b)} priors for the penalty parameters \eqn{\lambda_1} and \eqn{\lambda_2} tuning the smoothness of the additive terms in the long-term (quantum) and short-term (timing) survival submodels. (Default: 1.0).}
 
-\item{b}{Hyperprior parameter in the \eqn{Gamma(a,b)} priors for the penalty parameters \eqn{\lambda_1} and \eqn{\lambda_2} tuning the smoothness of the additive terms in the long-term (quantum) and short-term (timing) survival submodels. (Default: 1e-6).}
+\item{b}{Hyperprior parameter in the \eqn{Gamma(a,b)} priors for the penalty parameters \eqn{\lambda_1} and \eqn{\lambda_2} tuning the smoothness of the additive terms in the long-term (quantum) and short-term (timing) survival submodels. (Default: 1e-2).}
 
 \item{tau.0}{Starting value for \eqn{\tau_0} (Default: 1).}
 
-\item{tau.min}{Minimal value for the penalty parameter \eqn{tau_0}. (Default: 1.0).}
+\item{tau.min}{Minimal value for the penalty parameter \eqn{\tau_0}. (Default: 1.0).}
 
 \item{tau.method}{Method used to calculate the posterior mode of \eqn{p(\tau_0|data)}: "LPS" (Laplace P-splines), "Schall" (Fellner-Schall algorithm), "grid" (best choice in a regular grid on the log-scale) or "none" (stick to the initial value tau.0). (Default: "LPS").}
 
@@ -94,9 +71,9 @@ Method S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Method F0: \eqn{F(t|x) = F
 
 \item{lambda2.min}{Minimal value for the J2 penalty parameters \eqn{\lambda_2} of the additive terms in the short-term survival (or timing) submodel. (Default: 1.0).}
 
-\item{lambda.method}{Method used ("LPS2", "LPS", "Schall", "nlminb" or "none") to select the penalty parameters of the additive terms in the long-term survival (or quantum) submodel:
+\item{lambda.method}{Method used ("LPS", "LPS2", "LPS3", "Schall", "nlminb" or "none") to select the penalty parameters of the additive terms in the long-term survival (or quantum) submodel:
 \itemize{
-\item{\code{LPS2} or \code{LPS} : \verb{ }}{based on Laplace P-splines where the marginal posterior of the penalty parameters is maximized using a fixed-point method ;} 
+\item{\code{LPS}, \code{LPS2}, or \code{LPS3} : \verb{ }}{based on Laplace P-splines where the marginal posterior of the penalty parameters is maximized using a fixed-point method. LPS is based on the prior calculation of eigenvalues (unlike LPS2) and delivers results of comparable quality to those of nlminb, but much more quickly. LPS3 work sequentially and separately on long- and short-term parameters with potentially convergence issues ;}
 \item{\code{Schall} : \verb{ }}{Fellner-Schall method ;}
 \item{\code{nlminb} : \verb{ }}{nonlinear maximization of the marginal posterior of the penalty parameters using the R function <nlminb> ;}
 \item{\code{none} : \verb{ }}{penalty parameters are set at their initial values.}
@@ -112,7 +89,7 @@ Method S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Method F0: \eqn{F(t|x) = F
 
 \item{criterion}{Criterion used to assess convergence of the estimation procedure (Default: "levidence"):
 \itemize{
-\item{\code{levidence} : \verb{ }}{log of the evidence, i.e. of the marginal posterior of the penalty parameters at their selected values ;} 
+\item{\code{levidence} : \verb{ }}{log of the evidence, i.e. of the marginal posterior of the penalty parameters at their selected values ;}
 \item{\code{deviance} : \verb{ }}{deviance or -2 log(Likelihood) ;}
 \item{\code{AIC} : \verb{ }}{Akaike information criterion ;}
 \item{\code{BIC} : \verb{ }}{Bayesian (or Schwarz) information criterion ;}
@@ -142,12 +119,12 @@ beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2)
 df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
                           RC.dist="exponential",mu.cens=550)$df.raw
 ## TVcure model fitting
-tau.0 = 2.5 ; lambda1.0 = c(285,15) ; lambda2.0 = c(25,1325) ## Optional
+tau.0 = 2.7 ; lambda1.0 = c(40,15) ; lambda2.0 = c(25,70) ## Optional
 model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), df=df.raw,
                tau.0=tau.0, lambda1.0=lambda1.0, lambda2.0=lambda2.0)
 print(model)
 plot(model, mfrow=c(1,2))
- 
+
 }
 \references{
 Lambert, P. and Kreyenfeld, M. (2023). Exogenous time-varying covariates in double additive cure survival model

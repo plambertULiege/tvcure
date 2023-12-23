@@ -18,7 +18,19 @@
 
 #' Fit of a tvcure model.
 #' @description Fit of a double additive cure survival model with exogenous time-varying covariates.
-#'
+#' @usage tvcure(formula1, formula2, df,
+#'        method=c("S0","F0"), K0=20, pen.order0=2,
+#'        K1=10, pen.order1=2, K2=10, pen.order2=2,
+#'        phi.0=NULL, beta.0=NULL, gamma.0=NULL,
+#'        b.tau=1e-6, a=1, b=1e-2, 
+#'        tau.0=1, tau.min=1, tau.method = c("LPS","Schall","grid","none"),
+#'        lambda1.0=NULL, lambda1.min=1, lambda2.0=NULL, lambda2.min=1,
+#'        lambda.method=c("LPS","LPS2","LPS3","Schall","nlminb","none"),
+#'        observed.hessian=TRUE, use.Rfast=TRUE, Wood.test=TRUE,
+#'        ci.level=.95,
+#'        criterion=c("levidence","deviance","lpen","AIC","BIC","gradient"),
+#'        criterion.tol=1e-1, grad.tol=1e-2,
+#'        iterlim=50, iter.verbose=TRUE, verbose=FALSE)
 #' @param formula1 A formula describing the linear predictor in the long-term (cure) survival (or quantum) submodel.
 #' @param formula2 A formula describing the linear predictor in the short-term (cure) survival (or timing) submodel.
 #' @param df A data frame for survival data in a counting process format. It should always at least the following entries:
@@ -40,17 +52,17 @@
 #' @param gamma.0 (Optional) starting value for the regression and spline parameters in the short-term survival (or timing) submodel.
 #' @param b.tau Hyperprior parameter in the \eqn{Gamma(1,b.tau)} prior for the penalty parameter \eqn{\tau_0} tuning the smoothness of \eqn{\log f_0(t)} (Default: 1e-6).
 #' @param a Hyperprior parameter in the \eqn{Gamma(a,b)} priors for the penalty parameters \eqn{\lambda_1} and \eqn{\lambda_2} tuning the smoothness of the additive terms in the long-term (quantum) and short-term (timing) survival submodels. (Default: 1.0).
-#' @param b Hyperprior parameter in the \eqn{Gamma(a,b)} priors for the penalty parameters \eqn{\lambda_1} and \eqn{\lambda_2} tuning the smoothness of the additive terms in the long-term (quantum) and short-term (timing) survival submodels. (Default: 1e-6).
+#' @param b Hyperprior parameter in the \eqn{Gamma(a,b)} priors for the penalty parameters \eqn{\lambda_1} and \eqn{\lambda_2} tuning the smoothness of the additive terms in the long-term (quantum) and short-term (timing) survival submodels. (Default: 1e-2).
 #' @param tau.0 Starting value for \eqn{\tau_0} (Default: 1).
-#' @param tau.min Minimal value for the penalty parameter \eqn{tau_0}. (Default: 1.0).
+#' @param tau.min Minimal value for the penalty parameter \eqn{\tau_0}. (Default: 1.0).
 #' @param tau.method Method used to calculate the posterior mode of \eqn{p(\tau_0|data)}: "LPS" (Laplace P-splines), "Schall" (Fellner-Schall algorithm), "grid" (best choice in a regular grid on the log-scale) or "none" (stick to the initial value tau.0). (Default: "LPS").
 #' @param lambda1.0 (Optional) J1-vector with starting values for the penalty parameters of the additive terms in the long-term survival (or quantum) submodel.
 #' @param lambda1.min Minimal value for the J1 penalty parameters \eqn{\lambda_1} of the additive terms in the long-term survival (or quantum) submodel. (Default: 1.0).
 #' @param lambda2.0 (Optional) J2-vector with starting values for the penalty parameters of the additive terms in the short-term survival (or timing) submodel.
 #' @param lambda2.min Minimal value for the J2 penalty parameters \eqn{\lambda_2} of the additive terms in the short-term survival (or timing) submodel. (Default: 1.0).
-#' @param lambda.method Method used ("LPS2", "LPS", "Schall", "nlminb" or "none") to select the penalty parameters of the additive terms in the long-term survival (or quantum) submodel:
+#' @param lambda.method Method used ("LPS", "LPS2", "LPS3", "Schall", "nlminb" or "none") to select the penalty parameters of the additive terms in the long-term survival (or quantum) submodel:
 #' \itemize{
-#' \item{\code{LPS2} or \code{LPS} : \verb{ }}{based on Laplace P-splines where the marginal posterior of the penalty parameters is maximized using a fixed-point method ;}
+#' \item{\code{LPS}, \code{LPS2}, or \code{LPS3} : \verb{ }}{based on Laplace P-splines where the marginal posterior of the penalty parameters is maximized using a fixed-point method. LPS is based on the prior calculation of eigenvalues (unlike LPS2) and delivers results of comparable quality to those of nlminb, but much more quickly. LPS3 work sequentially and separately on long- and short-term parameters with potentially convergence issues ;}
 #' \item{\code{Schall} : \verb{ }}{Fellner-Schall method ;}
 #' \item{\code{nlminb} : \verb{ }}{nonlinear maximization of the marginal posterior of the penalty parameters using the R function <nlminb> ;}
 #' \item{\code{none} : \verb{ }}{penalty parameters are set at their initial values.}
@@ -87,7 +99,7 @@
 #' df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
 #'                           RC.dist="exponential",mu.cens=550)$df.raw
 #' ## TVcure model fitting
-#' tau.0 = 2.5 ; lambda1.0 = c(285,15) ; lambda2.0 = c(25,1325) ## Optional
+#' tau.0 = 2.7 ; lambda1.0 = c(40,15) ; lambda2.0 = c(25,70) ## Optional
 #' model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), df=df.raw,
 #'                tau.0=tau.0, lambda1.0=lambda1.0, lambda2.0=lambda2.0)
 #' print(model)
@@ -102,18 +114,17 @@ tvcure = function(formula1, formula2, df,
                   K2=10, pen.order2=2,
                   phi.0=NULL, beta.0=NULL, gamma.0=NULL,
                   b.tau=1e-6,  ## Prior on penalty parameter <tau> for log f0(t): Gamma(1,b.tau)
-                  a=1, b=1e-4, ## Prior on penalty parameters for the additive terms: Gamma(a,b)
+                  a=1, b=1e-2, ## Prior on penalty parameters for the additive terms: Gamma(a,b)
                   tau.0=1, tau.min=1,
                   tau.method = c("LPS","Schall","grid","none"),
                   lambda1.0=NULL, lambda1.min=1, lambda2.0=NULL, lambda2.min=1,
-                  lambda.method=c("LPS","LPS2","Schall","nlminb","none"), ## Penalty selection method for additive terms
+                  lambda.method=c("LPS","LPS2","LPS3","Schall","nlminb","none"), ## Penalty selection method for additive terms
                   observed.hessian=TRUE,  ## TRUE: X[event==1,]'X[event==1,] ; FALSE: X'diag(mu.ij)X
                   use.Rfast=TRUE,
                   Wood.test=TRUE,
                   ci.level=.95,
                   criterion=c("levidence","deviance","lpen","AIC","BIC","gradient"),
                   criterion.tol=1e-1,
-                  ## lpen.tol=1e-2, levidence.tol=1e-2, AIC.tol=1e-2, BIC.tol=1e-2, dev.tol=1e-2,
                   grad.tol=1e-2,
                   iterlim=50,iter.verbose=TRUE,verbose=FALSE){
     ##
@@ -131,9 +142,9 @@ tvcure = function(formula1, formula2, df,
     ## }
     if (missing(df)) {message("Missing data frame <df> with <id>, <time>, event indicator <event>, and covariate values !") ; return(NULL)}
     ##
-    ## if (!is.null(phi.0)) K0 = length(phi.0)
-    ## if (!is.null(beta.0))  K1 = length(beta.0)
-    ## if (!is.null(gamma.0)) K2 = length(gamma.0)
+    if (!is.null(phi.0)) K0 = length(phi.0)
+    if (!is.null(beta.0))  K1 = length(beta.0)
+    if (!is.null(gamma.0)) K2 = length(gamma.0)
     ##
     id = unique(df$id) ## Subject ids
     n = length(id)     ## Number of subjects
@@ -166,7 +177,77 @@ tvcure = function(formula1, formula2, df,
     regr1.lab = colnames(regr1$Xcal) ; regr2.lab = colnames(regr2$Xcal) ## Labels of the regression parms
     addregr1.lab = regr1$additive.lab ; addregr2.lab = regr2$additive.lab ## Labels of the additive terms
     ##
-    ## Initial values for the regression parameters
+    ## Log-determinant of a positive definite matrix based on Choleski
+    ##  Note: faster than methods based on functions svd, qr or determinant
+    ## ---------------------------------------------------------------------
+    ldet.fun = function(x) c(determinant(x,logarithm=TRUE)$mod)
+    ## ldet.fun = function(x) 2*sum(log(diag(chol(x))))
+    ## End ldet.fun
+    ##
+    ## Fast calculation of log |B'WB + lambda*Pd| using pre-computed eigenvalues:
+    ##  log |B'WB + lambda*Pd| = ldet0 + sum(log(lambda1)) + sum_j(log(tau+dj))
+    ## --------------------------------------------------------------------------
+
+    ## Starting from B'WB and Pd
+    ev.fun = function(BwB, Pd){  ## t(B) %*% diag(w) %*% B
+        K = ncol(Pd) ; rk = qr(Pd)$rank ; id1 = 1:rk ; id2 = (1:K)[-id1]
+        temp2 = svd(Pd) ; U = temp2$u ; lambda1 = temp2$d[id1]
+        BwB = t(U) %*% (BwB %*% U)
+        M = BwB[id1,id1] - BwB[id1,id2,drop=FALSE]%*%solve(BwB[id2,id2,drop=FALSE])%*%BwB[id2,id1,drop=FALSE]
+        MM = sqrt(1/lambda1) * t(sqrt(1/lambda1)*t(M))
+        ## MM2 = diag(1/sqrt(lambda1))%*%M%*%diag(1/sqrt(lambda1))
+        dj = svd(MM)$d
+        ldet0 = ldet.fun(BwB[id2,id2,drop=FALSE])
+        ## log |B'WB + lambda*Pd| = ldet0 + sum(log(lambda1)) + sum_j(log(tau+dj))
+        return(list(ldet0=ldet0,lambda1=lambda1,dj=dj))
+    }
+    ## Starting from B, W and Pd
+    ev.fun2 = function(B, w=NULL, Pd){  ## t(B) %*% diag(w) %*% B
+        if (is.null(w)) w = rep(1,nrow(B))
+        K = ncol(Pd) ; rk = qr(Pd)$rank ; id1 = 1:rk ; id2 = (1:K)[-id1]
+        temp2 = svd(Pd) ; U = temp2$u ; lambda1 = temp2$d[id1]
+        Bt = (sqrt(w) * B) %*% temp2$u
+        Bt1 = Bt[,id1] ; Bt0 = Bt[,-id1,drop=FALSE]
+        B01 = t(Bt0)%*%Bt1
+        M = t(Bt1)%*%Bt1 - t(B01)%*%solve(t(Bt0)%*%Bt0)%*%B01
+        MM = sqrt(1/lambda1) * t(sqrt(1/lambda1)*t(M))
+        ## MM2 = diag(1/sqrt(lambda1))%*%M%*%diag(1/sqrt(lambda1))
+        dj = svd(MM)$d
+        ldet0 = ldet.fun(t(Bt0)%*%Bt0)
+        return(list(ldet0=ldet0,lambda1=lambda1,dj=dj))
+    }
+    ## Eigenvalues associated to additive terms
+    id1 = as.logical(df$event) ##which(event==1)
+    ev1.lst = ev2.lst = list()
+    ## ... in long-term survival submodel
+    if (J1 > 0){
+        rk1 = qr(regr1$Pd.x)$rank
+        for (j in 1:J1){ ## Loop over additive terms in the long-term survival sub-model
+            idx = nfixed1 + (j-1)*K1 + (1:K1)
+            if (use.Rfast){
+                Hes.betaj = -Rfast::Crossprod(regr1$Xcal[id1,idx,drop=FALSE], regr1$Xcal[id1,idx,drop=FALSE])
+            } else {
+                Hes.betaj = -crossprod(regr1$Xcal[id1,idx,drop=FALSE], regr1$Xcal[id1,idx,drop=FALSE])
+            }
+            ev1.lst[[j]] = ev.fun(BwB=Hes.betaj,Pd=regr1$Pd.x)$dj
+        }
+    }
+    ## ... in short-term survival submodel
+    if (J2 > 0){
+        rk2 = qr(regr2$Pd.x)$rank
+        for (j in 1:J2){ ## Loop over additive terms in the long-term survival sub-model
+            idx = nfixed2 + (j-1)*K2 + (1:K2)
+            if (use.Rfast){
+                Hes.gamj = -Rfast::Crossprod(regr2$Xcal[id1,idx,drop=FALSE], regr2$Xcal[id1,idx,drop=FALSE])
+            } else {
+                Hes.gamj = -crossprod(regr2$Xcal[id1,idx,drop=FALSE], regr2$Xcal[id1,idx,drop=FALSE])
+            }
+            ev2.lst[[j]] = ev.fun(BwB=Hes.gamj,Pd=regr2$Pd.x)$dj
+        }
+    }
+    ## Initial values
+    ## --------------
+    ## ... for the regression parameters
     q1 = ncol(regr1$Xcal) ## Total number of regression and spline parameters in long-term survival
     q2 = ncol(regr2$Xcal) ## Total number of regression and spline parameters in short-term survival
     if (is.null(q2)){
@@ -183,12 +264,12 @@ tvcure = function(formula1, formula2, df,
         if (is.null(gamma.0)) gamma.0 = rep(0,q2)
         names(gamma.0) = regr2.lab
     }
-    ##
-    ## Initial values for the penalty parameters in regression part
+    ## ... for the penalty parameters in regression part
     if ((J1 > 0) & is.null(lambda1.0)) lambda1.0 = rep(100,J1)
     if ((J2 > 0) & is.null(lambda2.0)) lambda2.0 = rep(100,J2)
     ##
     ## Pre-evaluated IB-splines basis for F0(t)
+    ## ----------------------------------------
     ## t.grid = 1:T
     ## obj.knots = qknots(t.grid, xmin=0, xmax=max(t.grid), equid.knots = TRUE, pen.order=pen.order0, K=K0)
     obj.knots = qknots(1:T, xmin=0, xmax=T+1, equid.knots = TRUE, pen.order=pen.order0, K=K0)
@@ -205,12 +286,6 @@ tvcure = function(formula1, formula2, df,
     phi.0 = phi.0 - phi.0[k.ref]
     colnames(B0.grid) = names(phi.0)
     tB0B0 = t(B0.grid[df$time,-k.ref]) %*% B0.grid[df$time,-k.ref]
-    ## ---------------------------------------------------------------------
-    ## Log-determinant of a positive definite matrix based on Choleski
-    ##  Note: faster than methods based on functions svd, qr or determinant
-    ## ---------------------------------------------------------------------
-    ldet.fun = function(x) 2*sum(log(diag(chol(x))))
-    ## End ldet.fun
     ##
     ## -----------------------------------------------------------------------------------------
     ff = function(phi, beta, gamma,
@@ -525,13 +600,56 @@ tvcure = function(formula1, formula2, df,
                    grad.phi=grad.phi, Hes.phi=Hes.phi, Hes.phi0=Hes.phi0,
                    T=T, t.grid=1:T, f0.grid=f0.grid, F0.grid=F0.grid, S0.grid=S0.grid,
                    dlf0.grid=dlf0.grid, dlF0.grid=dlF0.grid, dlS0.grid=dlS0.grid, k.ref=k.ref,
-                   aa=aa, bb=bb)
+                   a=aa, b=bb)
         return(ans)
     } ## End ff
     ##
     ## Function 1: Penalty parameter selection using Laplace approximation to  p(lambda|data)
+    ##    with an underlying computation of |B'WB + lamdba Pd| using precomputed eigenvalues
+    ##    and the fixed point method to find lambda.MAP
     ## --------------------------------------------------------------------------------------
-    select.lambda.LPS = function(Hes.regr0){
+    select.lambda.LPS = function(itermax=50){
+        ## Generic update of lambda
+        update.lambda.fun = function(lambda,quad,ev,rk){
+            ok.lam = FALSE ; iter.lam = 0
+            while(!ok.lam){
+                iter.lam = iter.lam + 1
+                lambda.old = lambda
+                ttr = sum(1 / (lambda+ev))
+                lambda = (2*(aa-1) + rk) / (2*bb + quad + ttr)
+                lam.dif = abs(lambda - lambda.old)
+                ok.lam = (lam.dif < 1) | (iter.lam >= itermax)
+            }
+            return(lambda)
+        }
+        ## Update <lambda1> if (J1 > 0)
+        if (J1 > 0){
+            for (j in 1:J1){ ## Loop over additive terms in the long-term survival sub-model
+                ## Update lambda1.cur
+                idx = nfixed1 + (j-1)*K1 + (1:K1)
+                theta.j = beta.cur[idx]
+                quad.j = sum(theta.j*c(Pd1.x%*%theta.j))
+                lambda1.cur[j] = update.lambda.fun(lambda1.cur[j],quad.j,ev1.lst[[j]],rk1)
+            }
+        }
+        ## Update <lambda2> if (J2 > 0)
+        if (J2 > 0){
+            for (j in 1:J2){ ## Loop over additive terms in the short-term survival sub-model
+                ## Update lambda2.cur
+                idx = nfixed2 + (j-1)*K2 + (1:K2)
+                theta.j = gamma.cur[idx]
+                quad.j = sum(theta.j*c(Pd2.x%*%theta.j))
+                lambda2.cur[j] = update.lambda.fun(lambda2.cur[j],quad.j,ev2.lst[[j]],rk2)
+            }
+        }
+        ##
+        return(list(lambda1=lambda1.cur,lambda2=lambda2.cur))
+    } ## End select.lambda.LPS
+    ##
+    ## Function 2: Penalty parameter selection using Laplace approximation to  p(lambda|data)
+    ##   with the fixed point method to find lambda.MAP (without precomputation of eigenvalues)
+    ## ----------------------------------------------------------------------------------------
+    select.lambda.LPS2 = function(Hes.regr0){
         ok.lam = FALSE ; iter.lam = 0
         ##
         update.Sigma = function(){
@@ -591,11 +709,12 @@ tvcure = function(formula1, formula2, df,
         ##
         return(list(lambda1=lambda1.cur,lambda2=lambda2.cur,Sigma=Sigma,
                     niter=iter.lam,converged=ok.lam))
-    } ## End select.lambda.LPS
+    } ## End select.lambda.LPS2
     ##
-    ## Function 2: Penalty parameter selection using Laplace approximation to  p(lambda|data)
+    ## Function 3: Penalty parameter selection using Laplace approximation to  p(lambda|data)
+    ##     (separately for <lambda1> & <lambda2>
     ## --------------------------------------------------------------------------------------
-    select.lambda.LPS2 = function(coef, nfixed, lambda, Pd, Mcal, pen.order, lambda.min, b.tau){
+    select.lambda.LPS3 = function(coef, nfixed, lambda, Pd, Mcal, pen.order, lambda.min, b.tau){
         Mcal.1 = Mcal
         lambda1.cur = lambda ; J1 = length(lambda1.cur)
         nfixed1 = nfixed
@@ -673,7 +792,7 @@ tvcure = function(formula1, formula2, df,
         return(list(lambda=lambda1.cur, U.lambda=U.lam1, Hes.lam=Hes.lam1,
                     xi=xi1.cur, U.xi=U.xi1, Hes.xi=Hes.xi1,
                     ok.xi=ok.xi1))
-    } ## End select.lambda.LPS2
+    } ## End select.lambda.LPS3
     ##
     ## Function testStat implements Wood (2013) Biometrika 100(1), 221-228
     ## Goal: evaluate H0: fj = Xt %*% beta = 0  when  (beta | D) ~ N(p,V)
@@ -683,6 +802,7 @@ tvcure = function(formula1, formula2, df,
     ## 1. Round down to k if k<= rank < k+0.05, otherwise up.
     ## res.df is residual dof used to estimate scale. <=0 implies
     ## fixed scale.
+    ## -------------------------------------------------------------------
     Tr.test = function(p,Xt,V,edf){
         ans <- testStat(p, Xt, V, min(ncol(Xt), edf), type = 0, res.df = -1)
         ## ans <- mgcv:::testStat(p, Xt, V, min(ncol(Xt), edf), type = 0, res.df = -1)
@@ -812,6 +932,7 @@ tvcure = function(formula1, formula2, df,
     ## #############
     L2norm = function(x) sqrt(sum(x^2))
     ## Generic Newton-Raphson algorithm
+    ## --------------------------------
     NewtonRaphson = function(g, theta, tol=1e-2, itermax=20, verbose=FALSE){
         theta.cur = theta
         obj.cur = g(theta.cur,Dtheta=TRUE)
@@ -826,7 +947,7 @@ tvcure = function(formula1, formula2, df,
             step = 1 ; nrep = 0
             repeat { ## Repeat step-halving directly till improve target function
                 nrep = nrep + 1
-                if (nrep > 20) break
+                if (nrep > 5) break ## if (nrep > 20) break
                 theta.prop = theta.cur + step*dtheta ## Update.theta
                 obj.prop = tryCatch(expr=g(theta.prop,Dtheta=TRUE), error=function(e) e)
                 if (inherits(obj.prop, "error")){
@@ -846,11 +967,14 @@ tvcure = function(formula1, formula2, df,
         return(ans)
     } ## End NewtonRaphson
     ##
+    ## Starting values
+    ## ---------------
     phi.cur = phi.0 ; beta.cur = beta.0 ; gamma.cur = gamma.0
     tau.cur = tau.0 ; lambda1.cur = lambda1.0 ; lambda2.cur = lambda2.0
     Hes.xi1 = Hes.xi2 = Hes.lam1 = Hes.lam2 = NULL
     tau.iter = c()
     ## Functions to handle identification issue in polytomial logistic estimation of <f0>
+    ## ----------------------------------------------------------------------------------
     psi2phi = function(psi){
         ans = append(psi,values=0,after=k.ref-1)
         names(ans) = names(phi.0)
@@ -860,6 +984,7 @@ tvcure = function(formula1, formula2, df,
     ## ## Check whether there is no covariate in the short-term survival part
     ## ##  in which case  <gamma> should be a scalar fixed to 0
     ## nogamma = (regr2$nfixed==1) & (colnames(regr2$Xcal)[1]=="(Intercept)") & (regr2$J == 0)
+    ##
     converged = FALSE ; iter = 0
     final.iteration = FALSE ## Idea: when the EDs of the additive terms stabilize,
     ##
@@ -1023,8 +1148,11 @@ tvcure = function(formula1, formula2, df,
                       Dbeta=Dtheta,Dgamma=Dtheta)
             ## grad = obj.cur$grad.regr ; Sigma = diag(diag(-solve(obj.cur$Hes.regr)))
             ## grad = obj.cur$grad.regr ; Sigma = -solve(obj.cur$Hes.regr-diag(1e-6,length(theta)))
-            grad = obj.cur$grad.regr
-            dtheta = solve(-obj.cur$Hes.regr, grad)
+            grad = dtheta = NULL
+            if (Dtheta){
+                grad = obj.cur$grad.regr
+                dtheta = solve(-obj.cur$Hes.regr, grad)
+            }
             ##
             ans = list(g=obj.cur$lpen, theta=theta, dtheta=dtheta, grad=grad)
             return(ans)
@@ -1047,31 +1175,45 @@ tvcure = function(formula1, formula2, df,
         obj.cur = ff(phi.cur, beta.cur, gamma.cur,
                      tau=tau.cur, lambda1=lambda1.cur, lambda2=lambda2.cur,
                      Dphi=FALSE, Dbeta=TRUE, Dgamma=!nogamma,
-                     Dlambda=update.lambda & ((lambda.method == "LPS2")))
-        ##           Dlambda=update.lambda & ((lambda.method == "LPS2")|(lambda.method == "LPS")))
+                     Dlambda=update.lambda & ((lambda.method == "LPS3")))
+        ##           Dlambda=update.lambda & ((lambda.method == "LPS3")|(lambda.method == "LPS2")))
         ##
         ## Method 1: LPS
         ## -------------
-        if (lambda.method == "LPS"){ ## Laplace's method (jointly for (lambd1,lambda2))
+        if (lambda.method == "LPS"){ ## Laplace's method with fast determinant computation
             if (update.lambda & !final.iteration){
                 ## -3- lambda1 & lambda2
                 ## ---------------------
                 if (J1 > 0 | J2 > 0){
-                    temp = select.lambda.LPS(Hes.regr0=obj.cur$Hes.regr0)
+                    temp = select.lambda.LPS()
                     lambda1.cur = temp$lambda1
                     lambda2.cur = temp$lambda2
                 }
             }
         } ## Endif lambda.method == "LPS"
         ##
-        ## Method 1b: LPS2
+        ## Method 2: LPS2
+        ## --------------
+        if (lambda.method == "LPS2"){ ## Laplace's method (jointly for (lambd1,lambda2))
+            if (update.lambda & !final.iteration){
+                ## -3- lambda1 & lambda2
+                ## ---------------------
+                if (J1 > 0 | J2 > 0){
+                    temp = select.lambda.LPS2(Hes.regr0=obj.cur$Hes.regr0)
+                    lambda1.cur = temp$lambda1
+                    lambda2.cur = temp$lambda2
+                }
+            }
+        } ## Endif lambda.method == "LPS2"
+        ##
+        ## Method 3: LPS3
         ## ---------------
-        if (lambda.method == "LPS2"){ ## Laplace's method (separately for <lambda1> & <lambda2>
+        if (lambda.method == "LPS3"){ ## Laplace's method (separately for <lambda1> & <lambda2>
             if (update.lambda & !final.iteration){
                 ## -3a- lambda1 (long-term survival)
                 ## ------------
                 if (J1 > 0){
-                    temp = select.lambda.LPS2(coef=beta.cur, nfixed=nfixed1,
+                    temp = select.lambda.LPS3(coef=beta.cur, nfixed=nfixed1,
                                              lambda=lambda1.cur, Pd=Pd1.x, Mcal=obj.cur$Mcal.1,
                                              pen.order=pen.order1, lambda.min=lambda1.min, b.tau=b.tau)
                     lambda1.cur = temp$lambda ## Vector of penalty parameters for the additive terms
@@ -1081,7 +1223,7 @@ tvcure = function(formula1, formula2, df,
                 ## -3b- lambda2 (short-term survival)
                 ## ------------
                 if (J2 > 0){
-                   temp = select.lambda.LPS2(coef=gamma.cur, nfixed=nfixed2,
+                   temp = select.lambda.LPS3(coef=gamma.cur, nfixed=nfixed2,
                                              lambda=lambda2.cur, Pd=Pd2.x, Mcal=obj.cur$Mcal.2,
                                              pen.order=pen.order2, lambda.min=lambda2.min, b.tau=b.tau)
                    lambda2.cur = temp$lambda ## Vector of penalty parameters for the additive terms
@@ -1090,7 +1232,8 @@ tvcure = function(formula1, formula2, df,
                 }
 
             }
-        } ## Endif lambda.method == "LPS2"
+        } ## Endif lambda.method == "LPS3"
+        ##
         ##
         ## Method 2: SCHALL
         ## ----------------
@@ -1161,7 +1304,8 @@ tvcure = function(formula1, formula2, df,
             } ## End loglambda.loss
             ##
             ## Minimize the loss function to select <log(lambda)>
-            obj.ml = nlminb(start=log(c(lambda1.cur,lambda2.cur)),objective=loglambda.loss,
+            obj.ml = nlminb(start=log(c(lambda1.cur,lambda2.cur)),
+                            objective=loglambda.loss,
                             lower=rep(0,J1+J2),upper=(rep(10,J1+J2)))
             lambda.cur = exp(obj.ml$par) ## Selected <lambda> --> lambda.hat
             if (J1 > 0) lambda1.cur = lambda.cur[1:J1]

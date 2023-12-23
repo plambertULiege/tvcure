@@ -29,7 +29,7 @@ beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2)
 df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
                           RC.dist="exponential",mu.cens=550)$df.raw
 ## TVcure model fitting
-tau.0 = 2.5 ; lambda1.0 = c(285,15) ; lambda2.0 = c(25,1325) ## Optional
+tau.0 = 2.7 ; lambda1.0 = c(40,15) ; lambda2.0 = c(25,70) ## Optional
 model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), df=df.raw,
                tau.0=tau.0, lambda1.0=lambda1.0, lambda2.0=lambda2.0)
 AIC(model)
@@ -40,7 +40,7 @@ Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in doub
 with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, under review.
 }
 \seealso{
-\code{\link{tvcure}}, \code{\link{tvcure.object}}, \code{\link{BIC.tvcure}}
+\code{\link{tvcure}}, \code{\link{tvcure.object}}, \code{\link{BIC.tvcure}}, \code{\link{levidence}}
 }
 \author{
 Philippe Lambert \email{p.lambert@uliege.be}

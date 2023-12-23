@@ -1,16 +1,16 @@
-#' Bayesian Information Criterion (BIC) of a \code{tvcure.object}.
+#' Deviance of a \code{tvcure.object}.
 #'
 #' @description
-#' Bayesian Information Criterion (BIC) for the fitted tvcure model in a \code{tvcure.object}.
+#' Deviance for the fitted tvcure model in a \code{tvcure.object}.
 #'
-#' @usage \method{BIC}{tvcure}(object, ...)
+#' @usage \method{deviance}{tvcure}(object, ...)
 #'
 #' @param object An object of class \code{\link{tvcure.object}}.
 #' @param ... Optionally more fitted objects.
 #'
-#' @details Bayesian (Schwarz) information criterion in a tvcure object, with a penalty calculated using the total effective degrees of freedom and the total number of observed events, -2log(L) + log(d)*ED.tot, smaller values being preferred during model selection.
+#' @details Deviance -2log(L/L.hat)
 #'
-#' @return The BIC of the fitted tvcure model in \code{x}.
+#' @return The deviance of the fitted tvcure model in \code{x}.
 #'
 #' @author Philippe Lambert \email{p.lambert@uliege.be}
 #' @references Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
@@ -19,26 +19,25 @@
 #' @examples
 #' require(tvcure)
 #' ## Simulated data generation
-#' beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2) 
+#' beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2)
 #' df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
 #'                           RC.dist="exponential",mu.cens=550)$df.raw
 #' ## TVcure model fitting
 #' tau.0 = 2.7 ; lambda1.0 = c(40,15) ; lambda2.0 = c(25,70) ## Optional
 #' model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), df=df.raw,
 #'                tau.0=tau.0, lambda1.0=lambda1.0, lambda2.0=lambda2.0)
-#' BIC(model)
+#' deviance(model)
 #'
-#' @seealso \code{\link{tvcure}}, \code{\link{tvcure.object}}, \code{\link{AIC.tvcure}}, \code{\link{levidence}}
+#' @seealso \code{\link{tvcure}}, \code{\link{tvcure.object}}, \code{\link{AIC.tvcure}}, \code{\link{BIC.tvcure}}, \code{\link{levidence}}
 #'
 #' @export
-#' 
-BIC.tvcure <- function(object, ...){
+#'
+deviance.tvcure <- function(object, ...){
     obj = object
     lls = function(obj) return(ans = c(dev=obj$fit$dev, edf=obj$fit$ED.tot, d=obj$fit$d))
-    ## lls = function(obj) return(ans = c(dev=obj$fit$dev, edf=obj$fit$ED.tot, nobs=obj$fit$nobs))
     if (!missing(...)) {
         vals = sapply(list(obj,...), lls)
-        val <- data.frame(edf = round(vals[2L, ],2), BIC = vals[1L, ] + log(vals[3L, ]) * vals[2L, ])
+        val <- data.frame(edf = round(vals[2L, ],2), dev = vals[1L, ])
         nos <- na.omit(vals[3L, ])
         if (length(nos) && any(nos != nos[1L])) warning("models are not all fitted to the same number of observations")
         Call <- match.call()
@@ -46,6 +45,6 @@ BIC.tvcure <- function(object, ...){
         val
     } else {
         vals = unname(lls(obj))
-        vals[1L] + log(vals[3L]) * vals[2L]
+        vals[1L]
     }
 }

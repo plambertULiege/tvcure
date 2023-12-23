@@ -14,15 +14,15 @@
 #' \item{\code{additive.lab1} : \verb{ }}{labels of the additive terms in the long-term term (or quantum) submodel.}
 #' \item{\code{K1} : \verb{ }}{number of P-spline parameters per additive term in the long-term term (or quantum) submodel.}
 #' \item{\code{knots1} : \verb{ }}{list of length J1 containing the knots of the additive term in the long-term term (or quantum) submodel.}
-#' \item{\code{f1.grid} : \verb{ }}{list of length J1 containing for each additive term in the long-term term (or quantum) submodel, a list of length 2 with elements <x> and <y.mat>. 
-#' Element <x> is a vector of \code{ngrid} equidistant values covering the range of values for the covariate ; 
+#' \item{\code{f1.grid} : \verb{ }}{list of length J1 containing for each additive term in the long-term term (or quantum) submodel, a list of length 2 with elements <x> and <y.mat>.
+#' Element <x> is a vector of \code{ngrid} equidistant values covering the range of values for the covariate ;
 #' <y.mat> is (ngrid x 3) matrix containing in column 1 the estimated values of the additive term at <x> and the bounds of the credible interval for it in the other 2 columns.}
 #' \item{\code{f1} : \verb{ }}{list of length J1 containing the estimated function of the corresponding additive term in the long-term term (or quantum) submodel.}
 #' \item{\code{f1.se} : \verb{ }}{list of length J1 containing the estimated standard error function of the corresponding additive term in the long-term term (or quantum) submodel.}
 #' }
-#' The same definitions applies for \code{nfixed2}, \code{J2}, \code{additive.lab2}, \code{K2}, \code{knots2}, 
+#' The same definitions applies for \code{nfixed2}, \code{J2}, \code{additive.lab2}, \code{K2}, \code{knots2},
 #' \code{f2.grid}, \code{f2}, \code{f2.se} with the additive terms in the short-term (or timing) submodel.
-#' 
+#'
 #' @author Philippe Lambert \email{p.lambert@uliege.be}
 #' @references Lambert, P. and Kreyenfeld, M. (2023). Exogenous time-varying covariates in double additive cure survival model
 #' with application to fertility.
@@ -31,20 +31,20 @@
 #' @examples
 #' require(tvcure)
 #' ## Simulated data generation
-#' beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2) 
+#' beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2)
 #' df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
 #'                           RC.dist="exponential",mu.cens=550)$df.raw
 #' ## TVcure model fitting
-#' tau.0 = 2.5 ; lambda1.0 = c(285,15) ; lambda2.0 = c(25,1325) ## Optional
+#' tau.0 = 2.7 ; lambda1.0 = c(40,15) ; lambda2.0 = c(25,70) ## Optional
 #' model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), df=df.raw,
 #'                tau.0=tau.0, lambda1.0=lambda1.0, lambda2.0=lambda2.0)
-#' 
+#'
 #' ## Extract additive term estimates from tvcure object
 #' obj = additive.tvcure(model)
 #' names(obj)
-#' 
+#'
 #' @export
-#' 
+#'
 additive.tvcure <- function(obj.tvcure,ngrid=300, ci.level=.95){
     obj = obj.tvcure
     nfixed1 = obj$regr1$nfixed ; nfixed2 = obj$regr2$nfixed ## Number of fixed parms in the regression submodels
@@ -85,6 +85,7 @@ additive.tvcure <- function(obj.tvcure,ngrid=300, ci.level=.95){
     ## Additive part in long-term survival
     nbeta = obj$fit$nbeta
     ans$nfixed1=nfixed1 ; ans$J1 = J1
+    ## Sigma.regr = with(obj$fit, solve(-Hes.regr))
     if (J1 > 0){
         add.lab = obj$regr1$additive.lab
         ans$additive.lab1 = add.lab
