@@ -1071,10 +1071,10 @@ tvcure = function(formula1, formula2, df,
                 grad = Sigma = dtheta = NULL
                 if (Dtheta){
                     grad = obj.cur$grad.phi[-k.ref]
-                    A = Matrix::nearPD(-obj.cur$Hes.phi[-k.ref,-k.ref])$mat
-                    dtheta = solve(A, grad)
-                    ## Sigma = solve(-obj.cur$Hes.phi[-k.ref,-k.ref] + diag(1e-6,length(grad)))
-                    ## dtheta = c(Sigma %*% grad)
+                    ## A = Matrix::nearPD(-obj.cur$Hes.phi[-k.ref,-k.ref])$mat
+                    ## dtheta = solve(A, grad)
+                    Sigma = solve(-obj.cur$Hes.phi[-k.ref,-k.ref] + diag(1e-6,length(grad)))
+                    dtheta = c(Sigma %*% grad)
                     attr(theta,"ed.phi") = attr(obj.cur$phi,"ed.phi")
                 }
                 ans = list(g=obj.cur$lpen, theta=theta, dtheta=dtheta, grad=grad)
@@ -1191,7 +1191,8 @@ tvcure = function(formula1, formula2, df,
             grad = dtheta = NULL
             if (Dtheta){
                 grad = obj.cur$grad.regr
-                A = Matrix::nearPD(-obj.cur$Hes.regr)$mat
+                ## A = Matrix::nearPD(-obj.cur$Hes.regr)$mat
+                A = -obj.cur$Hes.regr
                 dtheta = solve(A, grad)
             }
             ##
