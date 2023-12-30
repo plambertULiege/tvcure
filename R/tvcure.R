@@ -22,7 +22,7 @@
 #'        method=c("S0","F0"), K0=20, pen.order0=2,
 #'        K1=10, pen.order1=2, K2=10, pen.order2=2,
 #'        phi.0=NULL, beta.0=NULL, gamma.0=NULL,
-#'        b.tau=1e-6, a=1, b=1e-2, 
+#'        b.tau=1e-6, a=1, b=1e-2,
 #'        tau.0=1, tau.min=1, tau.method = c("LPS","Schall","grid","none"),
 #'        lambda1.0=NULL, lambda1.min=1, lambda2.0=NULL, lambda2.min=1,
 #'        lambda.method=c("LPS","LPS2","LPS3","Schall","nlminb","none"),
@@ -222,26 +222,51 @@ tvcure = function(formula1, formula2, df,
     ## ... in long-term survival submodel
     if (J1 > 0){
         rk1 = qr(regr1$Pd.x)$rank
+        ## Non-penalized Hessian for <beta>
+        if (use.Rfast){
+            Hes.beta0 = -Rfast::Crossprod(regr1$Xcal[id1,,drop=FALSE], regr1$Xcal[id1,,drop=FALSE])
+        } else {
+            Hes.beta0 = -crossprod(regr1$Xcal[id1,,drop=FALSE], regr1$Xcal[id1,,drop=FALSE])
+        }
         for (j in 1:J1){ ## Loop over additive terms in the long-term survival sub-model
             idx = nfixed1 + (j-1)*K1 + (1:K1)
-            if (use.Rfast){
-                Hes.betaj = -Rfast::Crossprod(regr1$Xcal[id1,idx,drop=FALSE], regr1$Xcal[id1,idx,drop=FALSE])
-            } else {
-                Hes.betaj = -crossprod(regr1$Xcal[id1,idx,drop=FALSE], regr1$Xcal[id1,idx,drop=FALSE])
-            }
+            Hes.betaj = Hes.beta0[idx,idx,drop=FALSE]
+            ## if (use.Rfast){
+            ##     Hes.betaj = -Rfast::Crossprod(regr1$Xcal[id1,idx,drop=FALSE], regr1$Xcal[id1,idx,drop=FALSE])
+            ## } else {
+            ##     Hes.betaj = -crossprod(regr1$Xcal[id1,idx,drop=FALSE], regr1$Xcal[id1,idx,drop=FALSE])
+            ## }
             ev1.lst[[j]] = ev.fun(BwB=Hes.betaj,Pd=regr1$Pd.x)$dj
         }
     }
     ## ... in short-term survival submodel
     if (J2 > 0){
         rk2 = qr(regr2$Pd.x)$rank
+        ## (Exact) Non-penalized Hessian for <gamma>:
+        ## if (nogamma){ ## Absence of covariate (and no intercept for identification reasons)
+        ##     eta.2 = 0.0
+        ## } else {
+        ##     eta.2 = c(regr2$Xcal %*% gamma) ## Linear predictors in short-term survival
+        ## }
+        ## if (method == "F0") tempo = exp(eta.2)*log(F0.grid[time])
+        ## if (method == "S0") tempo = exp(eta.2)*log(S0.grid[time])
+        ## XcalTempo = (1+tempo) * regr2$Xcal
+        ## Hes.gamma0 = -Rfast::Crossprod(regr2$XcalTempo[id1,,drop=FALSE], regr2$XcalTemp[id1,,drop=FALSE])
+        ##
+        ## (Approximate) Non-penalized Hessian for <gamma>:
+        if (use.Rfast){
+            Hes.gamma0 = -Rfast::Crossprod(regr2$Xcal[id1,,drop=FALSE], regr2$Xcal[id1,,drop=FALSE])
+        } else {
+            Hes.gamma0 = -crossprod(regr2$Xcal[id1,,drop=FALSE], regr2$Xcal[id1,,drop=FALSE])
+        }
         for (j in 1:J2){ ## Loop over additive terms in the long-term survival sub-model
             idx = nfixed2 + (j-1)*K2 + (1:K2)
-            if (use.Rfast){
-                Hes.gamj = -Rfast::Crossprod(regr2$Xcal[id1,idx,drop=FALSE], regr2$Xcal[id1,idx,drop=FALSE])
-            } else {
-                Hes.gamj = -crossprod(regr2$Xcal[id1,idx,drop=FALSE], regr2$Xcal[id1,idx,drop=FALSE])
-            }
+            Hes.gamj = Hes.gamma0[idx,idx,drop=FALSE]
+            ## if (use.Rfast){
+            ##     Hes.gamj = -Rfast::Crossprod(regr2$Xcal[id1,idx,drop=FALSE], regr2$Xcal[id1,idx,drop=FALSE])
+            ## } else {
+            ##     Hes.gamj = -crossprod(regr2$Xcal[id1,idx,drop=FALSE], regr2$Xcal[id1,idx,drop=FALSE])
+            ## }
             ev2.lst[[j]] = ev.fun(BwB=Hes.gamj,Pd=regr2$Pd.x)$dj
         }
     }
@@ -359,7 +384,8 @@ tvcure = function(formula1, formula2, df,
         ## ------------------------------
         ## Gradient wrt <beta>
         grad.beta = NULL
-        Hes.beta = Hes.beta0 = Mcal.1 = NULL
+        Hes.beta = Mcal.1 = NULL
+        ## Hes.beta = Hes.beta0 = Mcal.1 = NULL
         if (Dbeta){
             if (use.Rfast){
                 grad.beta  = Rfast::colsums(regr1$Xcal*(event-mu.ij))
@@ -371,24 +397,34 @@ tvcure = function(formula1, formula2, df,
         }
         ## Hessian wrt <beta>
         if (Dbeta & hessian){
-            if (observed.hessian){
-              if (use.Rfast){
-                Hes.beta = -Rfast::Crossprod(regr1$Xcal[id1,,drop=FALSE], regr1$Xcal[id1,,drop=FALSE]) ## ICI ICI
-              } else {
-                  Hes.beta = -crossprod(regr1$Xcal[id1,,drop=FALSE], regr1$Xcal[id1,,drop=FALSE]) ## ICI ICI
-              }
-            } else {
+            if (!observed.hessian){ ## Note: already computed when observed.hessian=TRUE
                 W1 = mu.ij
                 if (use.Rfast){
-                    Hes.beta = -Rfast::Crossprod(regr1$Xcal, W1*regr1$Xcal)
+                    Hes.beta0 = -Rfast::Crossprod(regr1$Xcal, W1*regr1$Xcal)
                 } else {
-                    Hes.beta = -crossprod(regr1$Xcal, W1*regr1$Xcal)
-                ## Hes.beta = -t(regr1$Xcal) %*% (W1*regr1$Xcal)
+                    Hes.beta0 = -crossprod(regr1$Xcal, W1*regr1$Xcal)
+                ## Hes.beta0 = -t(regr1$Xcal) %*% (W1*regr1$Xcal)
                 }
             }
+            ## if (observed.hessian){
+            ##   if (use.Rfast){
+            ##     Hes.beta0 = -Rfast::Crossprod(regr1$Xcal[id1,,drop=FALSE], regr1$Xcal[id1,,drop=FALSE]) ## ICI ICI
+            ##   } else {
+            ##       Hes.beta0 = -crossprod(regr1$Xcal[id1,,drop=FALSE], regr1$Xcal[id1,,drop=FALSE]) ## ICI ICI
+            ##   }
+            ## } else {
+            ##     W1 = mu.ij
+            ##     if (use.Rfast){
+            ##         Hes.beta0 = -Rfast::Crossprod(regr1$Xcal, W1*regr1$Xcal)
+            ##     } else {
+            ##         Hes.beta0 = -crossprod(regr1$Xcal, W1*regr1$Xcal)
+            ##     ## Hes.beta0 = -t(regr1$Xcal) %*% (W1*regr1$Xcal)
+            ##     }
+            ## }
             ## toc()
+            ##
             ## Additive terms
-            Hes.beta0 = Hes.beta ## Non-penalized Hessian for <beta>
+            Hes.beta = Hes.beta0 ## Non-penalized Hessian Hes.beta0 for <beta>
             if (J1 > 0){
                 Hes.beta = Hes.beta - P1.cur ## Penalized Hessian for <beta>
                 ## Useful quantites for <lambda1> update
@@ -463,19 +499,21 @@ tvcure = function(formula1, formula2, df,
             W2 = (event-mu.ij)*tempo - mu.ij*(1+tempo)^2
             if (observed.hessian){
               if (use.Rfast){
-                Hes.gamma = -Rfast::Crossprod(XcalTempo[id1,,drop=FALSE], XcalTempo[id1,,drop=FALSE])
+                Hes.gamma0 = -Rfast::Crossprod(XcalTempo[id1,,drop=FALSE], XcalTempo[id1,,drop=FALSE])
               } else {
-                Hes.gamma = -crossprod(XcalTempo[id1,,drop=FALSE], XcalTempo[id1,,drop=FALSE])
+                Hes.gamma0 = -crossprod(XcalTempo[id1,,drop=FALSE], XcalTempo[id1,,drop=FALSE])
               }
             } else {
               if (use.Rfast){
-                Hes.gamma = Rfast::Crossprod(regr2$Xcal, W2*regr2$Xcal)
+                Hes.gamma0 = Rfast::Crossprod(XcalTempo, W2*XcalTempo)
+                ## Hes.gamma0 = Rfast::Crossprod(regr2$Xcal, W2*regr2$Xcal)
               } else {
-                Hes.gamma = crossprod(regr2$Xcal, W2*regr2$Xcal)
+                Hes.gamma0 = crossprod(XcalTempo, W2*XcalTempo)
+                ## Hes.gamma0 = crossprod(regr2$Xcal, W2*regr2$Xcal)
               }
             }
             ## Additive terms
-            Hes.gamma0 = Hes.gamma ## Non-penalized Hessian for <gamma>
+            Hes.gamma = Hes.gamma0 ## Non-penalized Hessian Hes.gamma0 for <gamma>
             if (J2 > 0){
                 Hes.gamma = Hes.gamma - P2.cur ## Penalized Hessian for <gamma>
                 ## Useful quantites for <lambda2> update
@@ -933,7 +971,7 @@ tvcure = function(formula1, formula2, df,
     L2norm = function(x) sqrt(sum(x^2))
     ## Generic Newton-Raphson algorithm
     ## --------------------------------
-    NewtonRaphson = function(g, theta, tol=1e-2, itermax=20, verbose=FALSE){
+    NewtonRaphson = function(g, theta, tol=1e-2, itermax=15, verbose=FALSE){
         theta.cur = theta
         obj.cur = g(theta.cur,Dtheta=TRUE)
         g.start = obj.cur$g ## Function at the iteration start
@@ -947,7 +985,7 @@ tvcure = function(formula1, formula2, df,
             step = 1 ; nrep = 0
             repeat { ## Repeat step-halving directly till improve target function
                 nrep = nrep + 1
-                if (nrep > 5) break ## if (nrep > 20) break
+                if (nrep > itermax) break ## if (nrep > 20) break
                 theta.prop = theta.cur + step*dtheta ## Update.theta
                 obj.prop = tryCatch(expr=g(theta.prop,Dtheta=TRUE), error=function(e) e)
                 if (inherits(obj.prop, "error")){
@@ -1033,8 +1071,10 @@ tvcure = function(formula1, formula2, df,
                 grad = Sigma = dtheta = NULL
                 if (Dtheta){
                     grad = obj.cur$grad.phi[-k.ref]
-                    Sigma = solve(-obj.cur$Hes.phi[-k.ref,-k.ref] + diag(1e-6,length(grad)))
-                    dtheta = c(Sigma %*% grad)
+                    A = Matrix::nearPD(-obj.cur$Hes.phi[-k.ref,-k.ref])$mat
+                    dtheta = solve(A, grad)
+                    ## Sigma = solve(-obj.cur$Hes.phi[-k.ref,-k.ref] + diag(1e-6,length(grad)))
+                    ## dtheta = c(Sigma %*% grad)
                     attr(theta,"ed.phi") = attr(obj.cur$phi,"ed.phi")
                 }
                 ans = list(g=obj.cur$lpen, theta=theta, dtheta=dtheta, grad=grad)
@@ -1151,7 +1191,8 @@ tvcure = function(formula1, formula2, df,
             grad = dtheta = NULL
             if (Dtheta){
                 grad = obj.cur$grad.regr
-                dtheta = solve(-obj.cur$Hes.regr, grad)
+                A = Matrix::nearPD(-obj.cur$Hes.regr)$mat
+                dtheta = solve(A, grad)
             }
             ##
             ans = list(g=obj.cur$lpen, theta=theta, dtheta=dtheta, grad=grad)
@@ -1184,6 +1225,15 @@ tvcure = function(formula1, formula2, df,
             if (update.lambda & !final.iteration){
                 ## -3- lambda1 & lambda2
                 ## ---------------------
+                if (J2 >0){
+                    Hes.gamma0 = obj.cur$Hes.gamma0 ## Update Hes.gamma0 value
+                    for (j in 1:J2){ ## Loop over additive terms in the long-term survival sub-model
+                        idx = nfixed2 + (j-1)*K2 + (1:K2)
+                        Hes.gamj = Hes.gamma0[idx,idx,drop=FALSE]
+                        ## Recompute eigenvalues for update of lambda2 (those for lambda1 remain unchanged!)
+                        ev2.lst[[j]] = ev.fun(BwB=Hes.gamj,Pd=regr2$Pd.x)$dj
+                    }
+                }
                 if (J1 > 0 | J2 > 0){
                     temp = select.lambda.LPS()
                     lambda1.cur = temp$lambda1
