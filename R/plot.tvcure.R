@@ -21,7 +21,7 @@
 #' @examples
 #' require(tvcure)
 #' ## Simulated data generation
-#' beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2) 
+#' beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2)
 #' df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
 #'                           RC.dist="exponential",mu.cens=550)$df.raw
 #' ## TVcure model fitting
@@ -44,7 +44,7 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, mfrow=NULL, equal.ylims=TRUE,
     ##
     ## Plot baseline f0 & F0
     ## ---------------------
-    dev.new(width=10,height=5) ; par(mar=c(4,5,1,1))
+    dev.new(width=8,height=4) ; par(mar=c(4,5,1,1))
     par(mfrow=c(1,2))
     with(fhat, curve(f0,xlim=attr(f0,"support"),xlab="time",ylab=bquote(f[0](t))))
     with(fhat, curve(F0,xlim=attr(F0,"support"),xlab="time",ylab=bquote(F[0](t))))
@@ -58,10 +58,10 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, mfrow=NULL, equal.ylims=TRUE,
     if (fhat$J1 > 0){
         ylims = NULL
         if (equal.ylims) ylims =  range(lapply(fhat$f1.grid, function(x) range(x$y.mat)))
-        dev.new() ; par(mar=c(4,5,1,1),mfrow=mfrow)
+        dev.new(width=8,height=4) ; par(mar=c(4,5,1,1),mfrow=mfrow)
         for (j in 1:fhat$J1){
             if ((j%/%(maxPlts+1) == 1)) { ## New plotting window if ...
-                dev.new() ; par(mar=c(4,5,1,1),mfrow=mfrow)
+                dev.new(width=8,height=4) ; par(mar=c(4,5,1,1),mfrow=mfrow)
             }
             xlab = names(fhat$f1.grid)[j]
             with(fhat$f1.grid[[j]], matplot(x, y.mat,type="l",
@@ -74,10 +74,10 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, mfrow=NULL, equal.ylims=TRUE,
     if (fhat$J2 > 0){
         ylims = NULL
         if (equal.ylims) ylims =  range(lapply(fhat$f2.grid, function(x) range(x$y.mat)))
-        dev.new() ; par(mar=c(4,5,1,1),mfrow=mfrow)
+        dev.new(width=8,height=4) ; par(mar=c(4,5,1,1),mfrow=mfrow)
         for (j in 1:fhat$J2){
             if ((j%/%(maxPlts+1) == 1)) { ## New plotting window if ...
-                dev.new() ; par(mar=c(4,5,1,1),mfrow=mfrow)
+                dev.new(width=8,height=4) ; par(mar=c(4,5,1,1),mfrow=mfrow)
             }
             xlab = names(fhat$f2.grid)[j]
             with(fhat$f2.grid[[j]], matplot(x, y.mat,type="l",
