@@ -996,7 +996,7 @@ tvcure = function(formula1, formula2, df,
                 }
             }
             obj.cur = obj.prop
-            ok = with(obj.cur, sum(g * dtheta)) < tol ## grad' H^-1 grad < tol ?
+            ok = with(obj.cur, sum(grad * dtheta)) < tol^2 ## grad' (-H)^-1 grad < tol^2 ?
             ## ok = (L2norm(obj.cur$grad) < tol) ## Stopping rule
             ## ok = all(abs(obj.cur$grad) < tol) ## Stopping rule
             if (iter > itermax) break
