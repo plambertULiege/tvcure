@@ -22,22 +22,22 @@
 #'        method=c("S0","F0"), K0=20, pen.order0=2,
 #'        K1=10, pen.order1=2, K2=10, pen.order2=2,
 #'        phi.0=NULL, beta.0=NULL, gamma.0=NULL,
-#'        b.tau=1e-6, a=1, b=1e-2,
-#'        tau.0=1, tau.min=1, tau.method = c("LPS","Schall","grid","none"),
+#'        a.tau=1, b.tau=1e-6, a=1, b=1e-2,
+#'        tau.0=100, tau.min=1, tau.method = c("LPS","LPS2","Schall","grid","none"),
 #'        lambda1.0=NULL, lambda1.min=1, lambda2.0=NULL, lambda2.min=1,
 #'        lambda.method=c("LPS","LPS2","LPS3","Schall","nlminb","none"),
-#'        observed.hessian=TRUE, use.Rfast=TRUE, Wood.test=TRUE,
+#'        observed.hessian=TRUE, use.Rfast=TRUE, Wood.test=FALSE,
 #'        ci.level=.95,
 #'        criterion=c("levidence","deviance","lpen","AIC","BIC","gradient"),
 #'        criterion.tol=1e-1, grad.tol=1e-2,
 #'        iterlim=50, iter.verbose=TRUE, verbose=FALSE)
 #' @param formula1 A formula describing the linear predictor in the long-term (cure) survival (or quantum) submodel.
 #' @param formula2 A formula describing the linear predictor in the short-term (cure) survival (or timing) submodel.
-#' @param df A data frame for survival data in a counting process format. It should always at least the following entries:
+#' @param df A data frame for survival data in a counting process format. It should always contain at least the following entries:
 #' \itemize{
 #' \item{\code{id} : \verb{ }}{the <id> of the unit associated to the data in a given line in the data frame.}
 #' \item{\code{time} : \verb{ }}{the integer time at which the observations are reported. For a given unit, it should be a sequence of CONSECUTIVE integers starting at 1 for the first observation.}
-#' \item{\code{event} : \verb{ }}{a sequence of 0-1 of event indicators. For the lines corresponding to a given unit, it starts with 0 values concluded by a 0 in case of right-censoring or by a 1 if the event is observed at the end of the follow-up.}
+#' \item{\code{event} : \verb{ }}{a sequence of 0-1 event indicators. For the lines corresponding to a given unit, it starts with 0 values concluded by a 0 in case of right-censoring or by a 1 if the event is observed at the end of the follow-up.}
 #' }
 #' @param method Method ("S0" or "F0") used to specify the dependence of the cumulative hazard dynamics on covariates (Default: "S0"):
 #' Method S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Method F0: \eqn{F(t|x) = F_0(t)^{\exp{\gamma'x}}}
@@ -50,12 +50,13 @@
 #' @param phi.0 (Optional) vector of length \code{K0} with starting values for the P-spline parameters in \eqn{\log f_0(t)}.
 #' @param beta.0 (Optional) starting value for the regression and spline parameters in the long-term survival (or quantum) submodel.
 #' @param gamma.0 (Optional) starting value for the regression and spline parameters in the short-term survival (or timing) submodel.
-#' @param b.tau Hyperprior parameter in the \eqn{Gamma(1,b.tau)} prior for the penalty parameter \eqn{\tau_0} tuning the smoothness of \eqn{\log f_0(t)} (Default: 1e-6).
+#' @param a.tau Hyperprior parameter in the \eqn{Gamma(a.tau,b.tau)} prior for the penalty parameter \eqn{\tau} tuning the smoothness of \eqn{\log f_0(t)} (Default: 1.0).
+#' @param b.tau Hyperprior parameter in the \eqn{Gamma(a.tau,b.tau)} prior for the penalty parameter \eqn{\tau} tuning the smoothness of \eqn{\log f_0(t)} (Default: 1e-6).
 #' @param a Hyperprior parameter in the \eqn{Gamma(a,b)} priors for the penalty parameters \eqn{\lambda_1} and \eqn{\lambda_2} tuning the smoothness of the additive terms in the long-term (quantum) and short-term (timing) survival submodels. (Default: 1.0).
 #' @param b Hyperprior parameter in the \eqn{Gamma(a,b)} priors for the penalty parameters \eqn{\lambda_1} and \eqn{\lambda_2} tuning the smoothness of the additive terms in the long-term (quantum) and short-term (timing) survival submodels. (Default: 1e-2).
-#' @param tau.0 Starting value for \eqn{\tau_0} (Default: 1).
-#' @param tau.min Minimal value for the penalty parameter \eqn{\tau_0}. (Default: 1.0).
-#' @param tau.method Method used to calculate the posterior mode of \eqn{p(\tau_0|data)}: "LPS" (Laplace P-splines), "Schall" (Fellner-Schall algorithm), "grid" (best choice in a regular grid on the log-scale) or "none" (stick to the initial value tau.0). (Default: "LPS").
+#' @param tau.0 Starting value for \eqn{\tau}. (Default: 100).
+#' @param tau.min Minimal value for the penalty parameter \eqn{\tau}. (Default: 1.0).
+#' @param tau.method Method used to calculate the posterior mode of \eqn{p(\tau|data)}: "LPS", "LPS2", "Schall" (Fellner-Schall algorithm), "grid" (best choice in a regular grid on the log-scale) or "none" (stick to the initial value tau.0). LPS and LPS2, based on Laplace P-splines, both maximize the marginal posterior of the penalty parameter \eqn{\tau} using a fixed-point method, with LPS relying on the prior calculation of eigenvalues. (Default: "LPS").
 #' @param lambda1.0 (Optional) J1-vector with starting values for the penalty parameters of the additive terms in the long-term survival (or quantum) submodel.
 #' @param lambda1.min Minimal value for the J1 penalty parameters \eqn{\lambda_1} of the additive terms in the long-term survival (or quantum) submodel. (Default: 1.0).
 #' @param lambda2.0 (Optional) J2-vector with starting values for the penalty parameters of the additive terms in the short-term survival (or timing) submodel.
@@ -69,7 +70,7 @@
 #' }
 #' @param observed.hessian Logical indicating if a fast approximation of the Hessian matrix based on cross-products is preferred over its expected value. (Default: TRUE).
 #' @param use.Rfast Logical indicating if matrix functions from the Rfast package should be used to fasten computation. (Default: TRUE).
-#' @param Wood.test Logical indicating if P-values based on Wood's test (Biometrika 2013) of the significance of additive terms should be preferred over basic Chi-square tests. (Default: TRUE).
+#' @param Wood.test Logical indicating if P-values based on Wood's test (Biometrika 2013) of the significance of additive terms should be preferred over basic Chi-square tests. (Default: FALSE).
 #' @param ci.level Default value for the levels of the credible intervals. (Default: 0.95).
 #' @param criterion Criterion used to assess convergence of the estimation procedure (Default: "levidence"):
 #' \itemize{
@@ -80,9 +81,9 @@
 #' \item{\code{gradient} : \verb{ }}{L2 norm of the gradient of the log of the joint posterior w.r.t. the regression and spline parameters.}
 #' }
 #' @param criterion.tol Maximum absolute difference between the successive values of the \code{criterion} values (when different from "gradient") to declare convergence. (Default: 1e-1).
-#' @param grad.tol Tolerance value for the L2 norm of the gradient to declare a convergence based on gradient values. (Default: 1e-2).
+#' @param grad.tol Tolerance value to declare convergence based on gradient values in an optimization procedure (such as Newton-Raphson). (Default: 1e-2).
 #' @param iterlim Maximum number of iterations. (Default: 50).
-#' @param iter.verbose Logical indicating if the values of the convergence criterions should be printed after each iteration.
+#' @param iter.verbose Logical indicating if the values of the convergence criterions should be printed after each iteration. (Default: TRUE).
 #' @param verbose Logical indicating if additional output based on gradients should be printed at the end of each iteration. (Default: FALSE).
 #'
 #' @return An object of type \code{\link{tvcure.object}}.
@@ -113,15 +114,15 @@ tvcure = function(formula1, formula2, df,
                   K1=10, pen.order1=2,
                   K2=10, pen.order2=2,
                   phi.0=NULL, beta.0=NULL, gamma.0=NULL,
-                  b.tau=1e-6,  ## Prior on penalty parameter <tau> for log f0(t): Gamma(1,b.tau)
+                  a.tau=1, b.tau=1e-6,  ## Prior on penalty parameter <tau> for log f0(t): Gamma(a.tau,b.tau)
                   a=1, b=1e-2, ## Prior on penalty parameters for the additive terms: Gamma(a,b)
-                  tau.0=1, tau.min=1,
-                  tau.method = c("LPS","Schall","grid","none"),
+                  tau.0=100, tau.min=1,
+                  tau.method = c("LPS","LPS2","Schall","grid","none"),
                   lambda1.0=NULL, lambda1.min=1, lambda2.0=NULL, lambda2.min=1,
                   lambda.method=c("LPS","LPS2","LPS3","Schall","nlminb","none"), ## Penalty selection method for additive terms
                   observed.hessian=TRUE,  ## TRUE: X[event==1,]'X[event==1,] ; FALSE: X'diag(mu.ij)X
                   use.Rfast=TRUE,
-                  Wood.test=TRUE,
+                  Wood.test=FALSE,
                   ci.level=.95,
                   criterion=c("levidence","deviance","lpen","AIC","BIC","gradient"),
                   criterion.tol=1e-1,
@@ -752,7 +753,7 @@ tvcure = function(formula1, formula2, df,
     ## Function 3: Penalty parameter selection using Laplace approximation to  p(lambda|data)
     ##     (separately for <lambda1> & <lambda2>
     ## --------------------------------------------------------------------------------------
-    select.lambda.LPS3 = function(coef, nfixed, lambda, Pd, Mcal, pen.order, lambda.min, b.tau){
+    select.lambda.LPS3 = function(coef, nfixed, lambda, Pd, Mcal, pen.order, lambda.min, bb){
         Mcal.1 = Mcal
         lambda1.cur = lambda ; J1 = length(lambda1.cur)
         nfixed1 = nfixed
@@ -784,7 +785,7 @@ tvcure = function(formula1, formula2, df,
                 Rj.1[[j]] = iMpen.1%*%(Pj.1/lam1.j[j])
                 idx = nfixed1 + (j-1)*K1 + (1:K1)
                 theta.j = theta.cur[idx]
-                quad1.cur = sum(theta.j*c(Pd1.x%*%theta.j)) + b.tau  ## <-----
+                quad1.cur = sum(theta.j*c(Pd1.x%*%theta.j)) + bb  ## <-----
                 U.lam1[j] = .5*(K1-pen.order1+1)/lam1.j[j] -.5*quad1.cur -.5*sum(diag(Rj.1[[j]]))
             }
             ## Score.xi1  where  lambda1 = lambda1.min + exp(xi1)
@@ -855,7 +856,7 @@ tvcure = function(formula1, formula2, df,
     ## End Wood.test
     ##
     ## Calculate EDF, Chi2 and Pval for additive terms
-    ED.fun = function(fit, Wood.test=TRUE){
+    ED.fun = function(fit, Wood.test=FALSE){
         ED1 = ED2 = ED1.Tr = ED2.Tr = ED1.Chi2 = ED2.Chi2 = NULL
         ##
         nbeta = fit$nbeta   ## Nbr of regression & spline parameters in long-term survival
@@ -972,10 +973,14 @@ tvcure = function(formula1, formula2, df,
     ## Generic Newton-Raphson algorithm
     ## --------------------------------
     NewtonRaphson = function(g, theta, tol=1e-2, itermax=15, verbose=FALSE){
+        ntheta = length(theta)
         theta.cur = theta
         obj.cur = g(theta.cur,Dtheta=TRUE)
         g.start = obj.cur$g ## Function at the iteration start
-        ok = (L2norm(obj.cur$grad) < tol) ## Stopping rule
+        ## Convergence criterion using RDM (see e.g. Prague et al, 2013)
+        RDM = with(obj.cur, sum(grad * dtheta)) / ntheta
+        ok =  (RDM < tol^2) ## grad' (-H)^-1 grad / ntheta < tol^2 ?
+        ## ok = (L2norm(obj.cur$grad) < tol) ## Stopping rule
         ## ok = all(abs(obj.cur$grad) < tol) ## Stopping rule
         iter = 0
         while(!ok){
@@ -996,7 +1001,10 @@ tvcure = function(formula1, formula2, df,
                 }
             }
             obj.cur = obj.prop
-            ok = with(obj.cur, sum(grad * dtheta)) < tol^2 ## grad' (-H)^-1 grad < tol^2 ?
+            ## Convergence criterion using RDM (see e.g. Prague et al, 2013)
+            RDM = with(obj.cur, sum(grad * dtheta)) / ntheta
+            ok =  (RDM < tol^2) ## grad' (-H)^-1 grad / ntheta < tol^2 ?
+            ## Alternative stopping rules:
             ## ok = (L2norm(obj.cur$grad) < tol) ## Stopping rule
             ## ok = all(abs(obj.cur$grad) < tol) ## Stopping rule
             if (iter > itermax) break
@@ -1074,8 +1082,8 @@ tvcure = function(formula1, formula2, df,
                     grad = obj.cur$grad.phi[-k.ref]
                     ## A = Matrix::nearPD(-obj.cur$Hes.phi[-k.ref,-k.ref])$mat
                     ## dtheta = solve(A, grad)
-                    Sigma = solve(-obj.cur$Hes.phi[-k.ref,-k.ref] + diag(1e-6,length(grad)))
-                    dtheta = c(Sigma %*% grad)
+                    A = -obj.cur$Hes.phi[-k.ref,-k.ref] + diag(1e-6,length(grad))
+                    dtheta = solve(A, grad)
                     attr(theta,"ed.phi") = attr(obj.cur$phi,"ed.phi")
                 }
                 ans = list(g=obj.cur$lpen, theta=theta, dtheta=dtheta, grad=grad)
@@ -1092,6 +1100,30 @@ tvcure = function(formula1, formula2, df,
         ## ------------------
         switch(tau.method,
                "LPS" = {
+                   ## Generic update of <tau>
+                   update.tau.fun = function(tau,quad,ev,rk,itermax=50){
+                       ok = FALSE ; iter = 0
+                       while(!ok){
+                           iter = iter + 1
+                           tau.old = tau
+                           ttr = sum(1 / (tau+ev))
+                           tau = (2*(a.tau-1) + rk) / (2*b.tau + quad + ttr)
+                           tau.dif = abs(tau - tau.old)
+                           ok = (tau.dif < 1) | (iter >= itermax)
+                       }
+                       return(tau)
+                   }
+                   ## Update tau.cur
+                   obj.cur = ff(phi=phi.cur, beta=beta.cur, gamma=gamma.cur,
+                                tau=tau.cur, lambda1=lambda1.cur, lambda2=lambda2.cur,
+                                Dphi=TRUE, D2phi=TRUE, Dbeta=FALSE, Dgamma=FALSE)
+                   BwB = -obj.cur$Hes.phi0[-k.ref,-k.ref]
+                   psi.cur =  phi2psi(phi.cur) ; quad = sum(psi.cur * c(Pd[-k.ref,-k.ref] %*% psi.cur))
+                   rk0 = qr(Pd[-k.ref,-k.ref])$rank ## Rank of Penalty matrix
+                   ev0 = ev.fun(BwB=BwB,Pd=Pd[-k.ref,-k.ref])$dj ## Eigenvalues for update of <tau>
+                   tau.cur = update.tau.fun(tau.cur,quad,ev0,rk0) ## <tau> udpate
+               },
+               "LPS2" = {
                    obj.cur = ff(phi=phi.cur, beta=beta.cur, gamma=gamma.cur,
                                 tau=tau.cur, lambda1=lambda1.cur, lambda2=lambda2.cur,
                                 Dphi=TRUE, D2phi=TRUE, Dbeta=FALSE, Dgamma=FALSE)
@@ -1267,7 +1299,7 @@ tvcure = function(formula1, formula2, df,
                 if (J1 > 0){
                     temp = select.lambda.LPS3(coef=beta.cur, nfixed=nfixed1,
                                              lambda=lambda1.cur, Pd=Pd1.x, Mcal=obj.cur$Mcal.1,
-                                             pen.order=pen.order1, lambda.min=lambda1.min, b.tau=b.tau)
+                                             pen.order=pen.order1, lambda.min=lambda1.min, bb=bb)
                     lambda1.cur = temp$lambda ## Vector of penalty parameters for the additive terms
                     Hes.xi1 = temp$Hes.xi
                     Hes.lam1 = temp$Hes.lam
@@ -1277,7 +1309,7 @@ tvcure = function(formula1, formula2, df,
                 if (J2 > 0){
                    temp = select.lambda.LPS3(coef=gamma.cur, nfixed=nfixed2,
                                              lambda=lambda2.cur, Pd=Pd2.x, Mcal=obj.cur$Mcal.2,
-                                             pen.order=pen.order2, lambda.min=lambda2.min, b.tau=b.tau)
+                                             pen.order=pen.order2, lambda.min=lambda2.min, bb=bb)
                    lambda2.cur = temp$lambda ## Vector of penalty parameters for the additive terms
                    Hes.xi2 = temp$Hes.xi
                    Hes.lam2 = temp$Hes.lam

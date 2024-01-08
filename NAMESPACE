@@ -11,7 +11,7 @@ export(Pcal.fun)
 export(s)
 export(testStat)
 
-importFrom("grDevices", "dev.new")
+importFrom("grDevices", "dev.interactive", "devAskNewPage")
 importFrom("graphics", "lines", "par", "polygon")
 importFrom("stats", "dgamma", "na.omit", "nlm", "nlminb", "pchisq",
            "pf", "printCoefmat", "qnorm", "quantile", "sd",

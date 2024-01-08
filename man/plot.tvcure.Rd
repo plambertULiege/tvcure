@@ -4,7 +4,7 @@
 \alias{plot.tvcure}
 \title{Plot visual information related to a tvcure object.}
 \usage{
-\method{plot}{tvcure}(x, ngrid=300, ci.level=.95, mfrow=NULL, equal.ylims=TRUE, ...)
+\method{plot}{tvcure}(x, ngrid=300, ci.level=.95, pages=0, equal.ylims=TRUE, ...)
 }
 \arguments{
 \item{x}{a \code{\link{tvcure.object}}.}
@@ -13,7 +13,7 @@
 
 \item{ci.level}{(optional) nominal level for the plotted pointwise credible intervals. (Default: 0.95).}
 
-\item{mfrow}{(optional) window layout to plot the additive terms.}
+\item{pages}{The number of pages over which to spread the output. For example, if pages=1 then all terms will be plotted on one page with the layout performed automatically. Set to 0 to have the routine leave all graphics settings as they are. (Default 0).}
 
 \item{equal.ylims}{logical indicating if the same y-limits must be used when plotting the fitted additive terms. (Default: TRUE).}
 
@@ -31,14 +31,14 @@ Plot of the fitted additive terms, as well as of the reference hazard \eqn{f_0(t
 \examples{
 require(tvcure)
 ## Simulated data generation
-beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2) 
+beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2)
 df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
                           RC.dist="exponential",mu.cens=550)$df.raw
 ## TVcure model fitting
 tau.0 = 2.7 ; lambda1.0 = c(40,15) ; lambda2.0 = c(25,70) ## Optional
 model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), df=df.raw,
                tau.0=tau.0, lambda1.0=lambda1.0, lambda2.0=lambda2.0)
-plot(model)
+plot(model,pages=1)
 
 }
 \references{
@@ -49,5 +49,5 @@ with application to fertility. \emph{Journal of the Royal Statistical Society, S
 \code{\link{tvcure}}, \code{\link{tvcure.object}}, \code{\link{print.tvcure}}
 }
 \author{
-Philippe Lambert \email{p.lambert@uliege.be}
+Philippe Lambert \email{p.lambert@uliege.be} based on the plot.gam function in mgcv for the \code{pages} argument.
 }

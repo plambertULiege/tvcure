@@ -8,11 +8,11 @@ tvcure(formula1, formula2, df,
        method=c("S0","F0"), K0=20, pen.order0=2,
        K1=10, pen.order1=2, K2=10, pen.order2=2,
        phi.0=NULL, beta.0=NULL, gamma.0=NULL,
-       b.tau=1e-6, a=1, b=1e-2, 
-       tau.0=1, tau.min=1, tau.method = c("LPS","Schall","grid","none"),
+       a.tau=1, b.tau=1e-6, a=1, b=1e-2,
+       tau.0=100, tau.min=1, tau.method = c("LPS","LPS2","Schall","grid","none"),
        lambda1.0=NULL, lambda1.min=1, lambda2.0=NULL, lambda2.min=1,
        lambda.method=c("LPS","LPS2","LPS3","Schall","nlminb","none"),
-       observed.hessian=TRUE, use.Rfast=TRUE, Wood.test=TRUE,
+       observed.hessian=TRUE, use.Rfast=TRUE, Wood.test=FALSE,
        ci.level=.95,
        criterion=c("levidence","deviance","lpen","AIC","BIC","gradient"),
        criterion.tol=1e-1, grad.tol=1e-2,
@@ -23,11 +23,11 @@ tvcure(formula1, formula2, df,
 
 \item{formula2}{A formula describing the linear predictor in the short-term (cure) survival (or timing) submodel.}
 
-\item{df}{A data frame for survival data in a counting process format. It should always at least the following entries:
+\item{df}{A data frame for survival data in a counting process format. It should always contain at least the following entries:
 \itemize{
 \item{\code{id} : \verb{ }}{the <id> of the unit associated to the data in a given line in the data frame.}
 \item{\code{time} : \verb{ }}{the integer time at which the observations are reported. For a given unit, it should be a sequence of CONSECUTIVE integers starting at 1 for the first observation.}
-\item{\code{event} : \verb{ }}{a sequence of 0-1 of event indicators. For the lines corresponding to a given unit, it starts with 0 values concluded by a 0 in case of right-censoring or by a 1 if the event is observed at the end of the follow-up.}
+\item{\code{event} : \verb{ }}{a sequence of 0-1 event indicators. For the lines corresponding to a given unit, it starts with 0 values concluded by a 0 in case of right-censoring or by a 1 if the event is observed at the end of the follow-up.}
 }}
 
 \item{method}{Method ("S0" or "F0") used to specify the dependence of the cumulative hazard dynamics on covariates (Default: "S0"):
@@ -51,17 +51,19 @@ Method S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Method F0: \eqn{F(t|x) = F
 
 \item{gamma.0}{(Optional) starting value for the regression and spline parameters in the short-term survival (or timing) submodel.}
 
-\item{b.tau}{Hyperprior parameter in the \eqn{Gamma(1,b.tau)} prior for the penalty parameter \eqn{\tau_0} tuning the smoothness of \eqn{\log f_0(t)} (Default: 1e-6).}
+\item{a.tau}{Hyperprior parameter in the \eqn{Gamma(a.tau,b.tau)} prior for the penalty parameter \eqn{\tau} tuning the smoothness of \eqn{\log f_0(t)} (Default: 1.0).}
+
+\item{b.tau}{Hyperprior parameter in the \eqn{Gamma(a.tau,b.tau)} prior for the penalty parameter \eqn{\tau} tuning the smoothness of \eqn{\log f_0(t)} (Default: 1e-6).}
 
 \item{a}{Hyperprior parameter in the \eqn{Gamma(a,b)} priors for the penalty parameters \eqn{\lambda_1} and \eqn{\lambda_2} tuning the smoothness of the additive terms in the long-term (quantum) and short-term (timing) survival submodels. (Default: 1.0).}
 
 \item{b}{Hyperprior parameter in the \eqn{Gamma(a,b)} priors for the penalty parameters \eqn{\lambda_1} and \eqn{\lambda_2} tuning the smoothness of the additive terms in the long-term (quantum) and short-term (timing) survival submodels. (Default: 1e-2).}
 
-\item{tau.0}{Starting value for \eqn{\tau_0} (Default: 1).}
+\item{tau.0}{Starting value for \eqn{\tau}. (Default: 100).}
 
-\item{tau.min}{Minimal value for the penalty parameter \eqn{\tau_0}. (Default: 1.0).}
+\item{tau.min}{Minimal value for the penalty parameter \eqn{\tau}. (Default: 1.0).}
 
-\item{tau.method}{Method used to calculate the posterior mode of \eqn{p(\tau_0|data)}: "LPS" (Laplace P-splines), "Schall" (Fellner-Schall algorithm), "grid" (best choice in a regular grid on the log-scale) or "none" (stick to the initial value tau.0). (Default: "LPS").}
+\item{tau.method}{Method used to calculate the posterior mode of \eqn{p(\tau|data)}: "LPS", "LPS2", "Schall" (Fellner-Schall algorithm), "grid" (best choice in a regular grid on the log-scale) or "none" (stick to the initial value tau.0). LPS and LPS2, based on Laplace P-splines, both maximize the marginal posterior of the penalty parameter \eqn{\tau} using a fixed-point method, with LPS relying on the prior calculation of eigenvalues. (Default: "LPS").}
 
 \item{lambda1.0}{(Optional) J1-vector with starting values for the penalty parameters of the additive terms in the long-term survival (or quantum) submodel.}
 
@@ -83,7 +85,7 @@ Method S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Method F0: \eqn{F(t|x) = F
 
 \item{use.Rfast}{Logical indicating if matrix functions from the Rfast package should be used to fasten computation. (Default: TRUE).}
 
-\item{Wood.test}{Logical indicating if P-values based on Wood's test (Biometrika 2013) of the significance of additive terms should be preferred over basic Chi-square tests. (Default: TRUE).}
+\item{Wood.test}{Logical indicating if P-values based on Wood's test (Biometrika 2013) of the significance of additive terms should be preferred over basic Chi-square tests. (Default: FALSE).}
 
 \item{ci.level}{Default value for the levels of the credible intervals. (Default: 0.95).}
 
@@ -98,11 +100,11 @@ Method S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Method F0: \eqn{F(t|x) = F
 
 \item{criterion.tol}{Maximum absolute difference between the successive values of the \code{criterion} values (when different from "gradient") to declare convergence. (Default: 1e-1).}
 
-\item{grad.tol}{Tolerance value for the L2 norm of the gradient to declare a convergence based on gradient values. (Default: 1e-2).}
+\item{grad.tol}{Tolerance value to declare convergence based on gradient values in an optimization procedure (such as Newton-Raphson). (Default: 1e-2).}
 
 \item{iterlim}{Maximum number of iterations. (Default: 50).}
 
-\item{iter.verbose}{Logical indicating if the values of the convergence criterions should be printed after each iteration.}
+\item{iter.verbose}{Logical indicating if the values of the convergence criterions should be printed after each iteration. (Default: TRUE).}
 
 \item{verbose}{Logical indicating if additional output based on gradients should be printed at the end of each iteration. (Default: FALSE).}
 }
