@@ -19,7 +19,7 @@
 #' Fit of a tvcure model.
 #' @description Fit of a double additive cure survival model with exogenous time-varying covariates.
 #' @usage tvcure(formula1, formula2, df,
-#'        method=c("S0","F0"), K0=20, pen.order0=2,
+#'        baseline=c("S0","F0"), K0=20, pen.order0=2,
 #'        K1=10, pen.order1=2, K2=10, pen.order2=2,
 #'        phi.0=NULL, beta.0=NULL, gamma.0=NULL,
 #'        a.tau=1, b.tau=1e-6, a=1, b=1e-2,
@@ -39,8 +39,8 @@
 #' \item{\code{time} : \verb{ }}{the integer time at which the observations are reported. For a given unit, it should be a sequence of CONSECUTIVE integers starting at 1 for the first observation.}
 #' \item{\code{event} : \verb{ }}{a sequence of 0-1 event indicators. For the lines corresponding to a given unit, it starts with 0 values concluded by a 0 in case of right-censoring or by a 1 if the event is observed at the end of the follow-up.}
 #' }
-#' @param method Method ("S0" or "F0") used to specify the dependence of the cumulative hazard dynamics on covariates (Default: "S0"):
-#' Method S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Method F0: \eqn{F(t|x) = F_0(t)^{\exp{\gamma'x}}}
+#' @param baseline Baseline ("S0" or "F0") used to specify the dependence of the cumulative hazard dynamics on covariates (Default: "S0"):
+#' Baseline S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Baseline F0: \eqn{F(t|x) = F_0(t)^{\exp{\gamma'x}}}
 #' @param K0 Number of B-splines used to specify \eqn{\log f_0(t)} (Default: 20).
 #' @param pen.order0 Penalty order for the P-splines used to specify \eqn{\log f_0(t)} (Default: 2).
 #' @param K1 Number of P-splines for a given additive term in the long-term (or quantum) survival sumbodel (Default: 10).
@@ -109,7 +109,7 @@
 #' @export
 #'
 tvcure = function(formula1, formula2, df,
-                  method=c("S0","F0"),
+                  baseline=c("S0","F0"),
                   K0=20, pen.order0=2,
                   K1=10, pen.order1=2,
                   K2=10, pen.order2=2,
@@ -131,7 +131,7 @@ tvcure = function(formula1, formula2, df,
     ##
     cl <- match.call()
     aa = a ; bb = b
-    method = match.arg(method) ## "S0": S(t|x) = S0(t)^exp(gamma'x) ;  "F0": F(t|x) = F0(t)^exp(gamma'x)
+    baseline = match.arg(baseline) ## "S0": S(t|x) = S0(t)^exp(gamma'x) ;  "F0": F(t|x) = F0(t)^exp(gamma'x)
     criterion = match.arg(criterion) ## Criterion to assess convergence of the global algorithm
     tau.method = match.arg(tau.method)
     lambda.method = match.arg(lambda.method)
@@ -220,15 +220,16 @@ tvcure = function(formula1, formula2, df,
     ## Eigenvalues associated to additive terms
     id1 = as.logical(df$event) ##which(event==1)
     ev1.lst = ev2.lst = list()
+    Hes.beta0 = NULL
     ## ... in long-term survival submodel
+    ## Non-penalized Hessian for <beta>
+    if (use.Rfast){
+        Hes.beta0 = -Rfast::Crossprod(regr1$Xcal[id1,,drop=FALSE], regr1$Xcal[id1,,drop=FALSE])
+    } else {
+        Hes.beta0 = -crossprod(regr1$Xcal[id1,,drop=FALSE], regr1$Xcal[id1,,drop=FALSE])
+    }
     if (J1 > 0){
         rk1 = qr(regr1$Pd.x)$rank
-        ## Non-penalized Hessian for <beta>
-        if (use.Rfast){
-            Hes.beta0 = -Rfast::Crossprod(regr1$Xcal[id1,,drop=FALSE], regr1$Xcal[id1,,drop=FALSE])
-        } else {
-            Hes.beta0 = -crossprod(regr1$Xcal[id1,,drop=FALSE], regr1$Xcal[id1,,drop=FALSE])
-        }
         for (j in 1:J1){ ## Loop over additive terms in the long-term survival sub-model
             idx = nfixed1 + (j-1)*K1 + (1:K1)
             Hes.betaj = Hes.beta0[idx,idx,drop=FALSE]
@@ -241,25 +242,25 @@ tvcure = function(formula1, formula2, df,
         }
     }
     ## ... in short-term survival submodel
-    if (J2 > 0){
-        rk2 = qr(regr2$Pd.x)$rank
-        ## (Exact) Non-penalized Hessian for <gamma>:
-        ## if (nogamma){ ## Absence of covariate (and no intercept for identification reasons)
-        ##     eta.2 = 0.0
-        ## } else {
-        ##     eta.2 = c(regr2$Xcal %*% gamma) ## Linear predictors in short-term survival
-        ## }
-        ## if (method == "F0") tempo = exp(eta.2)*log(F0.grid[time])
-        ## if (method == "S0") tempo = exp(eta.2)*log(S0.grid[time])
-        ## XcalTempo = (1+tempo) * regr2$Xcal
-        ## Hes.gamma0 = -Rfast::Crossprod(regr2$XcalTempo[id1,,drop=FALSE], regr2$XcalTemp[id1,,drop=FALSE])
-        ##
-        ## (Approximate) Non-penalized Hessian for <gamma>:
-        if (use.Rfast){
-            Hes.gamma0 = -Rfast::Crossprod(regr2$Xcal[id1,,drop=FALSE], regr2$Xcal[id1,,drop=FALSE])
+    ## (Exact) Non-penalized Hessian for <gamma>:
+    ## if (nogamma){ ## Absence of covariate (and no intercept for identification reasons)
+    ##     eta.2 = 0.0
+    ## } else {
+    ##     eta.2 = c(regr2$Xcal %*% gamma) ## Linear predictors in short-term survival
+    ## }
+    ## if (baseline == "F0") tempo = exp(eta.2)*log(F0.grid[time])
+    ## if (baseline == "S0") tempo = exp(eta.2)*log(S0.grid[time])
+    ## XcalTempo = (1+tempo) * regr2$Xcal
+    ## Hes.gamma0 = -Rfast::Crossprod(regr2$XcalTempo[id1,,drop=FALSE], regr2$XcalTemp[id1,,drop=FALSE])
+    ##
+    ## (Approximate) Non-penalized Hessian for <gamma>:
+    if (use.Rfast){
+        Hes.gamma0 = -Rfast::Crossprod(regr2$Xcal[id1,,drop=FALSE], regr2$Xcal[id1,,drop=FALSE])
         } else {
             Hes.gamma0 = -crossprod(regr2$Xcal[id1,,drop=FALSE], regr2$Xcal[id1,,drop=FALSE])
         }
+    if (J2 > 0){
+        rk2 = qr(regr2$Pd.x)$rank
         for (j in 1:J2){ ## Loop over additive terms in the long-term survival sub-model
             idx = nfixed2 + (j-1)*K2 + (1:K2)
             Hes.gamj = Hes.gamma0[idx,idx,drop=FALSE]
@@ -314,11 +315,17 @@ tvcure = function(formula1, formula2, df,
     tB0B0 = t(B0.grid[df$time,-k.ref]) %*% B0.grid[df$time,-k.ref]
     ##
     ## -----------------------------------------------------------------------------------------
+    ##  ff: key function computing llik, lpen, gradients, Hessians, etc.
+    ## -----------------------------------------------------------------------------------------
     ff = function(phi, beta, gamma,
                   tau, lambda1, lambda2,
                   Dbeta=FALSE, Dgamma=FALSE, Dphi=FALSE, D2phi=FALSE,
-                  Dlambda=FALSE, hessian=TRUE){
-    ## -----------------------------------------------------------------------------------------
+                  Dlambda=FALSE, hessian=TRUE, get.levidence=FALSE){
+        ## -----------------------------------------------------------------------------------------
+        if (get.levidence){
+            hessian = Dphi = D2phi = Dbeta = TRUE
+            Dgamma = !nogamma
+        }
         Delta = 1 ## Unit of measurement for df$time
         eta.grid = c(B0.grid %*% phi)
         pi.grid = exp(eta.grid) / sum(exp(eta.grid))
@@ -339,7 +346,7 @@ tvcure = function(formula1, formula2, df,
         }
         time = df$time ; event = df$event ; id1 = as.logical(event) ##which(event==1)
         ##
-        switch(method,
+        switch(baseline,
             "F0" = {
                 lhp = (eta.1 + eta.2) + ((exp(eta.2)-1.0) * log(F0.grid[time])) + log(f0.grid[time])
             },
@@ -359,12 +366,12 @@ tvcure = function(formula1, formula2, df,
         ## --------------
         mu.ij = exp(lhp)*Delta
         llik = -sum(mu.ij) + sum(log(mu.ij[id1]))
-        llik.y = -sum(event) + 0 ## ... as only 0-1 values for the Poisson counts --> y*log(y)=0
+        llik.y = -sum(event) + 0 ## ... as only 0-1 values for the Poisson counts <-- y*log(y)=0
         dev = -2*(llik - llik.y)
         ## Penalized llik
         ## --------------
         lpen = llik
-        lpen = lpen + (aa-1)*log(tau) - bb*tau ## Prior on <tau>
+        lpen = lpen + dgamma(tau,a.tau,b.tau,log=TRUE) ## Prior on <tau>
         lpen = lpen + .5*(K0-pen.order0)*log(tau) - .5*tau*quad.phi  ## Prior on (phi|tau)
         if (J1 > 0){
             ## Prior on <lambda1>
@@ -477,7 +484,7 @@ tvcure = function(formula1, formula2, df,
         grad.gamma = NULL
         Hes.gamma = Hes.gamma0 = Mcal.2 = NULL
         if ((Dgamma) & (!nogamma)){
-            switch(method,
+            switch(baseline,
                 "F0" = {
                     tempo = exp(eta.2)*log(F0.grid[time])
                 },
@@ -587,7 +594,7 @@ tvcure = function(formula1, formula2, df,
             dlF0.grid =  temp / F0.grid ## TxS matrix
             dlS0.grid = -temp / S0.grid ## TxS matrix
             ##
-            switch(method,
+            switch(baseline,
                    "F0" = {
                        dlhp = (exp(eta.2)-1.0) * dlF0.grid[time,] + dlf0.grid[time,] ## (nobs x S) matrix
                    },
@@ -627,8 +634,19 @@ tvcure = function(formula1, formula2, df,
             }
         }
         attr(phi,"ed.phi") = ed.phi ## Effective dimension for <phi> in F0(t) estimation
-        ##
-        ans = list(llik=llik, lpen=lpen, dev=dev, res=(event-mu.ij)/sqrt(mu.ij),
+        ## Log-evidence
+        levidence = NA
+        if (get.levidence){
+            ev.psi = svd(-Hes.phi[-k.ref,-k.ref])$d
+            ev.beta = svd(-Hes.beta)$d
+            ev.gamma = 0
+            if (!nogamma) ev.gamma = svd(-Hes.gamma)$d
+            levidence = lpen -.5*sum(log(ev.beta[ev.beta>1-6]))
+            if (!nogamma) levidence = levidence -.5*sum(log(ev.gamma[ev.gamma>1-6]))
+            levidence = levidence -.5*sum(log(ev.psi[ev.psi>1-6]))
+        }
+        ans = list(llik=llik, lpen=lpen, dev=dev, levidence=levidence,
+                   res=(event-mu.ij)/sqrt(mu.ij),
                    phi=phi, beta=beta, gamma=gamma,
                    nbeta=length(beta), ngamma=length(gamma),
                    grad.beta=grad.beta, Hes.beta=Hes.beta, Hes.beta0=Hes.beta0,
@@ -639,7 +657,7 @@ tvcure = function(formula1, formula2, df,
                    grad.phi=grad.phi, Hes.phi=Hes.phi, Hes.phi0=Hes.phi0,
                    T=T, t.grid=1:T, f0.grid=f0.grid, F0.grid=F0.grid, S0.grid=S0.grid,
                    dlf0.grid=dlf0.grid, dlF0.grid=dlF0.grid, dlS0.grid=dlS0.grid, k.ref=k.ref,
-                   a=aa, b=bb)
+                   a=aa, b=bb, a.tau=a.tau, b.tau=b.tau)
         return(ans)
     } ## End ff
     ##
@@ -718,7 +736,7 @@ tvcure = function(formula1, formula2, df,
                     idx = nfixed1 + (j-1)*K1 + (1:K1)
                     theta.j = beta.cur[idx]
                     quad.j = sum(theta.j*c(Pd1.x%*%theta.j))
-                    ttr = max(sum(t(Sigma[idx,idx]) * Pd1.x), 1) ## max(sum(t(Sigma[idx,idx]) * Pd1.x),1)
+                    ttr = max(sum(t(Sigma[idx,idx]) * Pd1.x), 1e-6) ## max(sum(t(Sigma[idx,idx]) * Pd1.x),1)
                     ## Note: rank(Pd1.x) = (K1-pen.order1+1)
                     lambda1.cur[j] = ((aa-1) + K1-pen.order1+1) / (bb + quad.j + ttr)
                 }
@@ -733,7 +751,7 @@ tvcure = function(formula1, formula2, df,
                     idx = nfixed2 + (j-1)*K2 + (1:K2)
                     theta.j = gamma.cur[idx]
                     quad.j = sum(theta.j*c(Pd2.x%*%theta.j))
-                    ttr = max(sum(t(Sigma[q1+idx, q1+idx]) * Pd2.x), 1) ## max(sum(t(Sigma[q1+idx, q1+idx]) * Pd2.x),1)
+                    ttr = max(sum(t(Sigma[q1+idx, q1+idx]) * Pd2.x), 1e-6) ## max(sum(t(Sigma[q1+idx, q1+idx]) * Pd2.x),1)
                     ## Note: rank(Pd2.x) = (K2-pen.order2+1)
                     lambda2.cur[j] = ((aa-1) + K2-pen.order2+1) / (bb + quad.j + ttr)
                 }
@@ -905,7 +923,7 @@ tvcure = function(formula1, formula2, df,
                 ## End Wood
                 ##
                 ## "Naive" method
-                Chi2[j] = sum(beta.j * c(solve(Sigma.beta[idx,idx]) %*% beta.j)) ## Added on 2023.10.11
+                Chi2[j] = sum(beta.j * c(solve(Sigma.beta[idx,idx], beta.j))) ## Added on 2023.10.11
                 ## Chi2[j] = sum(beta.j * c(solve(Sigma.regr[idx,idx]) %*% beta.j)) ## Removed on 2023.10.11
                 Pval.Chi2[j] = 1 - pchisq(Chi2[j],ED1[j])
                 ## cat("Naive:",Chi2[j],Pval.Chi2[j],ED1[j],"\n")
@@ -943,7 +961,7 @@ tvcure = function(formula1, formula2, df,
                 ## End Wood
                 ##
                 ## "Naive" method
-                Chi2[j] = sum(gamma.j * c(solve(Sigma.gamma[idx, idx]) %*% gamma.j)) ## Added on 2023.10.11
+                Chi2[j] = sum(gamma.j * c(solve(Sigma.gamma[idx, idx], gamma.j))) ## Added on 2023.10.11
                 ## Chi2[j] = sum(gamma.j * c(solve(Sigma.regr[nbeta+idx, nbeta+idx]) %*% gamma.j)) ## Removed on 2023.10.11
                 Pval.Chi2[j] = 1 - pchisq(Chi2[j],ED2[j])
                 ## cat("Naive:",Chi2[j],Pval[j],ED2[j],"\n")
@@ -977,6 +995,7 @@ tvcure = function(formula1, formula2, df,
         theta.cur = theta
         obj.cur = g(theta.cur,Dtheta=TRUE)
         g.start = obj.cur$g ## Function at the iteration start
+        ok = FALSE
         ## Convergence criterion using RDM (see e.g. Prague et al, 2013)
         RDM = with(obj.cur, sum(grad * dtheta)) / ntheta
         ok =  (RDM < tol^2) ## grad' (-H)^-1 grad / ntheta < tol^2 ?
@@ -1009,8 +1028,9 @@ tvcure = function(formula1, formula2, df,
             ## ok = all(abs(obj.cur$grad) < tol) ## Stopping rule
             if (iter > itermax) break
         }
-        if (verbose) cat(obj.cur$g," (niter = ",iter,") - grad = ",L2norm(obj.cur$grad),"\n",sep="")
-        ans = list(val=obj.cur$g, val.start=g.start, theta=obj.cur$theta, grad=obj.cur$grad, iter=iter)
+        if (verbose) cat(obj.cur$g," (niter = ",iter,") - RDM = ",RDM,"\n",sep="")
+        ## if (verbose) cat(obj.cur$g," (niter = ",iter,") - grad = ",L2norm(obj.cur$grad),"\n",sep="")
+        ans = list(val=obj.cur$g, val.start=g.start, theta=obj.cur$theta, grad=obj.cur$grad, RDM=RDM, iter=iter)
         return(ans)
     } ## End NewtonRaphson
     ##
@@ -1038,9 +1058,13 @@ tvcure = function(formula1, formula2, df,
     ptm <- proc.time() ## Start timer
     ##
     if (tau.method == "grid") tau.stable = FALSE ## Initiate the algorithm with the selection of <tau> for F0(t)
-    tau.iter = tau.cur
+    tau.iter = tau.cur ## Necessary when <tau.method> == "grid"
     dev.old = AIC.old = BIC.old = 1e12 ## Necessary for convergence criterion based on <deviance>
-    lpen.old = levidence.old = -1e12    ##  ... or <AIC> or <BIC> or <lpen> or <log(evidence)>
+    lpen.old = levidence.old = -1e12   ##  ... or <AIC> or <BIC> or <lpen> or <log(evidence)>
+    ##
+    ## ------------------------------------------------------------------------------------
+    ##                           START of the estimation process
+    ## ------------------------------------------------------------------------------------
     ## cat("Start of the iterative procedure\n")
     while(!converged){ ## Global estimation loop
         iter = iter + 1
@@ -1065,7 +1089,7 @@ tvcure = function(formula1, formula2, df,
                 return(ans)
             } ## End g.psi.nlm
             psi.cur = phi2psi(phi.cur)
-            psi.nlm = nlm(f=g.psi.nlm,psi.cur,tau=tau.cur) ##,hessian=TRUE) ## <---------
+            psi.nlm = nlm(f=g.psi.nlm,psi.cur,tau=tau.cur)
             psi.cur = psi.nlm$est ; phi.cur = psi2phi(psi.cur)
         }
         ##
@@ -1119,8 +1143,8 @@ tvcure = function(formula1, formula2, df,
                                 Dphi=TRUE, D2phi=TRUE, Dbeta=FALSE, Dgamma=FALSE)
                    BwB = -obj.cur$Hes.phi0[-k.ref,-k.ref]
                    psi.cur =  phi2psi(phi.cur) ; quad = sum(psi.cur * c(Pd[-k.ref,-k.ref] %*% psi.cur))
-                   rk0 = qr(Pd[-k.ref,-k.ref])$rank ## Rank of Penalty matrix
                    ev0 = ev.fun(BwB=BwB,Pd=Pd[-k.ref,-k.ref])$dj ## Eigenvalues for update of <tau>
+                   rk0 = qr(Pd[-k.ref,-k.ref])$rank ## Rank of Penalty matrix
                    tau.cur = update.tau.fun(tau.cur,quad,ev0,rk0) ## <tau> udpate
                },
                "LPS2" = {
@@ -1135,9 +1159,7 @@ tvcure = function(formula1, formula2, df,
                        quad = sum(phi.cur * c(Pd%*%phi.cur))
                        tau.old = tau.cur
                        tau.cur = max(tau.min, (K0-pen.order0) / (quad + ttr))
-                       ## cat("tau:",tau.old," --> ",tau.cur,"\n")
                        ok.tau = (abs(tau.old-tau.cur) < 1)
-                       ## if(ok.tau) cat("\n")
                    }
                },
                "Schall" = {
@@ -1219,13 +1241,10 @@ tvcure = function(formula1, formula2, df,
             obj.cur = ff(phi=phi.cur, beta=beta, gamma=gamma,
                       tau=tau.cur, lambda1=lambda1.cur, lambda2=lambda2.cur,
                       Dbeta=Dtheta,Dgamma=Dtheta)
-            ## grad = obj.cur$grad.regr ; Sigma = diag(diag(-solve(obj.cur$Hes.regr)))
-            ## grad = obj.cur$grad.regr ; Sigma = -solve(obj.cur$Hes.regr-diag(1e-6,length(theta)))
             grad = dtheta = NULL
             if (Dtheta){
                 grad = obj.cur$grad.regr
-                ## A = Matrix::nearPD(-obj.cur$Hes.regr)$mat
-                A = -obj.cur$Hes.regr
+                A = -obj.cur$Hes.regr ## A = Matrix::nearPD(-obj.cur$Hes.regr)$mat
                 dtheta = solve(A, grad)
             }
             ##
@@ -1234,11 +1253,10 @@ tvcure = function(formula1, formula2, df,
         } ## End g.regr
         ## cat("Regr estimation: ")
         regr.NR = NewtonRaphson(g=g.regr,theta=c(beta.cur,gamma.cur),tol=grad.tol)
-        ## cat("done in ",regr.NR$iter," iterations\n",sep="")
         beta.cur = regr.NR$theta[idx1] ; gamma.cur = regr.NR$theta[-idx1]
         ##
         ## ================================
-        ## -3- Update <lambda1> & <lambda2> (i.e. penalty vectors for additive terms in short- and long-term survival)
+        ## -3- Update <lambda1> & <lambda2> (i.e. penalty vectors for additive terms in long- and short-term survival)
         ## ================================
         ##
         ## cat("lambda\n")
@@ -1251,7 +1269,6 @@ tvcure = function(formula1, formula2, df,
                      tau=tau.cur, lambda1=lambda1.cur, lambda2=lambda2.cur,
                      Dphi=FALSE, Dbeta=TRUE, Dgamma=!nogamma,
                      Dlambda=update.lambda & ((lambda.method == "LPS3")))
-        ##           Dlambda=update.lambda & ((lambda.method == "LPS3")|(lambda.method == "LPS2")))
         ##
         ## Method 1: LPS
         ## -------------
@@ -1319,7 +1336,7 @@ tvcure = function(formula1, formula2, df,
         } ## Endif lambda.method == "LPS3"
         ##
         ##
-        ## Method 2: SCHALL
+        ## Method 4: SCHALL
         ## ----------------
         if (lambda.method == "Schall"){ ## Schall's method
             ##
@@ -1360,7 +1377,7 @@ tvcure = function(formula1, formula2, df,
             } ## Endif update.lambda
         } ## Endif lambda.method == "Schall"
         ##
-        ## Method 3: nlminb
+        ## Method 5: nlminb
         ## ----------------
         if (lambda.method == "nlminb"){ ## Direct optimization of log-evidence
             ## Loss function to select <lambda>:
@@ -1404,41 +1421,45 @@ tvcure = function(formula1, formula2, df,
         ##
         obj.cur = ff(phi.cur, beta.cur, gamma.cur,
                   tau=tau.cur, lambda1=lambda1.cur, lambda2=lambda2.cur,
-                  Dphi=TRUE, D2phi=TRUE, Dbeta=TRUE, Dgamma=!nogamma)
-        ##
+                  Dphi=TRUE, D2phi=TRUE, Dbeta=TRUE, Dgamma=!nogamma,
+                  get.levidence=TRUE)
+        ## Gradient for <beta,gamma>
+        ## -------------------------
         if (nogamma) obj.cur$grad.gamma = 0
         grad.cur = with(obj.cur, grad.regr) ##c(grad.beta,grad.gamma))
         grad.L2 = with(obj.cur, c(beta=L2norm(abs(grad.beta)),gamma=L2norm(abs(grad.gamma))))
         ##
+        ## Penalized logLik
+        ## ----------------
         lpen.final = obj.cur$lpen ## Value of the penalized llik at the end of the global iteration
-        ## ctrl = abs(lpen.final-lpen.start) / (abs(lpen.final) + .1)
-        ## converged = (ctrl < 1e-5)
-        ## converged = all(abs(grad.cur) < grad.tol*10)
         ##
         ## Effective dims & Information criteria
+        ## -------------------------------------
         ED.cur = ED.fun(obj.cur,Wood.test=Wood.test)
         ED1.tot = regr1$nfixed + ifelse(J1==0, 0, sum(ED.cur$ED1[,1]))
         ED2.tot = ifelse(nogamma, 0, regr2$nfixed) + ifelse(J2==0, 0, sum(ED.cur$ED2[,1]))
         ED.tot = ED1.tot + ED2.tot
         AIC = obj.cur$dev + 2*ED.tot
         BIC = obj.cur$dev + log(sum(n.event))*ED.tot
-        ## log(evidence)
-        ev.phi = svd(-obj.cur$Hes.phi)$d
-        ev.beta = svd(-obj.cur$Hes.beta)$d
-        if (!nogamma){
-            ev.gamma = svd(-obj.cur$Hes.gamma)$d
-        } else {
-            ev.gamma = 0
-        }
-        levidence = obj.cur$lpen -.5*sum(log(ev.beta[ev.beta>1-6]))
-        if (!nogamma) levidence = levidence -.5*sum(log(ev.gamma[ev.gamma>1-6]))
+        levidence = obj.cur$levidence
+        ##
+        ## ## log(evidence)
+        ## ## -------------
+        ## ev.psi = svd(-obj.cur$Hes.phi[-k.ref,-k.ref])$d
+        ## ev.beta = svd(-obj.cur$Hes.beta)$d
+        ## ev.gamma = 0
+        ## if (!nogamma) ev.gamma = svd(-obj.cur$Hes.gamma)$d
+        ## levidence = obj.cur$lpen -.5*sum(log(ev.beta[ev.beta>1-6]))
+        ## if (!nogamma) levidence = levidence -.5*sum(log(ev.gamma[ev.gamma>1-6]))
+        ## levidence = levidence -.5*sum(log(ev.psi[ev.psi>1-6])) ## NEW NEW NEW <-----
+        ## cat("levidence:",levidence,obj.cur$levidence,"\n")
+        ##
         ## ev.regr = svd(-obj.cur$Hes.regr)$d
         ## levidence = obj.cur$lpen -.5*sum(log(ev.phi[ev.phi>1-6])) -.5*sum(log(ev.regr[ev.regr>1-6]))
         ##
+        ## Some output at the end of an iteration
+        ## --------------------------------------
         if (iter.verbose){
-            ## cat(iter,": Dev:",round(obj.cur$dev,2),
-            ##     "; lpen:",obj.cur$lpen," ; AIC:",AIC," ; BIC:",BIC,
-            ##     "; levidence:",levidence,"\n")
             cat(iter,
                 ": levidence:",round(levidence,2),
                 "; BIC:",round(BIC,2),
@@ -1446,9 +1467,6 @@ tvcure = function(formula1, formula2, df,
                 "; Dev:",round(obj.cur$dev,2),
                 "; lpen:",round(obj.cur$lpen,2),
                 "\n")
-            ## cat("lambda1:",lambda1.cur," ; ","lambda2:",lambda2.cur,"\n")
-            ## cat("ED1:",ED1.tot," ; ","ED2:",ED2.tot,"\n")
-            ## cat("ED:") ; print(ED.cur)
         }
         ##
         switch(criterion, ## CONVERGENCE criterion
@@ -1479,21 +1497,17 @@ tvcure = function(formula1, formula2, df,
                )
         if (iter >= iterlim) break
     } ## End While (global estimation loop)
+    ## ------------------------------------------------------------------------------------
+    ##                           END the estimation process
+    ## ------------------------------------------------------------------------------------
     ##
     ## Prepare final output (after convergence)
     ## ========================================
     fit = obj.cur
     fit$criterion = criterion
-    ## Report parameter estimates with their se's, z-score, Pval
-    fun = function(est,se){
-        mat = cbind(est=est,se=se,
-                    low=est-z.alpha*se, up=est+z.alpha*se,
-                    "Z"=est/se,
-                    "Pval"=1-pchisq((est/se)^2,1))
-        attr(mat,"ci.level") = ci.level
-        return(mat)
-    } ## End fun
     ##
+    ## Gradients, Hessians and se's
+    ## ----------------------------
     fit$grad.phi = obj.cur$grad.phi
     fit$grad.psi = obj.cur$grad.phi[-k.ref]
     fit$Hes.phi0 = obj.cur$Hes.phi0 ; fit$Hes.phi = obj.cur$Hes.phi
@@ -1510,11 +1524,23 @@ tvcure = function(formula1, formula2, df,
     ## The following line of code was there before, yielding misleading results !!
     ## se.gamma = ifelse(nogamma, 0, sqrt(diag(solve(-fit$Hes.gamma))))
     ##
+    ## Regression parameter estimates with their se's, z-score, Pval
+    ## -------------------------------------------------------------
+    fun = function(est,se){
+        mat = cbind(est=est,se=se,
+                    low=est-z.alpha*se, up=est+z.alpha*se,
+                    "Z"=est/se,
+                    "Pval"=1-pchisq((est/se)^2,1))
+        attr(mat,"ci.level") = ci.level
+        return(mat)
+    } ## End fun
     fit$gam = fit$gamma
     fit$phi = with(fit, fun(est=phi,se=se.phi))
-    fit$tau = tau.cur ; fit$pen.order0 = pen.order0
     fit$beta = with(fit, fun(est=beta,se=se.beta))
     fit$gamma = with(fit, fun(est=gamma,se=se.gamma))
+    ##
+    ## Penalty parameters
+    ## ------------------
     if (J1 > 0){
         fit$lambda1 = lambda1.cur
         if ((lambda.method == "Schall") || (lambda.method == "LPS2")){
@@ -1531,40 +1557,54 @@ tvcure = function(formula1, formula2, df,
         }
         fit$pen.order2 = pen.order2
     }
-    fit$tau.method = tau.method
     fit$lambda.method = lambda.method
     ##
-    ## Evaluate EDF, Chi2 and Pval for estimated additive terms
+    fit$tau = tau.cur ; fit$pen.order0 = pen.order0
+    fit$tau.method = tau.method
+    ##
+    ## Evaluate EDF, Chi2 and Pval for the estimated additive terms
+    ## ------------------------------------------------------------
     temp = ED.fun(fit,Wood.test=Wood.test)
     fit$ED1 = temp$ED1 ; fit$ED2 = temp$ED2
     fit$ED1.Tr = temp$ED1.Tr ; fit$ED2.Tr = temp$ED2.Tr
     fit$ED1.Chi2 = temp$ED1.Chi2 ; fit$ED2.Chi2 = temp$ED2.Chi2
     ##
     ## Effective total number of parameters in regression submodels
+    ## ------------------------------------------------------------
     ED1.tot = ED2.tot = 0
     ED1.tot = regr1$nfixed + ifelse(J1==0, 0, sum(fit$ED1[,1]))
     ED2.tot = ifelse(nogamma, 0, regr2$nfixed) + ifelse(J2==0, 0, sum(fit$ED2[,1]))
     ED.tot = ED1.tot + ED2.tot
+    fit$ED1.tot = ED1.tot ; fit$ED2.tot = ED2.tot ; fit$ED.tot = ED.tot
     ##
     ## AIC and BIC
+    ## -----------
     fit$nobs = nrow(regr1$Xcal)
-    fit$n = n ## Numer of units (not to be confused with the number <nobs> of longitudinal binary observations)
+    fit$n = n ## Number of units (not to be confused with the number <nobs> of longitudinal binary observations)
     fit$d = sum(n.event) ## Total number of events observed on the <n> units
     ##
-    fit$ED1.tot = ED1.tot ; fit$ED2.tot = ED2.tot ; fit$ED.tot = ED.tot
-    fit$AIC = fit$dev + 2*ED.tot
-    fit$BIC = fit$dev + log(fit$d)*ED.tot
-    ## fit$BIC = fit$dev + log(fit$nobs)*ED.tot
+    fit$AIC = AIC ## fit$dev + 2*ED.tot
+    fit$BIC = BIC ## fit$dev + log(fit$d)*ED.tot
     ##
-    ## ## levidence
-    ev.phi = svd(-fit$Hes.phi)$d
-    ev.regr = svd(-fit$Hes.regr)$d
-    fit$levidence = fit$lpen -.5*sum(log(ev.phi[ev.phi>1-6])) -.5*sum(log(ev.regr[ev.regr>1-6]))
+    ## ## log(evidence)
+    ## ## -------------
+    ## ev.psi = svd(-obj.cur$Hes.phi[-k.ref,-k.ref])$d
+    ## ev.beta = svd(-obj.cur$Hes.beta)$d
+    ## ev.gamma = 0
+    ## if (!nogamma) ev.gamma = svd(-obj.cur$Hes.gamma)$d
+    ## levidence = obj.cur$lpen -.5*sum(log(ev.beta[ev.beta>1-6]))
+    ## if (!nogamma) levidence = levidence -.5*sum(log(ev.gamma[ev.gamma>1-6]))
+    ## levidence = levidence -.5*sum(log(ev.psi[ev.psi>1-6]))
+    ## fit$levidence = levidence
     ##
+    ## Iterations and Computation time
+    ## -------------------------------
     fit$iter = iter
     fit$elapsed.time <- (proc.time()-ptm)[1] ## Elapsed time
     ##
-    ans = list(formula1=formula1, formula2=formula2, method=method,
+    ## Returned list
+    ## -------------
+    ans = list(formula1=formula1, formula2=formula2, baseline=baseline,
             regr1=regr1,regr2=regr2, K0=K0,
             fit=fit,
             call=cl,

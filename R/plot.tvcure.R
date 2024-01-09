@@ -79,7 +79,7 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, equal.ylims=TRUE,...
     with(fhat, curve(F0,xlim=attr(F0,"support"),xlab="time",ylab=bquote(F[0](t))))
     ## Plot Additive terms
     ## -------------------
-    if ((fhat$J1 == 0)|(fhat$J2 == 0)) return(NULL)
+    ## if ((fhat$J1 == 0)&&(fhat$J2 == 0)) return(NULL)
     if (fhat$J1 > 0){
         ylims = NULL
         if (equal.ylims) ylims =  range(lapply(fhat$f1.grid, function(x) range(x$y.mat)))

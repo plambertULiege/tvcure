@@ -23,7 +23,7 @@
 #' @examples
 #' require(tvcure)
 #' ## Simulated data generation
-#' beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2) 
+#' beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2)
 #' df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
 #'                           RC.dist="exponential",mu.cens=550)$df.raw
 #' ## TVcure model fitting
@@ -38,18 +38,8 @@
 #'
 print.tvcure <- function(x,ci.level=.95,expEst=TRUE,digits=3,...){ ##,nrow=NULL,ncol=1,width=5,height=5){
     obj = x
-    cat("Call:\n",deparse(obj$call),"\n")
+    cat("\nCall:\n",deparse(obj$call),"\n")
     cat("\n")
-    ## cat("Model:\n")
-    switch(obj$method,
-           "1" = {
-               cat("  S.p(t|x) = exp{-theta(x) F(t|x)}   where   F(t|x) = F.0(t)^exp(eta(x))\n\n")
-           },
-           "2" = {
-               cat("  S.p(t|x) = exp{-theta(x) F(t|x)}   where   1-F(t|x) = S(t|x) = S.0(t)^exp(eta(x))\n\n")
-           }
-    )
-    ## cat("S.p(t|x) = exp{-theta(x) F(t|x)}\n\n")
     ##
     cat(">> log(theta(x)) - Long-term survival (Quantum) <<\n")
     cat("Formula:",deparse(obj$formula1),"\n")
@@ -77,6 +67,14 @@ print.tvcure <- function(x,ci.level=.95,expEst=TRUE,digits=3,...){ ##,nrow=NULL,
     }
     ##
     cat("\n\n>> eta(x) - Short-term survival (Timing) <<\n")
+    ## switch(obj$baseline,
+    ##        "S0" = {
+    ##            cat("S.p(t|x) = exp{-theta(x) F(t|x)}  where  1-F(t|x) = S(t|x) = S.0(t)^exp(eta(x))\n")
+    ##        },
+    ##        "F0" = {
+    ##            cat("S.p(t|x) = exp{-theta(x) F(t|x)}  where  F(t|x) = F.0(t)^exp(eta(x))\n")
+    ##        }
+    ## )
     cat("Formula:",deparse(obj$formula2),"\n")
     nfixed2 = obj$regr2$nfixed
     cat("\nParametric coefficients:\n")
