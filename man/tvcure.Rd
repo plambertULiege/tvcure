@@ -5,7 +5,7 @@
 \title{Fit of a tvcure model.}
 \usage{
 tvcure(formula1, formula2, df,
-       method=c("S0","F0"), K0=20, pen.order0=2,
+       baseline=c("S0","F0"), K0=20, pen.order0=2,
        K1=10, pen.order1=2, K2=10, pen.order2=2,
        phi.0=NULL, beta.0=NULL, gamma.0=NULL,
        a.tau=1, b.tau=1e-6, a=1, b=1e-2,
@@ -30,8 +30,8 @@ tvcure(formula1, formula2, df,
 \item{\code{event} : \verb{ }}{a sequence of 0-1 event indicators. For the lines corresponding to a given unit, it starts with 0 values concluded by a 0 in case of right-censoring or by a 1 if the event is observed at the end of the follow-up.}
 }}
 
-\item{method}{Method ("S0" or "F0") used to specify the dependence of the cumulative hazard dynamics on covariates (Default: "S0"):
-Method S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Method F0: \eqn{F(t|x) = F_0(t)^{\exp{\gamma'x}}}}
+\item{baseline}{Baseline ("S0" or "F0") used to specify the dependence of the cumulative hazard dynamics on covariates (Default: "S0"):
+Baseline S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Baseline F0: \eqn{F(t|x) = F_0(t)^{\exp{\gamma'x}}}}
 
 \item{K0}{Number of B-splines used to specify \eqn{\log f_0(t)} (Default: 20).}
 
@@ -125,7 +125,7 @@ tau.0 = 2.7 ; lambda1.0 = c(40,15) ; lambda2.0 = c(25,70) ## Optional
 model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), df=df.raw,
                tau.0=tau.0, lambda1.0=lambda1.0, lambda2.0=lambda2.0)
 print(model)
-plot(model, mfrow=c(1,2))
+plot(model, pages=1)
 
 }
 \references{

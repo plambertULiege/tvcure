@@ -104,7 +104,7 @@
 #' model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), df=df.raw,
 #'                tau.0=tau.0, lambda1.0=lambda1.0, lambda2.0=lambda2.0)
 #' print(model)
-#' plot(model, mfrow=c(1,2))
+#' plot(model, pages=1)
 #'
 #' @export
 #'
@@ -137,32 +137,66 @@ tvcure = function(formula1, formula2, df,
     lambda.method = match.arg(lambda.method)
     if (missing(formula1)) {message("Missing model formula <formula1> for long-term survival !") ; return(NULL)}
     if (missing(formula2)) {message("Missing model formula <formula2> for short-term survival !") ; return(NULL)}
-    ## if (attr(terms(formula2),"intercept")){
-    ##     cat("Intercept automatically removed from <formula2> !\n")
-    ##     formula2 = formula(paste(deparse(formula2),"-1")) ## Remove intercept from <formula2>
-    ## }
+    ## Check that <id>, <time> and <event> entries in <df>
+    ## ---------------------------------------------------
     if (missing(df)) {message("Missing data frame <df> with <id>, <time>, event indicator <event>, and covariate values !") ; return(NULL)}
-    ##
-    if (!is.null(phi.0)) K0 = length(phi.0)
-    if (!is.null(beta.0))  K1 = length(beta.0)
-    if (!is.null(gamma.0)) K2 = length(gamma.0)
-    ##
-    id = unique(df$id) ## Subject ids
-    n = length(id)     ## Number of subjects
-    ## Make sure that <time> takes integer values !!
-    temp = round(df$time)
-    if (!all(temp == df$time)){
-        stop("<time> must take integer values !!")
-    }
+    if (!"id" %in% colnames(df)) stop("Missing <id> column in the data frame <df> !!")
+    if (!"time" %in% colnames(df)) stop("Missing <time> column in the data frame <df> !!")
+    if (!"event" %in% colnames(df)) stop("Missing <event> column in the data frame <df> !!")
+    ## Some check on df$time values
+    ## ----------------------------
+    ## Check 0: for a given <id>, <event> can only contain 0's finished by 0 or 1
+    if (!all(sort(unique(df$event)) %in% c(0,1))) stop("<event> can only contain 0 and 1 values !!")
+    fun0 = function(x) x[length(x)] %in% c(0,1) && sum(x[-length(x)])==0
+    check0 = all(unlist(by(df$event, df$id, fun0)))
+    if (!check0) stop("<event> can only contain 0's (with 0 or 1 at the end) for a given <id> !!")
+    ## Check 1: <time> starts at 1 for a given <id>
+    fun1 = function(x) x[1]==1
+    check1 = all(as.vector(by(df$time, df$id, fun1))) ## Should be true
+    if (!check1) stop("<time> should start at 1 for a given <id> !!")
+    ## Check 2: Make sure that <time> takes integer values !!
+    temp = as.integer(abs(df$time))
+    check2 = all(temp == df$time)
+    if (!check2) stop("<time> must take positive integer values !!")
     df$time = temp
     T = max(df$time) ## Maximum follow-up time (that should be RC)
-    ## Significance level
-    alpha = 1-ci.level
-    z.alpha = qnorm(1-.5*alpha)
+    ## Check 3: <time> should be a sequence of consecutive integers for a given <id>
+    fun3 = function(x) all(diff(x)==1)
+    check3 = c(by(df$time, df$id, fun3)) ## Should be true for a given <id>
+    id.discarded = names(check3)[!check3]
+    n.id = length(check3)
+    if (sum(check3) < .1*n.id) stop("<time> should be a sequence of consecutive integers for a given <id> !!")
+    if (!all(check3)){
+        cat(sum(!check3),"units with non-consecutive integer values for <time> detected\n")
+##        cat("   <id> value(s):",id.discarded,"\n")
+        fun4 = function(x) as.logical(cumprod(c(TRUE,diff(x)==1)))
+        rows.ok =  unlist(by(df$time, df$id, fun4)) ## Rows with consecutive <time> values within a given <id>
+        ##
+        temp = c(by(df$id[!rows.ok],df$id[!rows.ok],function(x) length(x)))
+        temp = c(temp,sum(temp)) ; names(temp)[length(temp)] = "Total"
+        cat("Number of discarded time entries (per problematic unit <id>):\n")
+        print(temp)
+        df = df[rows.ok,]  ## Only keep rows with consecutive <time> values for a given <id>
+ces
+    }
+    ## Number of units and their id's
+    ## ------------------------------
+    id = unique(df$id) ## Unit ids
+    n = length(id)     ## Number of units
     ## Preliminary NP estimation of S(t)
+    ## ---------------------------------
     tab = with(df, table(time,event))
     n.risk = rowSums(tab) ; n.event = tab[,2]
     h0.hat = n.event / n.risk ; H0.hat = cumsum(h0.hat) ; lS0.hat = -H0.hat
+    ## Significance level
+    ## ------------------
+    alpha = 1-ci.level
+    z.alpha = qnorm(1-.5*alpha)
+    ## Length of spline vectors
+    ## -------------------------
+    if (!is.null(phi.0)) K0 = length(phi.0)
+    if (!is.null(beta.0))  K1 = length(beta.0)
+    if (!is.null(gamma.0)) K2 = length(gamma.0)
     ## Regression models for long-term (formula1) & short-term (formula2) survival
     ## ---------------------------------------------------------------------------
     regr1 = DesignFormula(formula1, data=df, K=K1, pen.order=pen.order1) ##, n=n)
@@ -188,7 +222,6 @@ tvcure = function(formula1, formula2, df,
     ## Fast calculation of log |B'WB + lambda*Pd| using pre-computed eigenvalues:
     ##  log |B'WB + lambda*Pd| = ldet0 + sum(log(lambda1)) + sum_j(log(tau+dj))
     ## --------------------------------------------------------------------------
-
     ## Starting from B'WB and Pd
     ev.fun = function(BwB, Pd){  ## t(B) %*% diag(w) %*% B
         K = ncol(Pd) ; rk = qr(Pd)$rank ; id1 = 1:rk ; id2 = (1:K)[-id1]

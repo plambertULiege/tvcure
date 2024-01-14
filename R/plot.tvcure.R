@@ -1,13 +1,17 @@
 #' Plot visual information related to a tvcure object.
 #' @description Visualization of the estimated additive terms and of the reference (cumulative) hazard function in a tvcure object.
 #'
-#' @usage \method{plot}{tvcure}(x, ngrid=300, ci.level=.95, pages=0, equal.ylims=TRUE, ...)
+#' @usage \method{plot}{tvcure}(x, ngrid=300, ci.level=.95, pages=0, select=NULL,
+#'                              equal.ylims=TRUE, ylim1=NULL, ylim2=NULL, ...)
 #'
 #' @param x a \code{\link{tvcure.object}}.
 #' @param ngrid (optional) number of points used to plot the fitted additive terms. (Default: 300).
 #' @param ci.level (optional) nominal level for the plotted pointwise credible intervals. (Default: 0.95).
 #' @param pages The number of pages over which to spread the output. For example, if pages=1 then all terms will be plotted on one page with the layout performed automatically. Set to 0 to have the routine leave all graphics settings as they are. (Default 0).
-#' @param equal.ylims logical indicating if the same y-limits must be used when plotting the fitted additive terms. (Default: TRUE).
+#' @param select Allows the plot for a single model term to be selected for printing. e.g. if you just want the plot for the second smooth term set select=2. The plot of the reference hazard \eqn{f_0(t)} and cumulative hazard \eqn{F_0(t)} functions is provided when select=0. (Default: NULL).
+#' @param equal.ylims logical indicating if the same y-limits must be used when plotting the fitted additive terms. It can be overriden by non-NULL values for \code{ylim1} or \code{ylim2}. (Default: TRUE).
+#' @param ylim1 Vector of length 2 specifying (common) y-axis limits when plotting the fitted additive term(s) in the long-term survival submodel. (Default: NULL).
+#' @param ylim2 Vector of length 2 specifying (common) y-axis limits when plotting the fitted additive term(s) in the short-term survival submodel. (Default: NULL).
 #' @param ... additional generic plotting arguments.
 #'
 #' @details Plot of the fitted additive terms, as well as of the reference hazard \eqn{f_0(t)} and cumulative hazard \eqn{F_0(t)} functions of the fitted tvcure model in \code{x}.
@@ -34,7 +38,7 @@
 #'
 #' @export
 #'
-plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, equal.ylims=TRUE,...){
+plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL, equal.ylims=TRUE, ylim1=NULL, ylim2=NULL,...){
     obj = x
     ## Compute additive term + envelope
     ## --------------------------------
@@ -42,7 +46,12 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, equal.ylims=TRUE,...
     ##
     ## Plot organization (extracted from mgcv::plot.gam)
     ## -------------------------------------------------
-    n.plots = 2 + fhat$J1 + fhat$J2 ## Number of plots: f0, F0 + additive terms
+    if (is.null(select)){
+        n.plots = 2 + fhat$J1 + fhat$J2 ## Number of plots: f0, F0 + additive terms
+    } else {
+        n.plots = 1
+        if (select == 0) n.plots = 2
+    }
     if (pages > n.plots) pages = n.plots
     if (pages < 0) pages = 0
     if (pages != 0) {
@@ -65,43 +74,54 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, equal.ylims=TRUE,...
         pages > 1 && dev.interactive())
         ask = TRUE
     else ask = FALSE
-    ## if (!is.null(select)) {
-    ##     ask = FALSE
-    ## }
+    if (!is.null(select) && (select!=0)) {
+        ask = FALSE
+    }
     if (ask) {
         oask = devAskNewPage(TRUE)
         on.exit(devAskNewPage(oask))
     }
     ## Plot baseline f0 & F0
     ## ---------------------
-    par(mar=c(4,5,1,1))
-    with(fhat, curve(f0,xlim=attr(f0,"support"),xlab="time",ylab=bquote(f[0](t))))
-    with(fhat, curve(F0,xlim=attr(F0,"support"),xlab="time",ylab=bquote(F[0](t))))
+    if (is.null(select) || (select==0)){
+        par(mar=c(4,5,1,1))
+        beta0 = x$fit$beta[1,1]
+        curve(exp(beta0)*fhat$f0(x), xlim=attr(fhat$f0,"support"),
+              xlab="time",ylab=bquote(e^{beta[0]}*~f[0](t)))
+        ## with(fhat, curve(f0,
+        ##                  xlim=attr(f0,"support"),xlab="time",ylab=bquote(e^{beta[0]}*~f[0](t))))
+        with(fhat, curve(F0, xlim=attr(F0,"support"),
+                         xlab="time",ylab=bquote(F[0](t))))
+    }
     ## Plot Additive terms
     ## -------------------
-    ## if ((fhat$J1 == 0)&&(fhat$J2 == 0)) return(NULL)
+    plotAdd = function(x,y,...) matplot(x, y,type="l",
+                                        ylim=ylims,xlab=xlab,ylab=ylab,
+                                        lwd=c(2,1,1),lty=c(1,2,2),col=1, ...)
     if (fhat$J1 > 0){
         ylims = NULL
         if (equal.ylims) ylims =  range(lapply(fhat$f1.grid, function(x) range(x$y.mat)))
+        if (!is.null(ylim1)) ylims = ylim1
         for (j in 1:fhat$J1){
-            xlab = names(fhat$f1.grid)[j]
-            with(fhat$f1.grid[[j]], matplot(x, y.mat,type="l",
-                                            ylim=ylims,
-                                            xlab=xlab,
-                                            ylab=bquote('f'[.(j)]*(.(xlab))),
-                                            lwd=c(2,1,1),lty=c(1,2,2),col=1, ...))
+            if ((is.null(select)) || (select == j)){
+                par(mar=c(4,5,1,1))
+                xlab = names(fhat$f1.grid)[j]
+                ylab = bquote('f'[.(j)]*(.(xlab)))
+                with(fhat$f1.grid[[j]], plotAdd(x, y.mat, ...))
+            }
         }
     }
     if (fhat$J2 > 0){
         ylims = NULL
         if (equal.ylims) ylims =  range(lapply(fhat$f2.grid, function(x) range(x$y.mat)))
+        if (!is.null(ylim2)) ylims = ylim2
         for (j in 1:fhat$J2){
-            xlab = names(fhat$f2.grid)[j]
-            with(fhat$f2.grid[[j]], matplot(x, y.mat,type="l",
-                                            ylim=ylims,
-                                            xlab=xlab,
-                                            ylab=bquote(tilde('f')[.(j)]*(.(xlab))),
-                                            lwd=c(2,1,1),lty=c(1,2,2),col=1, ...))
+            if ((is.null(select)) || (select == fhat$J1+j)){
+                par(mar=c(4,5,1,1))
+                xlab = names(fhat$f2.grid)[j]
+                ylab = bquote(tilde('f')[.(j)]*(.(xlab)))
+                with(fhat$f2.grid[[j]], plotAdd(x, y.mat, ...))
+            }
         }
     }
     if (pages > 0) par(oldpar)

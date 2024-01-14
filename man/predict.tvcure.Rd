@@ -36,7 +36,7 @@ Predicted values based on a tvcure object.
 \examples{
 require(tvcure)
 ## Simulated data generation
-beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2) 
+beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2)
 df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
                           RC.dist="exponential",mu.cens=550)$df.raw
 ## TVcure model fitting

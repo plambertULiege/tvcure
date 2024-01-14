@@ -1,14 +1,14 @@
 #' Predict method for tvcure model fits
 #' @description
 #' Predicted values based on a tvcure object.
-#' 
+#'
 #' @usage \method{predict}{tvcure}(x, df.new, ci.level=.95, ...)
 #'
-#' @param x A \code{\link{tvcure.object}}. 
+#' @param x A \code{\link{tvcure.object}}.
 #' @param df.new An optional data frame in which to look for the 'id' (distinguishing the different units), 'time' and covariate values for which 'predictions' should be made. Time values for a given 'id' should be a series of consecutive integers starting with 1. If \code{df.new} is NULL, then predictions are assumed to concern a single unit with consecutive time values starting with 1.
 #' @param ci.level Credible level for the reported estimates. (Default: 0.95).
 #' @param ... additional generic arguments.
-#'  
+#'
 #'
 #' @return A list containing, in addition to the optional \code{df.new} entries, the following elements:
 #' \itemize{
@@ -23,28 +23,28 @@
 #' \item{\code{llpcure} : \verb{ }}{Matrix containing estimates of the log-log cure probability \eqn{\log(-\log(P(cure|x)))}, with its standard error and credible interval bounds at time \eqn{t} if covariates keep their current values.}
 #' \item{\code{se.llpcure} : \verb{ }}{Vector containing the standard errors of the estimated log-log cure probability \eqn{\log(-\log P(cure|x))} given the history of covariates.}
 #' }
-#' 
+#'
 #' @author Philippe Lambert \email{p.lambert@uliege.be}
 #' @references Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
 #' with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, under review.
-#' 
+#'
 #' @export
 #'
 #' @examples
 #' require(tvcure)
 #' ## Simulated data generation
-#' beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2) 
+#' beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2)
 #' df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
 #'                           RC.dist="exponential",mu.cens=550)$df.raw
 #' ## TVcure model fitting
 #' tau.0 = 2.7 ; lambda1.0 = c(40,15) ; lambda2.0 = c(25,70) ## Optional
 #' model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), df=df.raw,
 #'                tau.0=tau.0, lambda1.0=lambda1.0, lambda2.0=lambda2.0)
-#' 
+#'
 #' ## Covariate profiles for which 'predicted' values are requested
 #' df.new = subset(df.raw, id==1 | id==4)[,-3] ## Focus on units 1 & 4
 #' pred = predict(model,df.new)
-#' 
+#'
 #' ## Visualize the estimated population survival fns for units 1 & 4
 #' ## par(mfrow=c(1,2))
 #' with(subset(pred,id==1), plotRegion(time,Sp,main="Id=1",
@@ -57,7 +57,7 @@ predict.tvcure <- function(x, df.new, ci.level=.95, ...){
     if (is.null(df.new$id)) df.new$id = rep(1,nrow(df.new))
     ##
     obj = obj.tvcure
-    method = obj$method
+    baseline = obj$baseline
     t.grid = obj$fit$t.grid
     ##
     f0.grid = obj$fit$f0.grid
@@ -106,7 +106,7 @@ predict.tvcure <- function(x, df.new, ci.level=.95, ...){
         ## Fitted log(h_p(t|x)) and log(H_p(t|x))
         ## --------------------------------------
         Delta = 1
-        switch(method,
+        switch(baseline,
                "F0" = {
                    lhp = eta.1 + eta.2 + (exp(eta.2)-1) * log(F0.grid[time]) + log(f0.grid[time])
                    Hp = cumsum(exp(lHp)*Delta)
@@ -135,7 +135,7 @@ predict.tvcure <- function(x, df.new, ci.level=.95, ...){
         ##
         ## Derivatives of log(Hp) & log(hp) wrt <gamma> at the grid times
         if (!constant.gamma){
-            switch(method,
+            switch(baseline,
                    "F0" = {
                        tempo = exp(eta.2)*log(F0.grid[time])
                    },
@@ -161,7 +161,7 @@ predict.tvcure <- function(x, df.new, ci.level=.95, ...){
         k.ref = obj$fit$k.ref
         npsi = nrow(obj$fit$phi) - 1
         if (!constant.gamma){
-            switch(method,
+            switch(baseline,
                    "F0" = {
                        part1 = (exp(eta.2)-1) * dlF0.grid[time,-k.ref,drop=FALSE]
                    },
@@ -192,7 +192,7 @@ predict.tvcure <- function(x, df.new, ci.level=.95, ...){
         ##    log(-log pcure(t|x)): llpcure
         ##    pcure(t|x) = exp(-exp(llpcure))
         ## ----------------------------------------------------------
-        switch(method,
+        switch(baseline,
                "F0" = {
                    llpcure = eta.1 + log(1-F0.grid[time]^(exp(eta.2)))
                },
@@ -202,7 +202,7 @@ predict.tvcure <- function(x, df.new, ci.level=.95, ...){
         )
         ##
         ## se(llpcure)
-        if (method == "S0"){
+        if (baseline == "S0"){
             Dllpcure.beta = regr1$Xcal ## Tgrid x nbeta
             if (!constant.gamma){
                 Dllpcure.gamma = tempo * regr2$Xcal ## Tgrid x ngamma
@@ -249,7 +249,7 @@ predict.tvcure <- function(x, df.new, ci.level=.95, ...){
 ##     if (is.null(df.new$id)) df.new$id = rep(1,nrow(df.new))
 ##     ##
 ##     obj = obj.tvcure
-##     method = obj$method
+##     baseline = obj$baseline
 ##     t.grid = obj$fit$t.grid
 ##     f0.grid = obj$fit$f0.grid
 ##     F0.grid = obj$fit$F0.grid
@@ -291,7 +291,7 @@ predict.tvcure <- function(x, df.new, ci.level=.95, ...){
 ##         }
 ##         ## Fitted log(h_p(t|x)) and log(H_p(t|x))
 ##         Delta = 1
-##         switch(method,
+##         switch(baseline,
 ##                "F0" = {
 ##                    lhp = eta.1 + eta.2 + (exp(eta.2)-1) * log(F0.grid[time]) + log(f0.grid[time])
 ##                    Hp = cumsum(exp(lHp)*Delta)
