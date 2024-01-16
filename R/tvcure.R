@@ -167,17 +167,16 @@ tvcure = function(formula1, formula2, df,
     n.id = length(check3)
     if (sum(check3) < .1*n.id) stop("<time> should be a sequence of consecutive integers for a given <id> !!")
     if (!all(check3)){
-        cat(sum(!check3),"units with non-consecutive integer values for <time> detected\n")
+        cat(sum(!check3)," units (out of ",length(unique(df$id)),") with non-consecutive integer values for <time> detected\n",sep="")
 ##        cat("   <id> value(s):",id.discarded,"\n")
         fun4 = function(x) as.logical(cumprod(c(TRUE,diff(x)==1)))
         rows.ok =  unlist(by(df$time, df$id, fun4)) ## Rows with consecutive <time> values within a given <id>
         ##
         temp = c(by(df$id[!rows.ok],df$id[!rows.ok],function(x) length(x)))
         temp = c(temp,sum(temp)) ; names(temp)[length(temp)] = "Total"
-        cat("Number of discarded time entries (per problematic unit <id>):\n")
+        cat("Number of discarded time entries (out of ",nrow(df),") per problematic unit <id>:\n",sep="")
         print(temp)
         df = df[rows.ok,]  ## Only keep rows with consecutive <time> values for a given <id>
-ces
     }
     ## Number of units and their id's
     ## ------------------------------
@@ -185,6 +184,9 @@ ces
     n = length(id)     ## Number of units
     ## Preliminary NP estimation of S(t)
     ## ---------------------------------
+    ## df2 = array2DF(by(df[,c("id","time","event")], df$id, function(x) x[nrow(x),-1]))[,-1]
+    ## temp = with(df2, survfit(Surv(time,event) ~ 1))
+    ## t.hat = temp$time ; H0.hat = temp$cumhaz
     tab = with(df, table(time,event))
     n.risk = rowSums(tab) ; n.event = tab[,2]
     h0.hat = n.event / n.risk ; H0.hat = cumsum(h0.hat) ; lS0.hat = -H0.hat
@@ -317,7 +319,7 @@ ces
     }
     if (is.null(beta.0)){
         beta.0 = rep(0,q1)
-        beta.0[1] = log(tail(H0.hat,1))
+        beta.0[1] = log(H0.hat[length(H0.hat)])
     }
     names(beta.0) = regr1.lab
     if (!nogamma){

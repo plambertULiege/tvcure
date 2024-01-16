@@ -5,7 +5,9 @@
 \title{Plot visual information related to a tvcure object.}
 \usage{
 \method{plot}{tvcure}(x, ngrid=300, ci.level=.95, pages=0, select=NULL,
-                             equal.ylims=TRUE, ylim1=NULL, ylim2=NULL, ...)
+                             mar=c(4,5,1,1), xlim0=NULL, ylim0=NULL,
+                             xlim1=NULL, ylim1=NULL, xlim2=NULL, ylim2=NULL,
+                             equal.ylims=TRUE,...)
 }
 \arguments{
 \item{x}{a \code{\link{tvcure.object}}.}
@@ -16,13 +18,23 @@
 
 \item{pages}{The number of pages over which to spread the output. For example, if pages=1 then all terms will be plotted on one page with the layout performed automatically. Set to 0 to have the routine leave all graphics settings as they are. (Default 0).}
 
-\item{select}{Allows the plot for a single model term to be selected for printing. e.g. if you just want the plot for the second smooth term set select=2. The plot of the reference hazard \eqn{f_0(t)} and cumulative hazard \eqn{F_0(t)} functions is provided when select=0. (Default: NULL).}
+\item{select}{Allows the plot for a single model term to be selected for printing. e.g. if you just want the plot for the second smooth term set select=2. The plot of the reference hazard \eqn{f_0(t)} and cumulative hazard \eqn{F_0(t)} functions is provided when select=0. When select=-1, only the reference hazard is plotted.(Default: NULL).}
 
-\item{equal.ylims}{logical indicating if the same y-limits must be used when plotting the fitted additive terms. It can be overriden by non-NULL values for \code{ylim1} or \code{ylim2}. (Default: TRUE).}
+\item{mar}{A numerical vector of the form c(bottom, left, top, right) which gives the number of lines of margin to be specified on the four sides of the plot. (Default: c(4,5,1,1)).}
+
+\item{xlim0}{Vector of length 2 specifying x-axis limits when plotting the estimated reference hazard function \eqn{\exp(\beta_0)f_0(t)}.}
+
+\item{ylim0}{Vector of length 2 specifying y-axis limits when plotting the estimated reference hazard function \eqn{\exp(\beta_0)f_0(t)}.}
+
+\item{xlim1}{Vector of length 2 specifying (common) x-axis limits when plotting the fitted additive term(s) in the long-term survival submodel. (Default: NULL).}
 
 \item{ylim1}{Vector of length 2 specifying (common) y-axis limits when plotting the fitted additive term(s) in the long-term survival submodel. (Default: NULL).}
 
+\item{xlim2}{Vector of length 2 specifying (common) x-axis limits when plotting the fitted additive term(s) in the short-term survival submodel. (Default: NULL).}
+
 \item{ylim2}{Vector of length 2 specifying (common) y-axis limits when plotting the fitted additive term(s) in the short-term survival submodel. (Default: NULL).}
+
+\item{equal.ylims}{logical indicating if the same y-limits must be used when plotting the fitted additive terms from the same submodel. It can be overriden by non-NULL values for \code{ylim1} or \code{ylim2}. (Default: TRUE).}
 
 \item{...}{additional generic plotting arguments.}
 }
