@@ -90,7 +90,7 @@ additive.tvcure <- function(obj.tvcure,ngrid=300, ci.level=.95){
         add.lab = obj$regr1$additive.lab
         ans$additive.lab1 = add.lab
         ans$K1=K1 ; ans$knots1 = obj$regr1$knots.x
-        Sigma = with(obj$fit, solve(-Hes.beta)) ## Added in 2023.10.11
+        Sigma = with(obj$fit, solve(-Hes.beta+1e-6*diag(ncol(Hes.beta)))) ## Added in 2023.10.11
         ## Sigma = Sigma.regr[1:nbeta,1:nbeta] ## Removed in 2023.10.11
         f.grid = f = f.se = list()
         ##
@@ -126,7 +126,7 @@ additive.tvcure <- function(obj.tvcure,ngrid=300, ci.level=.95){
         add.lab = obj$regr2$additive.lab
         ans$additive.lab2 = add.lab
         ans$K2=K2 ; ans$knots2 = obj$regr2$knots.x
-        Sigma = with(obj$fit, solve(-Hes.gamma)) ## Added in 2023.10.11
+        Sigma = with(obj$fit, solve(-Hes.gamma+1e-6*diag(ncol(Hes.gamma)))) ## Added in 2023.10.11
         ## Sigma = Sigma.regr[nbeta + (1:ngamma),nbeta + (1:ngamma)] ## Removed in 2023.10.11
         f.grid = f = f.se = list()
         for (j in 1:J2){

@@ -167,8 +167,9 @@ tvcure = function(formula1, formula2, df,
     n.id = length(check3)
     if (sum(check3) < .1*n.id) stop("<time> should be a sequence of consecutive integers for a given <id> !!")
     if (!all(check3)){
-        cat(sum(!check3)," units (out of ",length(unique(df$id)),") with non-consecutive integer values for <time> detected\n",sep="")
-##        cat("   <id> value(s):",id.discarded,"\n")
+        word = ifelse(sum(!check3)>1, " units", " unit")
+        cat(sum(!check3),word," (out of ",length(unique(df$id)),") with non-consecutive integer values for <time> detected\n",sep="")
+        ##        cat("   <id> value(s):",id.discarded,"\n")
         fun4 = function(x) as.logical(cumprod(c(TRUE,diff(x)==1)))
         rows.ok =  unlist(by(df$time, df$id, fun4)) ## Rows with consecutive <time> values within a given <id>
         ##
@@ -203,6 +204,13 @@ tvcure = function(formula1, formula2, df,
     ## ---------------------------------------------------------------------------
     regr1 = DesignFormula(formula1, data=df, K=K1, pen.order=pen.order1) ##, n=n)
     regr2 = DesignFormula(formula2, data=df, K=K2, pen.order=pen.order2, nointercept=TRUE) ##, n=n)
+    q1 = ncol(regr1$Xcal) ## Total number of regression and spline parameters in long-term survival
+    q2 = ncol(regr2$Xcal) ## Total number of regression and spline parameters in short-term survival
+    if (is.null(q2)){
+        nogamma = TRUE ## Check whether covariates are absent in <formula2> --> gamma=0
+    } else {
+        nogamma = FALSE
+    }
     ## Extract key stuff from regr1 & regr2
     nobs = nrow(regr1$Xcal)     ## Number of data entries
     J1 = regr1$J ; J2 = regr2$J ## Number of additive terms
@@ -289,34 +297,30 @@ tvcure = function(formula1, formula2, df,
     ## Hes.gamma0 = -Rfast::Crossprod(regr2$XcalTempo[id1,,drop=FALSE], regr2$XcalTemp[id1,,drop=FALSE])
     ##
     ## (Approximate) Non-penalized Hessian for <gamma>:
-    if (use.Rfast){
-        Hes.gamma0 = -Rfast::Crossprod(regr2$Xcal[id1,,drop=FALSE], regr2$Xcal[id1,,drop=FALSE])
+    Hes.gamma0 = ev2.lst = NULL
+    if (!nogamma){
+        if (use.Rfast){
+            Hes.gamma0 = -Rfast::Crossprod(regr2$Xcal[id1,,drop=FALSE], regr2$Xcal[id1,,drop=FALSE])
         } else {
             Hes.gamma0 = -crossprod(regr2$Xcal[id1,,drop=FALSE], regr2$Xcal[id1,,drop=FALSE])
         }
-    if (J2 > 0){
-        rk2 = qr(regr2$Pd.x)$rank
-        for (j in 1:J2){ ## Loop over additive terms in the long-term survival sub-model
-            idx = nfixed2 + (j-1)*K2 + (1:K2)
-            Hes.gamj = Hes.gamma0[idx,idx,drop=FALSE]
-            ## if (use.Rfast){
-            ##     Hes.gamj = -Rfast::Crossprod(regr2$Xcal[id1,idx,drop=FALSE], regr2$Xcal[id1,idx,drop=FALSE])
-            ## } else {
-            ##     Hes.gamj = -crossprod(regr2$Xcal[id1,idx,drop=FALSE], regr2$Xcal[id1,idx,drop=FALSE])
-            ## }
-            ev2.lst[[j]] = ev.fun(BwB=Hes.gamj,Pd=regr2$Pd.x)$dj
+        if (J2 > 0){
+            rk2 = qr(regr2$Pd.x)$rank
+            for (j in 1:J2){ ## Loop over additive terms in the long-term survival sub-model
+                idx = nfixed2 + (j-1)*K2 + (1:K2)
+                Hes.gamj = Hes.gamma0[idx,idx,drop=FALSE]
+                ## if (use.Rfast){
+                ##     Hes.gamj = -Rfast::Crossprod(regr2$Xcal[id1,idx,drop=FALSE], regr2$Xcal[id1,idx,drop=FALSE])
+                ## } else {
+                ##     Hes.gamj = -crossprod(regr2$Xcal[id1,idx,drop=FALSE], regr2$Xcal[id1,idx,drop=FALSE])
+                ## }
+                ev2.lst[[j]] = ev.fun(BwB=Hes.gamj,Pd=regr2$Pd.x)$dj
+            }
         }
     }
     ## Initial values
     ## --------------
     ## ... for the regression parameters
-    q1 = ncol(regr1$Xcal) ## Total number of regression and spline parameters in long-term survival
-    q2 = ncol(regr2$Xcal) ## Total number of regression and spline parameters in short-term survival
-    if (is.null(q2)){
-        nogamma = TRUE ## Check whether covariates are absent in <formula2> --> gamma=0
-    } else {
-        nogamma = FALSE
-    }
     if (is.null(beta.0)){
         beta.0 = rep(0,q1)
         beta.0[1] = log(H0.hat[length(H0.hat)])
@@ -677,7 +681,7 @@ tvcure = function(formula1, formula2, df,
             ev.gamma = 0
             if (!nogamma) ev.gamma = svd(-Hes.gamma)$d
             levidence = lpen -.5*sum(log(ev.beta[ev.beta>1-6]))
-            if (!nogamma) levidence = levidence -.5*sum(log(ev.gamma[ev.gamma>1-6]))
+            if (!nogamma) levidence = levidence -.5*sum(log(ev.gamma[ev.gamma>1e-6]))
             levidence = levidence -.5*sum(log(ev.psi[ev.psi>1-6]))
         }
         ans = list(llik=llik, lpen=lpen, dev=dev, levidence=levidence,
@@ -915,11 +919,11 @@ tvcure = function(formula1, formula2, df,
         nbeta = fit$nbeta   ## Nbr of regression & spline parameters in long-term survival
         ngamma = fit$ngamma ## Nbr of regression & spline parameters in short-term survival
         ##
-        Sigma.beta = with(fit, solve(-Hes.beta))
+        Sigma.beta = with(fit, solve(-Hes.beta+1e-6*diag(ncol(Hes.beta))))
         ED.beta = rowSums(t(Sigma.beta) * (-fit$Hes.beta0))
         ##
         if (!nogamma){
-            Sigma.gamma = with(fit, solve(-Hes.gamma))
+            Sigma.gamma = with(fit, solve(-Hes.gamma+1e-6*diag(ncol(Hes.gamma))))
             ED.gamma = rowSums(t(Sigma.gamma) * (-fit$Hes.gamma0))
         } else {
             Sigma.gamma = NULL
@@ -1279,7 +1283,8 @@ tvcure = function(formula1, formula2, df,
             grad = dtheta = NULL
             if (Dtheta){
                 grad = obj.cur$grad.regr
-                A = -obj.cur$Hes.regr ## A = Matrix::nearPD(-obj.cur$Hes.regr)$mat
+                A = -obj.cur$Hes.regr + diag(1e-6,length(grad))
+                ## A = Matrix::nearPD(-obj.cur$Hes.regr)$mat
                 dtheta = solve(A, grad)
             }
             ##
@@ -1550,11 +1555,11 @@ tvcure = function(formula1, formula2, df,
     se.psi = sqrt(diag(solve(-fit$Hes.psi)))
     se.phi = psi2phi(se.psi)
     ##
-    se.beta = sqrt(diag(solve(-fit$Hes.beta)))
+    se.beta = with(fit, sqrt(diag(solve(-Hes.beta+1e-6*diag(ncol(Hes.beta))))))
     if (nogamma){
         se.gamma = 0
     } else {
-        se.gamma = sqrt(diag(solve(-fit$Hes.gamma)))
+        se.gamma = with(fit, sqrt(diag(solve(-Hes.gamma+1e-6*diag(ncol(Hes.gamma))))))
     }
     ## The following line of code was there before, yielding misleading results !!
     ## se.gamma = ifelse(nogamma, 0, sqrt(diag(solve(-fit$Hes.gamma))))
