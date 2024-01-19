@@ -331,8 +331,8 @@ tvcure = function(formula1, formula2, df,
         names(gamma.0) = regr2.lab
     }
     ## ... for the penalty parameters in regression part
-    if ((J1 > 0) & is.null(lambda1.0)) lambda1.0 = rep(100,J1)
-    if ((J2 > 0) & is.null(lambda2.0)) lambda2.0 = rep(100,J2)
+    if ((J1 > 0) & is.null(lambda1.0)) lambda1.0 = rep(10,J1)
+    if ((J2 > 0) & is.null(lambda2.0)) lambda2.0 = rep(10,J2)
     ##
     ## Pre-evaluated IB-splines basis for F0(t)
     ## ----------------------------------------

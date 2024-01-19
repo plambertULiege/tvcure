@@ -38,7 +38,9 @@
 #'
 print.tvcure <- function(x,ci.level=.95,expEst=TRUE,digits=3,...){ ##,nrow=NULL,ncol=1,width=5,height=5){
     obj = x
-    cat("\nCall:\n",deparse(obj$call),"\n")
+    cat("\nCall:\n")
+    print(x$call)
+    ## cat("\nCall:\n",deparse(obj$call),"\n")
     cat("\n")
     ##
     cat(">> log(theta(x)) - Long-term survival (Quantum) <<\n")
