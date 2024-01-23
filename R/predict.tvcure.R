@@ -237,7 +237,7 @@ predict.tvcure <- function(x, df.new, ci.level=.95, ...){
     ans$hp = exp(ans$lhp[,c(1,3,4),drop=FALSE])
     ans$lHp = with(ans, cbind(est=log(Hp), se=se.lHp, low=log(Hp)-z*se.lHp, up=log(Hp)+z*se.lHp))
     ans$Hp = exp(ans$lHp[,c(1,3,4),drop=FALSE])
-    ans$Sp = exp(-ans$Hp)
+    ans$Sp = exp(-ans$Hp[,c(1,3,2)]) ; colnames(ans$Sp) = colnames(ans$Hp)[c(1,3,2)]
     ##
     return(ans)
 }
