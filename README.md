@@ -163,7 +163,7 @@ print(model)
     ## ------------------------------------------------------------------------
     ##  logEvid: -2002.59   Dev: 3161.93   AIC: 3194.52   BIC: 3257.523 
     ##  edf: 16.29  nobs: 50672  n: 500  d: 353
-    ##  Elapsed time: 2.7 seconds  (6 iterations)
+    ##  Elapsed time: 2.8 seconds  (6 iterations)
     ## ------------------------------------------------------------------------
 
 The estimated reference hazard $\mathrm{e}^{\beta_0}f_0(t)$ and the
@@ -211,13 +211,11 @@ of the follow-up:
 
 ``` r
 df1 = subset(df.raw, df.raw$id==1) ## Data for unit 1
-tail(df1, n=1) ## Data at the last observation time
+round(tail(df1, n=1),3) ## Data at the last observation time
 ```
 
-    ##     id time event   z1          z2        x1        x2   z3          z4
-    ## 275  1  275     0 -0.5 -0.08574682 0.6682187 0.1040038 -0.5 -0.05348258
-    ##            x3        x4
-    ## 275 0.6682187 0.3355297
+    ##     id time event   z1     z2    x1    x2   z3     z4    x3    x4
+    ## 275  1  275     0 -0.5 -0.086 0.668 0.104 -0.5 -0.053 0.668 0.336
 
 The estimated population survival function of a subject sharing the same
 covariate history can be computed and visualized,
