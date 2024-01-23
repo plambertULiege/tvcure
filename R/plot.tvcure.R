@@ -58,8 +58,8 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL, mar=c(4
     if (is.null(select)){
         n.plots = 2 + fhat$J1 + fhat$J2 ## Number of plots: f0, F0 + additive terms
     } else {
-        n.plots = 1
-        if (select == 0) n.plots = 2
+        n.plots = length(select)
+        if (all(select == 0)) n.plots = 2
     }
     if (pages > n.plots) pages = n.plots
     if (pages < 0) pages = 0
@@ -83,7 +83,7 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL, mar=c(4
         pages > 1 && dev.interactive())
         ask = TRUE
     else ask = FALSE
-    if (!is.null(select) && (select!=0)) {
+    if (!is.null(select) && (all(select!=0))) {
         ask = FALSE
     }
     if (ask) {
@@ -94,7 +94,7 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL, mar=c(4
     ## ---------------------
     if (is.null(xlim0)) xlim0 = attr(fhat$f0,"support")
     ## Plot only f0 if select=-1
-    if (!is.null(select) && (select==-1)){
+    if (!is.null(select) && (all(select==-1))){
         par(mar=mar)
         beta0 = x$fit$beta[1,1]
         curve(exp(beta0)*fhat$f0(x),
@@ -105,7 +105,7 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL, mar=c(4
               xlab="time",ylab=bquote(e^{beta[0]}*~f[0](t)), ...)
     }
     ## Plot both if select=0 or NULL
-    if (is.null(select) || (select==0)){
+    if (is.null(select) || (all(select==0))){
         par(mar=mar)
         beta0 = x$fit$beta[1,1]
         curve(exp(beta0)*fhat$f0(x),
@@ -132,7 +132,7 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL, mar=c(4
         if (!is.null(ylim1)) ylims = ylim1
         if (!is.null(xlim1)) xlims = xlim1
         for (j in 1:fhat$J1){
-            if ((is.null(select)) || (select == j)){
+            if ((is.null(select)) || (any(select == j))){
                 par(mar=mar)
                 xlab = names(fhat$f1.grid)[j]
                 ylab = bquote('f'[.(j)]*(.(xlab)))
@@ -146,7 +146,7 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL, mar=c(4
         if (!is.null(ylim2)) ylims = ylim2
         if (!is.null(xlim2)) xlims = xlim2
         for (j in 1:fhat$J2){
-            if ((is.null(select)) || (select == fhat$J1+j)){
+            if ((is.null(select)) || (any(select == fhat$J1+j))){
                 par(mar=mar)
                 xlab = names(fhat$f2.grid)[j]
                 ylab = bquote(tilde('f')[.(j)]*(.(xlab)))

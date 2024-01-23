@@ -30,7 +30,7 @@
 #'        ci.level=.95,
 #'        criterion=c("levidence","deviance","lpen","AIC","BIC","gradient"),
 #'        criterion.tol=1e-1, grad.tol=1e-2,
-#'        iterlim=50, iter.verbose=TRUE, verbose=FALSE)
+#'        iterlim=50, iter.verbose=FALSE, verbose=FALSE)
 #' @param formula1 A formula describing the linear predictor in the long-term (cure) survival (or quantum) submodel.
 #' @param formula2 A formula describing the linear predictor in the short-term (cure) survival (or timing) submodel.
 #' @param df A data frame for survival data in a counting process format. It should always contain at least the following entries:
@@ -83,7 +83,7 @@
 #' @param criterion.tol Maximum absolute difference between the successive values of the \code{criterion} values (when different from "gradient") to declare convergence. (Default: 1e-1).
 #' @param grad.tol Tolerance value to declare convergence based on gradient values in an optimization procedure (such as Newton-Raphson). (Default: 1e-2).
 #' @param iterlim Maximum number of iterations. (Default: 50).
-#' @param iter.verbose Logical indicating if the values of the convergence criterions should be printed after each iteration. (Default: TRUE).
+#' @param iter.verbose Logical indicating if the values of the convergence criterions should be printed after each iteration. (Default: FALSE).
 #' @param verbose Logical indicating if additional output based on gradients should be printed at the end of each iteration. (Default: FALSE).
 #'
 #' @return An object of type \code{\link{tvcure.object}}.
@@ -127,7 +127,7 @@ tvcure = function(formula1, formula2, df,
                   criterion=c("levidence","deviance","lpen","AIC","BIC","gradient"),
                   criterion.tol=1e-1,
                   grad.tol=1e-2,
-                  iterlim=50,iter.verbose=TRUE,verbose=FALSE){
+                  iterlim=50,iter.verbose=FALSE,verbose=FALSE){
     ##
     cl <- match.call()
     aa = a ; bb = b
