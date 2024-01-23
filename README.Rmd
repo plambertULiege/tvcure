@@ -8,6 +8,7 @@ knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(fig.path="man/figures/")
 ```
 
+## Introduction
 The _*tvcure*_ package enables to fit additive cure survival model with exogenous time-varying covariates (Lambert \& Kreyenfeld, 2023) [1,2].
 
 The starting point is the bounded cumulative hazard model (also name the *promotion time* model) (Tsodikov 1998) with population survival function
@@ -100,7 +101,7 @@ model = tvcure(~z1+z2+s(x1,ref=.75)+s(x2,ref=.5),
 plot(model, select=1:4, pages=1) ## The 4 additive terms in the model
 ```
 
-## Predictions
+### Predictions
 Predictions can be made for a given history of covariate values. Consider for example unit 1 for which no event was observed by the end of the follow-up:
 ```{r tvcure2a}
 df1 = subset(df.raw, df.raw$id==1) ## Data for unit 1
@@ -146,5 +147,6 @@ You should have received a copy of the GNU General Public License along with thi
 
 [7] Lambert, P. and Gressani, O. (2023). Penalty parameter selection and asymmetry corrections to Laplace approximations in Bayesian P-splines models. Statistical Modelling, 23(5-6): 409–423. [*doi:10.1177/1471082X231181173*](https://doi.org/10.1177/1471082X231181173)
 
-[8] Tsodikov, A. (1998) A proportional hazard model taking account of long-term survivors. Biometrics, 54, 1508–1516.
+[8] Tsodikov, A. (1998) A proportional hazard model taking account of long-term survivors. Biometrics, 54, 1508–1516. [*doi:10.2307/2533675*](https://doi.org/10.2307/2533675)
+
 

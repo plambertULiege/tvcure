@@ -1,6 +1,8 @@
 The *tvcure* R-package
 ================
 
+## Introduction
+
 The **tvcure** package enables to fit additive cure survival model with
 exogenous time-varying covariates (Lambert & Kreyenfeld, 2023) \[1,2\].
 
@@ -161,7 +163,7 @@ print(model)
     ## ------------------------------------------------------------------------
     ##  logEvid: -2002.59   Dev: 3161.93   AIC: 3194.52   BIC: 3257.523 
     ##  edf: 16.29  nobs: 50672  n: 500  d: 353
-    ##  Elapsed time: 2.8 seconds  (6 iterations)
+    ##  Elapsed time: 2.7 seconds  (6 iterations)
     ## ------------------------------------------------------------------------
 
 The estimated reference hazard $\mathrm{e}^{\beta_0}f_0(t)$ and the
@@ -201,7 +203,7 @@ plot(model, select=1:4, pages=1) ## The 4 additive terms in the model
 
 ![](man/figures/tvcure1c-1.png)<!-- -->
 
-## Predictions
+### Predictions
 
 Predictions can be made for a given history of covariate values.
 Consider for example unit 1 for which no event was observed by the end
@@ -301,3 +303,4 @@ P-splines models. Statistical Modelling, 23(5-6): 409–423.
 
 \[8\] Tsodikov, A. (1998) A proportional hazard model taking account of
 long-term survivors. Biometrics, 54, 1508–1516.
+[*doi:10.2307/2533675*](https://doi.org/10.2307/2533675)
