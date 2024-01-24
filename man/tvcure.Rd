@@ -16,7 +16,7 @@ tvcure(formula1, formula2, df,
        ci.level=.95,
        criterion=c("levidence","deviance","lpen","AIC","BIC","gradient"),
        criterion.tol=1e-1, grad.tol=1e-2,
-       iterlim=50, iter.verbose=TRUE, verbose=FALSE)
+       iterlim=50, iter.verbose=FALSE, verbose=FALSE)
 }
 \arguments{
 \item{formula1}{A formula describing the linear predictor in the long-term (cure) survival (or quantum) submodel.}
@@ -104,7 +104,7 @@ Baseline S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Baseline F0: \eqn{F(t|x)
 
 \item{iterlim}{Maximum number of iterations. (Default: 50).}
 
-\item{iter.verbose}{Logical indicating if the values of the convergence criterions should be printed after each iteration. (Default: TRUE).}
+\item{iter.verbose}{Logical indicating if the values of the convergence criterions should be printed after each iteration. (Default: FALSE).}
 
 \item{verbose}{Logical indicating if additional output based on gradients should be printed at the end of each iteration. (Default: FALSE).}
 }

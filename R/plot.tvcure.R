@@ -49,6 +49,7 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL, mar=c(4
                        xlim0=NULL, ylim0=NULL, xlim1=NULL, ylim1=NULL, xlim2=NULL, ylim2=NULL,
                        equal.ylims=TRUE,...){
     obj = x
+    add.grid = TRUE
     ## Compute additive term + envelope
     ## --------------------------------
     fhat = additive.tvcure(obj,ngrid=ngrid,ci.level=ci.level)
@@ -100,6 +101,7 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL, mar=c(4
         curve(exp(beta0)*fhat$f0(x),
               xlim=xlim0,ylim=ylim0,
               xlab="time",ylab=bquote(e^{beta[0]}*~f[0](t)), type="n",...)
+        grid(lwd=.5,lty=1)
         curve(exp(beta0)*fhat$f0(x),
               xlim=attr(fhat$f0,"support"),ylim=ylim0, add=TRUE,
               xlab="time",ylab=bquote(e^{beta[0]}*~f[0](t)), ...)
@@ -111,21 +113,30 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL, mar=c(4
         curve(exp(beta0)*fhat$f0(x),
               xlim=xlim0,ylim=ylim0,
               xlab="time",ylab=bquote(e^{beta[0]}*~f[0](t)), type="n",...)
+        grid(lwd=.5,lty=1)
         curve(exp(beta0)*fhat$f0(x),
               xlim=attr(fhat$f0,"support"),ylim=ylim0, add=TRUE,
               xlab="time",ylab=bquote(e^{beta[0]}*~f[0](t)), ...)
         ## with(fhat, curve(f0,
         ##                  xlim=attr(f0,"support"),xlab="time",ylab=bquote(e^{beta[0]}*~f[0](t))))
-        with(fhat, curve(F0, xlim=xlim0, type="n",
+        with(fhat, curve(F0, xlim=xlim0, type="n",las=1,
                          xlab="time",ylab=bquote(F[0](t))))
+        grid(lwd=.5,lty=1,ny=0)
+        abline(h=seq(0,1,by=.1),col="grey",lwd=.5)
         with(fhat, curve(F0, xlim=attr(F0,"support"), add=TRUE,
                          xlab="time",ylab=bquote(F[0](t))))
     }
     ## Plot Additive terms
     ## -------------------
-    plotAdd = function(x,y,...) matplot(x, y,type="l",
-                                        xlim=xlims,ylim=ylims,xlab=xlab,ylab=ylab,
-                                        lwd=c(2,1,1),lty=c(1,2,2),col=1, ...)
+    plotAdd = function(x,y,col=1,las=1,...) {
+        matplot(x, y,type="n",col=col,las=las,
+                xlim=xlims,ylim=ylims,xlab=xlab,ylab=ylab,
+                lwd=c(2,1,1),lty=c(1,2,2),...)
+        grid(lwd=.5,lty=1)
+        matplot(x, y,type="l",add=TRUE,col=col,las=las,,
+                xlim=xlims,ylim=ylims,xlab=xlab,ylab=ylab,
+                lwd=c(2,1,1),lty=c(1,2,2),...)
+    }
     if (fhat$J1 > 0){
         xlims = ylims = NULL
         if (equal.ylims) ylims =  range(lapply(fhat$f1.grid, function(x) range(x$y.mat)))

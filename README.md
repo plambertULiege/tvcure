@@ -223,8 +223,9 @@ covariate history can be computed and visualized,
 ``` r
 obj = predict(model, ci.level=0.95, df=df1)
 matplot(obj$Sp, ylim=c(0,1),
-        type="l", lty=c(1,2,2),col=1,
+        type="l", lty=c(1,2,2), col=1, las=1,
         xlab="time", ylab=bquote(S[p](t)))
+grid(lwd=.5,lty=1)
 ```
 
 ![](man/figures/tvcure2b-1.png)<!-- -->
