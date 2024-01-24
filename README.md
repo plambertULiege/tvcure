@@ -289,17 +289,27 @@ survival models using Bayesian P-splines. Computational Statistics and
 Data Analysis, 93, 270–284.
 [*doi:10.1016/j.csda.2014.05.009*](https://doi.org/10.1016/j.csda.2014.05.009)
 
-\[6\] Lambert, P. and Bremhorst, V. (2019). Estimation and
+\[6\] Gressani, O. and Lambert P. (2018). Fast Bayesian inference using
+Laplace approximations in a flexible promotion time cure model based on
+P-splines. Computational Statistics and Data Analysis, 124: 151-167.
+[*doi:10.1016/j.csda.2018.02.007*](https://doi.org/j.csda.2018.02.007)
+
+\[7\] Lambert, P. and Bremhorst, V. (2020). Inclusion of time-varying
+covariates in cure survival models with an application in fertility
+studies. Journal of the Royal Statistical Society: Series A, 183(1):
+333-354. [*doi:10.1111/rssa.12501*](https://doi.org/10.1111/rssa.12501)
+
+\[8\] Lambert, P. and Bremhorst, V. (2019). Estimation and
 identification issues in the promotion time cure model when the same
 covariates influence long- and short-term survival. Biometrical Journal,
 61(2): 275-279.
 [*doi:10.1002/bimj.201700250*](https://doi.org/10.1002/bimj.201700250)
 
-\[7\] Lambert, P. and Gressani, O. (2023). Penalty parameter selection
+\[9\] Lambert, P. and Gressani, O. (2023). Penalty parameter selection
 and asymmetry corrections to Laplace approximations in Bayesian
 P-splines models. Statistical Modelling, 23(5-6): 409–423.
 [*doi:10.1177/1471082X231181173*](https://doi.org/10.1177/1471082X231181173)
 
-\[8\] Tsodikov, A. (1998) A proportional hazard model taking account of
+\[10\] Tsodikov, A. (1998) A proportional hazard model taking account of
 long-term survivors. Biometrics, 54, 1508–1516.
 [*doi:10.2307/2533675*](https://doi.org/10.2307/2533675)
