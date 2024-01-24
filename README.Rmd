@@ -138,19 +138,19 @@ You should have received a copy of the GNU General Public License along with thi
 [2] Lambert, P. (2023) R-package *tvcure* - GitHub: [plambertULiege/tvcure](https://github.com/plambertULiege/tvcure)
 
 ### Complementary references
-[3] Bremhorst, V., Kreyenfeld M. and Lambert P. (2016). Fertility progression in Germany: an analysis using flexible nonparametric cure survival models. Demographic Research, 35: 505-534. [*doi:10.4054/DemRes.2016.35.18*](https://doi.org/10.4054/DemRes.2016.35.18)
+[3] Lambert, P. and Gressani, O. (2023). Penalty parameter selection and asymmetry corrections to Laplace approximations in Bayesian P-splines models. Statistical Modelling, 23(5-6): 409–423. [*doi:10.1177/1471082X231181173*](https://doi.org/10.1177/1471082X231181173)
 
-[4] Bremhorst, V., Kreyenfeld M. and Lambert P. (2019). Nonparametric double additive cure survival models: an application to the estimation of the nonlinear effect of age at first parenthood on fertility progression. Statistical Modelling, 19(3): 248-275.  [*doi:10.1177/1471082X18784685*](https://doi.org/10.1177/1471082X18784685)
+[4] Lambert, P. and Bremhorst, V. (2020). Inclusion of time-varying covariates in cure survival models with an application in fertility studies. Journal of the Royal Statistical Society: Series A, 183(1): 333-354. [*doi:10.1111/rssa.12501*](https://doi.org/10.1111/rssa.12501)
 
-[5] Bremhorst, V. and Lambert, P. (2016). Flexible estimation in cure survival models using Bayesian P-splines. Computational Statistics and Data Analysis, 93, 270–284. [*doi:10.1016/j.csda.2014.05.009*](https://doi.org/10.1016/j.csda.2014.05.009)
+[5] Lambert, P. and Bremhorst, V. (2019). Estimation and identification issues in the promotion time cure model when the same covariates influence long- and short-term survival. Biometrical Journal, 61(2): 275-279. [*doi:10.1002/bimj.201700250*](https://doi.org/10.1002/bimj.201700250)
 
 [6] Gressani, O. and Lambert P. (2018). Fast Bayesian inference using Laplace approximations in a flexible promotion time cure model based on P-splines. Computational Statistics and Data Analysis, 124: 151-167. [*doi:10.1016/j.csda.2018.02.007*](https://doi.org/j.csda.2018.02.007)
 
-[7] Lambert, P. and Bremhorst, V. (2020). Inclusion of time-varying covariates in cure survival models with an application in fertility studies. Journal of the Royal Statistical Society: Series A, 183(1): 333-354. [*doi:10.1111/rssa.12501*](https://doi.org/10.1111/rssa.12501)
+[7] Bremhorst, V., Kreyenfeld M. and Lambert P. (2019). Nonparametric double additive cure survival models: an application to the estimation of the nonlinear effect of age at first parenthood on fertility progression. Statistical Modelling, 19(3): 248-275.  [*doi:10.1177/1471082X18784685*](https://doi.org/10.1177/1471082X18784685)
 
-[8] Lambert, P. and Bremhorst, V. (2019). Estimation and identification issues in the promotion time cure model when the same covariates influence long- and short-term survival. Biometrical Journal, 61(2): 275-279. [*doi:10.1002/bimj.201700250*](https://doi.org/10.1002/bimj.201700250)
+[8] Bremhorst, V., Kreyenfeld M. and Lambert P. (2016). Fertility progression in Germany: an analysis using flexible nonparametric cure survival models. Demographic Research, 35: 505-534. [*doi:10.4054/DemRes.2016.35.18*](https://doi.org/10.4054/DemRes.2016.35.18)
 
-[9] Lambert, P. and Gressani, O. (2023). Penalty parameter selection and asymmetry corrections to Laplace approximations in Bayesian P-splines models. Statistical Modelling, 23(5-6): 409–423. [*doi:10.1177/1471082X231181173*](https://doi.org/10.1177/1471082X231181173)
+[9] Bremhorst, V. and Lambert, P. (2016). Flexible estimation in cure survival models using Bayesian P-splines. Computational Statistics and Data Analysis, 93, 270–284. [*doi:10.1016/j.csda.2014.05.009*](https://doi.org/10.1016/j.csda.2014.05.009)
 
 [10] Tsodikov, A. (1998) A proportional hazard model taking account of long-term survivors. Biometrics, 54, 1508–1516. [*doi:10.2307/2533675*](https://doi.org/10.2307/2533675)
 
