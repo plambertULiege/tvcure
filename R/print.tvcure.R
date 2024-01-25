@@ -112,8 +112,8 @@ print.tvcure <- function(x,ci.level=.95,expEst=TRUE,digits=3,...){ ##,nrow=NULL,
         "\n")
     cat(" edf: ",round(obj$fit$ED.tot,2),
         "  nobs: ",obj$fit$nobs,
-        "  n: ",obj$fit$n,
-        "  d: ",obj$fit$d,
+        "  n: ",obj$fit$n," (units)",
+        "  d: ",obj$fit$d," (events)",
         "\n",sep="")
     cat(" Elapsed time: ",round(obj$fit$elapsed.time,1)," seconds  (",obj$fit$iter," iterations)\n",sep="")
     cat("------------------------------------------------------------------------\n")
