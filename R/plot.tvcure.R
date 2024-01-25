@@ -2,7 +2,8 @@
 #' @description Visualization of the estimated additive terms and of the reference (cumulative) hazard function in a tvcure object.
 #'
 #' @usage \method{plot}{tvcure}(x, ngrid=300, ci.level=.95, pages=0, select=NULL,
-#'                              fill=TRUE, mar=c(4,5,1,1), xlim0=NULL, ylim0=NULL,
+#'                              fill=TRUE, pointwise=TRUE, mar=c(4,5,1,1),
+#'                              xlim0=NULL, ylim0=NULL,
 #'                              xlim1=NULL, ylim1=NULL, xlim2=NULL, ylim2=NULL,
 #'                              equal.ylims=TRUE,...)
 #'
@@ -12,6 +13,7 @@
 #' @param pages The number of pages over which to spread the output. For example, if pages=1 then all terms will be plotted on one page with the layout performed automatically. Set to 0 to have the routine leave all graphics settings as they are. (Default 0).
 #' @param select Allows the plot for a single model term to be selected for printing. e.g. if you just want the plot for the second smooth term set select=2. The plot of the reference hazard \eqn{f_0(t)} and cumulative hazard \eqn{F_0(t)} functions is provided when select=0. When select=-1, only the reference hazard is plotted.(Default: NULL).
 #' @param fill Logical indicating whether credible regions should be greyed out. (Default: TRUE).
+#' @param pointwise Logical indicating whether only pointwise credible intervals should be plotted for additive terms. When FALSE, simultaneous credible regions are also provided. (Default: TRUE).
 #' @param mar A numerical vector of the form c(bottom, left, top, right) which gives the number of lines of margin to be specified on the four sides of the plot. (Default: c(4,5,1,1)).
 #' @param xlim0 Vector of length 2 specifying x-axis limits when plotting the estimated reference hazard function \eqn{\exp(\beta_0)f_0(t)}.
 #' @param ylim0 Vector of length 2 specifying y-axis limits when plotting the estimated reference hazard function \eqn{\exp(\beta_0)f_0(t)}.
@@ -47,7 +49,7 @@
 #' @export
 #'
 plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL,
-                       fill=TRUE, mar=c(4,5,1,1),
+                       fill=TRUE, pointwise=TRUE, mar=c(4,5,1,1),
                        xlim0=NULL, ylim0=NULL, xlim1=NULL, ylim1=NULL, xlim2=NULL, ylim2=NULL,
                        equal.ylims=TRUE,...){
     obj = x
@@ -130,24 +132,40 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL,
     }
     ## Plot Additive terms
     ## -------------------
-    plotAdd = function(x,y,col=1,las=1,...) {
+    plotAdd = function(x,y,y2=NULL,col=1,colfill=c("#CCCCCC80","#E5E5E580"),las=1,...) {
         matplot(x, y,type="n",col=col,las=las,
                 xlim=xlims,ylim=ylims,xlab=xlab,ylab=ylab,
                 lwd=c(2,1,1),lty=c(1,2,2),...)
         grid(lwd=.5,lty=1)
         if (!fill){
+            if (!is.null(y2)){
+                matplot(x,y2,type="l",add=TRUE,col="grey",las=las,
+                        xlim=xlims,ylim=ylims,xlab=xlab,ylab=ylab,
+                        lwd=c(2,1,1),lty=c(1,3,3),...)
+            }
             matplot(x,y,type="l",add=TRUE,col=col,las=las,
                     xlim=xlims,ylim=ylims,xlab=xlab,ylab=ylab,
                     lwd=c(2,1,1),lty=c(1,2,2),...)
         } else {
-            plotRegion(x,y,add=TRUE,col=col,las=las,
-                    xlim=xlims,ylim=ylims,xlab=xlab,ylab=ylab,
-                    lwd=2,...)
+            if (!is.null(y2)){
+                plotRegion(x,y2,add=TRUE,col=col,colfill=colfill[2],las=las,
+                           xlim=xlims,ylim=ylims,
+                           xlab=xlab,ylab=ylab,lwd=2,...)
+            }
+            plotRegion(x,y,add=TRUE,col=col,colfill=colfill[1],las=las,
+                       xlim=xlims,ylim=ylims,
+                       xlab=xlab,ylab=ylab,lwd=2,...)
         }
     }
     if (fhat$J1 > 0){
         xlims = ylims = NULL
-        if (equal.ylims) ylims =  range(lapply(fhat$f1.grid, function(x) range(x$y.mat)))
+        if (equal.ylims){
+            if (pointwise){
+                ylims =  range(lapply(fhat$f1.grid, function(x) range(x$y.mat)))
+            } else {
+                ylims =  range(lapply(fhat$f1.grid, function(x) range(x$y.mat2)))
+            }
+        }
         if (!is.null(ylim1)) ylims = ylim1
         if (!is.null(xlim1)) xlims = xlim1
         for (j in 1:fhat$J1){
@@ -155,13 +173,23 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL,
                 par(mar=mar)
                 xlab = names(fhat$f1.grid)[j]
                 ylab = bquote('f'[.(j)]*(.(xlab)))
-                with(fhat$f1.grid[[j]], plotAdd(x, y.mat, ...))
+                if (!pointwise) {
+                    with(fhat$f1.grid[[j]], plotAdd(x,y.mat,y.mat2,...))
+                } else {
+                    with(fhat$f1.grid[[j]], plotAdd(x,y.mat,...))
+                }
             }
         }
     }
     if (fhat$J2 > 0){
         xlims = ylims = NULL
-        if (equal.ylims) ylims =  range(lapply(fhat$f2.grid, function(x) range(x$y.mat)))
+        if (equal.ylims){
+            if (pointwise){
+                ylims =  range(lapply(fhat$f2.grid, function(x) range(x$y.mat)))
+            } else {
+                ylims =  range(lapply(fhat$f2.grid, function(x) range(x$y.mat2)))
+            }
+        }
         if (!is.null(ylim2)) ylims = ylim2
         if (!is.null(xlim2)) xlims = xlim2
         for (j in 1:fhat$J2){
@@ -169,7 +197,11 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL,
                 par(mar=mar)
                 xlab = names(fhat$f2.grid)[j]
                 ylab = bquote(tilde('f')[.(j)]*(.(xlab)))
-                with(fhat$f2.grid[[j]], plotAdd(x, y.mat, ...))
+                if (!pointwise) {
+                    with(fhat$f2.grid[[j]], plotAdd(x,y.mat,y.mat2,...))
+                } else {
+                    with(fhat$f2.grid[[j]], plotAdd(x,y.mat,...))
+                }
             }
         }
     }

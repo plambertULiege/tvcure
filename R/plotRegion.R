@@ -1,13 +1,14 @@
 #' Generic function to plot a shaded region around values of a scalar function.
 #' @usage plotRegion(x, mat,
 #'            add=FALSE,xlim=range(x),ylim=range(mat),
-#'            lwd=2,xlab="",ylab="",main="",...)
+#'            colfill="#D9D9D980",lwd=2,xlab="",ylab="",main="",...)
 
 #' @param x n-vector with a grid of x values where the scalar function f(x) is evaluated.
 #' @param mat (n x 3)-matrix containing on its ith row, the function value at x[i] and the bounds of an interval containing it, (f(x[i]), f.low(x[i]), f.up(x[i])).
 #' @param add logical indicating if the shaded region should be superposed to an existing plot.
 #' @param xlim x-limits. (Default: range of x).
 #' @param ylim y-limits. (Default: range of mat).
+#' @param colfill color used for filling the shaded region. (Default: "#D9D9D980").
 #' @param lwd line width to plot (x,f(x)). (Default: 2).
 #' @param xlab x-label. (Default: none).
 #' @param ylab y-label. (Default: none).
@@ -39,11 +40,12 @@
 #' with(obj$f1.grid$x1, plotRegion(x=x,mat=y.mat,xlab="x1",ylab="f(x1)"))
 #' with(obj$f1.grid$x2, plotRegion(x=x,mat=y.mat,xlab="x2",ylab="f(x2)"))
 plotRegion = function(x,mat,add=FALSE,xlim=range(x),ylim=range(mat),
-                      lwd=2,xlab="",ylab="",main="",...){
+                      colfill="#D9D9D980",lwd=2,xlab="",ylab="",main="",...){
   f = mat[,1] ; f.low = mat[,2] ; f.up = mat[,3]
   if (add==FALSE) plot(x,f,type="n",ylim=ylim,xlim=xlim,
                        lwd=lwd,xlab=xlab,ylab=ylab,main=main,...)
-  polygon(c(x,rev(x)),c(f.low,rev(f.up)),col= "#D9D9D980",border=F)
+  polygon(c(x,rev(x)),c(f.low,rev(f.up)),col=colfill,border=F)
   ## adjustcolor("grey85", alpha.f=0.5): "#D9D9D980"
+  ## adjustcolor("grey90", alpha.f=0.5): "#E5E5E580"
   lines(x,f,lwd=lwd)
 }

@@ -24,9 +24,10 @@ A list with following elements:
 \item{\code{additive.lab1} : \verb{ }}{labels of the additive terms in the long-term term (or quantum) submodel.}
 \item{\code{K1} : \verb{ }}{number of P-spline parameters per additive term in the long-term term (or quantum) submodel.}
 \item{\code{knots1} : \verb{ }}{list of length J1 containing the knots of the additive term in the long-term term (or quantum) submodel.}
-\item{\code{f1.grid} : \verb{ }}{list of length J1 containing for each additive term in the long-term term (or quantum) submodel, a list of length 2 with elements <x> and <y.mat>.
+\item{\code{f1.grid} : \verb{ }}{list of length J1 containing for each additive term in the long-term term (or quantum) submodel, a list of length 3 with elements <x>, <y.mat> and <y.mat2>.
 Element <x> is a vector of \code{ngrid} equidistant values covering the range of values for the covariate ;
-<y.mat> is (ngrid x 3) matrix containing in column 1 the estimated values of the additive term at <x> and the bounds of the credible interval for it in the other 2 columns.}
+<y.mat> is (ngrid x 3) matrix containing in column 1 the estimated values of the additive term at <x> and the bounds of the pointwise credible interval for it in the other 2 columns.
+<y.mat2> is (ngrid x 3) matrix containing in column 1 the estimated values of the additive term at <x> and the bounds of the simultaneous credible region for it in the other 2 columns.}
 \item{\code{f1} : \verb{ }}{list of length J1 containing the estimated function of the corresponding additive term in the long-term term (or quantum) submodel.}
 \item{\code{f1.se} : \verb{ }}{list of length J1 containing the estimated standard error function of the corresponding additive term in the long-term term (or quantum) submodel.}
 }

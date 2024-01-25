@@ -6,7 +6,7 @@
 \usage{
 plotRegion(x, mat,
            add=FALSE,xlim=range(x),ylim=range(mat),
-           lwd=2,xlab="",ylab="",main="",...)
+           colfill="#D9D9D980",lwd=2,xlab="",ylab="",main="",...)
 }
 \arguments{
 \item{x}{n-vector with a grid of x values where the scalar function f(x) is evaluated.}
@@ -18,6 +18,8 @@ plotRegion(x, mat,
 \item{xlim}{x-limits. (Default: range of x).}
 
 \item{ylim}{y-limits. (Default: range of mat).}
+
+\item{colfill}{color used for filling the shaded region. (Default: "#D9D9D980").}
 
 \item{lwd}{line width to plot (x,f(x)). (Default: 2).}
 

@@ -14,9 +14,10 @@
 #' \item{\code{additive.lab1} : \verb{ }}{labels of the additive terms in the long-term term (or quantum) submodel.}
 #' \item{\code{K1} : \verb{ }}{number of P-spline parameters per additive term in the long-term term (or quantum) submodel.}
 #' \item{\code{knots1} : \verb{ }}{list of length J1 containing the knots of the additive term in the long-term term (or quantum) submodel.}
-#' \item{\code{f1.grid} : \verb{ }}{list of length J1 containing for each additive term in the long-term term (or quantum) submodel, a list of length 2 with elements <x> and <y.mat>.
+#' \item{\code{f1.grid} : \verb{ }}{list of length J1 containing for each additive term in the long-term term (or quantum) submodel, a list of length 3 with elements <x>, <y.mat> and <y.mat2>.
 #' Element <x> is a vector of \code{ngrid} equidistant values covering the range of values for the covariate ;
-#' <y.mat> is (ngrid x 3) matrix containing in column 1 the estimated values of the additive term at <x> and the bounds of the credible interval for it in the other 2 columns.}
+#' <y.mat> is (ngrid x 3) matrix containing in column 1 the estimated values of the additive term at <x> and the bounds of the pointwise credible interval for it in the other 2 columns.
+#' <y.mat2> is (ngrid x 3) matrix containing in column 1 the estimated values of the additive term at <x> and the bounds of the simultaneous credible region for it in the other 2 columns.}
 #' \item{\code{f1} : \verb{ }}{list of length J1 containing the estimated function of the corresponding additive term in the long-term term (or quantum) submodel.}
 #' \item{\code{f1.se} : \verb{ }}{list of length J1 containing the estimated standard error function of the corresponding additive term in the long-term term (or quantum) submodel.}
 #' }
@@ -92,6 +93,7 @@ additive.tvcure <- function(obj.tvcure,ngrid=300, ci.level=.95){
         ans$K1=K1 ; ans$knots1 = obj$regr1$knots.x
         Sigma = with(obj$fit, solve(-Hes.beta+1e-6*diag(ncol(Hes.beta)))) ## Added in 2023.10.11
         ## Sigma = Sigma.regr[1:nbeta,1:nbeta] ## Removed in 2023.10.11
+        ED = obj$fit$ED1[,1]
         f.grid = f = f.se = list()
         ##
         for (j in 1:J1){
@@ -104,11 +106,17 @@ additive.tvcure <- function(obj.tvcure,ngrid=300, ci.level=.95){
             cB = centeredBasis.gen(x.grid,knots=knots.x,cm=cm,pen.order)$B ## Centered B-spline basis
             y.grid = c(cB %*% beta.j)
             y.grid.se = sqrt(diag(cB %*% (Sigma[idx,idx]%*%t(cB))))
+            ## Pointwise credible region
             ylow = y.grid - z.alpha*y.grid.se
             yup  = y.grid + z.alpha*y.grid.se
+            ## Simultaneous credible region
+            c2 = sqrt(qchisq(ci.level,ED[j]))
+            ylow2 = y.grid - c2 * y.grid.se
+            yup2  = y.grid + c2 * y.grid.se
             ##
             f.grid[[add.lab[j]]]$x = x.grid
             f.grid[[add.lab[j]]]$y.mat = cbind(est=y.grid,low=ylow,up=yup)
+            f.grid[[add.lab[j]]]$y.mat2 = cbind(est=y.grid,low=ylow2,up=yup2)
             ##
             f[[add.lab[j]]]    = splinefun(x.grid, y.grid)
             f.se[[add.lab[j]]] = splinefun(x.grid, y.grid.se)
@@ -128,7 +136,8 @@ additive.tvcure <- function(obj.tvcure,ngrid=300, ci.level=.95){
         ans$K2=K2 ; ans$knots2 = obj$regr2$knots.x
         Sigma = with(obj$fit, solve(-Hes.gamma+1e-6*diag(ncol(Hes.gamma)))) ## Added in 2023.10.11
         ## Sigma = Sigma.regr[nbeta + (1:ngamma),nbeta + (1:ngamma)] ## Removed in 2023.10.11
-        f.grid = f = f.se = list()
+        ED = obj$fit$ED2[,1]
+        f.grid = f.se = list()
         for (j in 1:J2){
             idx = nfixed2 + (j-1)*K2 + (1:K2)
             gamma.j = obj$fit$gamma[idx,"est"] ## Centered B-splines coefs for jth additive term
@@ -139,11 +148,17 @@ additive.tvcure <- function(obj.tvcure,ngrid=300, ci.level=.95){
             cB = centeredBasis.gen(x.grid,knots=knots.x,cm=cm,pen.order)$B ## Centered B-spline basis
             y.grid = c(cB %*% gamma.j)
             y.grid.se = sqrt(diag(cB %*% (Sigma[idx,idx]%*%t(cB))))
+            ## Pointwise credible region
             ylow = y.grid - z.alpha*y.grid.se
             yup  = y.grid + z.alpha*y.grid.se
+            ## Simultaneous credible region
+            c2 = sqrt(qchisq(ci.level,ED[j]))
+            ylow2 = y.grid - c2 * y.grid.se
+            yup2  = y.grid + c2 * y.grid.se
             ##
             f.grid[[add.lab[j]]]$x = x.grid
             f.grid[[add.lab[j]]]$y.mat = cbind(est=y.grid,low=ylow,up=yup)
+            f.grid[[add.lab[j]]]$y.mat2 = cbind(est=y.grid,low=ylow2,up=yup2)
             ##
             f[[add.lab[j]]]    = splinefun(x.grid, y.grid)
             f.se[[add.lab[j]]] = splinefun(x.grid, y.grid.se)

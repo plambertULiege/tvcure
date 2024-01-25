@@ -14,7 +14,7 @@ export(testStat)
 importFrom("grDevices", "dev.interactive", "devAskNewPage")
 importFrom("graphics", "abline", "curve", "grid", "lines", "matplot", "par", "polygon")
 importFrom("stats", "dgamma", "na.omit", "nlm", "nlminb", "pchisq",
-           "pf", "printCoefmat", "qnorm", "quantile", "sd",
+           "pf", "printCoefmat", "qchisq", "qnorm", "quantile", "sd",
            "splinefun", "model.matrix", "model.frame",
            "dweibull", "pweibull", "rbinom", "rexp", "rnorm", "rpois", "runif",
            "AIC","BIC")
