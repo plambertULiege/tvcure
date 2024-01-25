@@ -135,7 +135,7 @@ You should have received a copy of the GNU General Public License along with thi
 ## References
 [1] Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model with application to fertility. Journal of the Royal Statistical Society, Series A, under review. Preprint: [*arXiv:2302.00331*](https://arxiv.org/abs/2302.00331)
 
-[2] Lambert, P. (2023) R-package *tvcure* - GitHub: [plambertULiege/tvcure](https://github.com/plambertULiege/tvcure)
+[2] Lambert, P. (2024). R-package *tvcure* - Version `r packageVersion("tvcure")`. GitHub: [plambertULiege/tvcure](https://github.com/plambertULiege/tvcure)
 
 ### Complementary references
 [3] Lambert, P. and Gressani, O. (2023). Penalty parameter selection and asymmetry corrections to Laplace approximations in Bayesian P-splines models. Statistical Modelling, 23(5-6): 409–423. [*doi:10.1177/1471082X231181173*](https://doi.org/10.1177/1471082X231181173)

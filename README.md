@@ -163,7 +163,7 @@ print(model)
     ## ------------------------------------------------------------------------
     ##  logEvid: -2002.59   Dev: 3161.93   AIC: 3194.52   BIC: 3257.523 
     ##  edf: 16.29  nobs: 50672  n: 500  d: 353
-    ##  Elapsed time: 2.6 seconds  (6 iterations)
+    ##  Elapsed time: 2.8 seconds  (6 iterations)
     ## ------------------------------------------------------------------------
 
 The estimated reference hazard $\mathrm{e}^{\beta_0}f_0(t)$ and the
@@ -268,7 +268,7 @@ covariates in double additive cure survival model with application to
 fertility. Journal of the Royal Statistical Society, Series A, under
 review. Preprint: [*arXiv:2302.00331*](https://arxiv.org/abs/2302.00331)
 
-\[2\] Lambert, P. (2023) R-package *tvcure* - GitHub:
+\[2\] Lambert, P. (2024). R-package *tvcure* - Version 0.6.2. GitHub:
 [plambertULiege/tvcure](https://github.com/plambertULiege/tvcure)
 
 ### Complementary references
