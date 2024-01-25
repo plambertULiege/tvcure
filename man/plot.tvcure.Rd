@@ -5,7 +5,7 @@
 \title{Plot visual information related to a tvcure object.}
 \usage{
 \method{plot}{tvcure}(x, ngrid=300, ci.level=.95, pages=0, select=NULL,
-                             mar=c(4,5,1,1), xlim0=NULL, ylim0=NULL,
+                             fill=TRUE, mar=c(4,5,1,1), xlim0=NULL, ylim0=NULL,
                              xlim1=NULL, ylim1=NULL, xlim2=NULL, ylim2=NULL,
                              equal.ylims=TRUE,...)
 }
@@ -19,6 +19,8 @@
 \item{pages}{The number of pages over which to spread the output. For example, if pages=1 then all terms will be plotted on one page with the layout performed automatically. Set to 0 to have the routine leave all graphics settings as they are. (Default 0).}
 
 \item{select}{Allows the plot for a single model term to be selected for printing. e.g. if you just want the plot for the second smooth term set select=2. The plot of the reference hazard \eqn{f_0(t)} and cumulative hazard \eqn{F_0(t)} functions is provided when select=0. When select=-1, only the reference hazard is plotted.(Default: NULL).}
+
+\item{fill}{Logical indicating whether credible regions should be greyed out. (Default: TRUE).}
 
 \item{mar}{A numerical vector of the form c(bottom, left, top, right) which gives the number of lines of margin to be specified on the four sides of the plot. (Default: c(4,5,1,1)).}
 

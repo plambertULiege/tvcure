@@ -2,7 +2,7 @@
 #' @description Visualization of the estimated additive terms and of the reference (cumulative) hazard function in a tvcure object.
 #'
 #' @usage \method{plot}{tvcure}(x, ngrid=300, ci.level=.95, pages=0, select=NULL,
-#'                              mar=c(4,5,1,1), xlim0=NULL, ylim0=NULL,
+#'                              fill=TRUE, mar=c(4,5,1,1), xlim0=NULL, ylim0=NULL,
 #'                              xlim1=NULL, ylim1=NULL, xlim2=NULL, ylim2=NULL,
 #'                              equal.ylims=TRUE,...)
 #'
@@ -11,6 +11,7 @@
 #' @param ci.level (optional) nominal level for the plotted pointwise credible intervals. (Default: 0.95).
 #' @param pages The number of pages over which to spread the output. For example, if pages=1 then all terms will be plotted on one page with the layout performed automatically. Set to 0 to have the routine leave all graphics settings as they are. (Default 0).
 #' @param select Allows the plot for a single model term to be selected for printing. e.g. if you just want the plot for the second smooth term set select=2. The plot of the reference hazard \eqn{f_0(t)} and cumulative hazard \eqn{F_0(t)} functions is provided when select=0. When select=-1, only the reference hazard is plotted.(Default: NULL).
+#' @param fill Logical indicating whether credible regions should be greyed out. (Default: TRUE).
 #' @param mar A numerical vector of the form c(bottom, left, top, right) which gives the number of lines of margin to be specified on the four sides of the plot. (Default: c(4,5,1,1)).
 #' @param xlim0 Vector of length 2 specifying x-axis limits when plotting the estimated reference hazard function \eqn{\exp(\beta_0)f_0(t)}.
 #' @param ylim0 Vector of length 2 specifying y-axis limits when plotting the estimated reference hazard function \eqn{\exp(\beta_0)f_0(t)}.
@@ -45,7 +46,8 @@
 #'
 #' @export
 #'
-plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL, mar=c(4,5,1,1),
+plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL,
+                       fill=TRUE, mar=c(4,5,1,1),
                        xlim0=NULL, ylim0=NULL, xlim1=NULL, ylim1=NULL, xlim2=NULL, ylim2=NULL,
                        equal.ylims=TRUE,...){
     obj = x
@@ -133,9 +135,15 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL, mar=c(4
                 xlim=xlims,ylim=ylims,xlab=xlab,ylab=ylab,
                 lwd=c(2,1,1),lty=c(1,2,2),...)
         grid(lwd=.5,lty=1)
-        matplot(x, y,type="l",add=TRUE,col=col,las=las,,
-                xlim=xlims,ylim=ylims,xlab=xlab,ylab=ylab,
-                lwd=c(2,1,1),lty=c(1,2,2),...)
+        if (!fill){
+            matplot(x,y,type="l",add=TRUE,col=col,las=las,
+                    xlim=xlims,ylim=ylims,xlab=xlab,ylab=ylab,
+                    lwd=c(2,1,1),lty=c(1,2,2),...)
+        } else {
+            plotRegion(x,y,add=TRUE,col=col,las=las,
+                    xlim=xlims,ylim=ylims,xlab=xlab,ylab=ylab,
+                    lwd=2,...)
+        }
     }
     if (fhat$J1 > 0){
         xlims = ylims = NULL

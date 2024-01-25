@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{A \code{\link{tvcure.object}}.}
 
-\item{df.new}{An optional data frame in which to look for the 'id' (distinguishing the different units), 'time' and covariate values for which 'predictions' should be made. Time values for a given 'id' should be a series of consecutive integers starting with 1. If \code{df.new} is NULL, then predictions are assumed to concern a single unit with consecutive time values starting with 1.}
+\item{df.new}{A data frame in which to look for the 'id' (distinguishing the different units), 'time' and covariate values for which 'predictions' should be made. Time values for a given 'id' should be a series of consecutive integers starting with 1. If \code{df.new$id} does not exist, then predictions are assumed to concern a single unit with consecutive time values starting with 1.}
 
 \item{ci.level}{Credible level for the reported estimates. (Default: 0.95).}
 

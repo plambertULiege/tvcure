@@ -4,8 +4,8 @@
 \alias{plotRegion}
 \title{Generic function to plot a shaded region around values of a scalar function.}
 \usage{
-plotRegion(x, mat, 
-           add=FALSE,xlim=range(x),ylim=range(mat), 
+plotRegion(x, mat,
+           add=FALSE,xlim=range(x),ylim=range(mat),
            lwd=2,xlab="",ylab="",main="",...)
 }
 \arguments{
@@ -38,7 +38,7 @@ Generic function to plot a shaded region around values of a scalar function.
 \examples{
 require(tvcure)
 ## Simulated data generation
-beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2) 
+beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2)
 df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
                           RC.dist="exponential",mu.cens=550)$df.raw
 ## TVcure model fitting
