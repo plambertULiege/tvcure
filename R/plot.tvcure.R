@@ -178,6 +178,7 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL,
                 } else {
                     with(fhat$f1.grid[[j]], plotAdd(x,y.mat,...))
                 }
+                if (obj$regr1$has.ref[j]) rug(obj$regr1$ref.values[j],col=1)
             }
         }
     }
@@ -202,6 +203,7 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL,
                 } else {
                     with(fhat$f2.grid[[j]], plotAdd(x,y.mat,...))
                 }
+                if (obj$regr2$has.ref[j]) rug(obj$regr2$ref.values[j],col=1)
             }
         }
     }
