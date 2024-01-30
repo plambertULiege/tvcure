@@ -19,19 +19,19 @@
 #' @examples
 #' require(tvcure)
 #' ## Simulated data generation
-#' beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2) 
-#' df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
-#'                           RC.dist="exponential",mu.cens=550)$df.raw
+#' beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2)
+#' data = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
+#'                           RC.dist="exponential",mu.cens=550)$rawdata
 #' ## TVcure model fitting
 #' tau.0 = 2.7 ; lambda1.0 = c(40,15) ; lambda2.0 = c(25,70) ## Optional
-#' model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), df=df.raw,
+#' model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), data=data,
 #'                tau.0=tau.0, lambda1.0=lambda1.0, lambda2.0=lambda2.0)
 #' BIC(model)
 #'
 #' @seealso \code{\link{tvcure}}, \code{\link{tvcure.object}}, \code{\link{AIC.tvcure}}, \code{\link{levidence}}
 #'
 #' @export
-#' 
+#'
 BIC.tvcure <- function(object, ...){
     obj = object
     lls = function(obj) return(ans = c(dev=obj$fit$dev, edf=obj$fit$ED.tot, d=obj$fit$d))

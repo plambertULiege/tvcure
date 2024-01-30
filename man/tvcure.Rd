@@ -4,7 +4,7 @@
 \alias{tvcure}
 \title{Fit of a tvcure model.}
 \usage{
-tvcure(formula1, formula2, df,
+tvcure(formula1, formula2, data,
        baseline=c("S0","F0"), K0=20, pen.order0=2,
        K1=10, pen.order1=2, K2=10, pen.order2=2,
        phi.0=NULL, beta.0=NULL, gamma.0=NULL,
@@ -23,7 +23,7 @@ tvcure(formula1, formula2, df,
 
 \item{formula2}{A formula describing the linear predictor in the short-term (cure) survival (or timing) submodel.}
 
-\item{df}{A data frame for survival data in a counting process format. It should always contain at least the following entries:
+\item{data}{A data frame with survival data in a counting process format. It should always contain at least the following entries:
 \itemize{
 \item{\code{id} : \verb{ }}{the <id> of the unit associated to the data in a given line in the data frame.}
 \item{\code{time} : \verb{ }}{the integer time at which the observations are reported. For a given unit, it should be a sequence of CONSECUTIVE integers starting at 1 for the first observation.}
@@ -118,11 +118,11 @@ Fit of a double additive cure survival model with exogenous time-varying covaria
 require(tvcure)
 ## Simulated data generation
 beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2)
-df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
-                          RC.dist="exponential",mu.cens=550)$df.raw
+data = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
+                          RC.dist="exponential",mu.cens=550)$rawdata
 ## TVcure model fitting
 tau.0 = 2.7 ; lambda1.0 = c(40,15) ; lambda2.0 = c(25,70) ## Optional
-model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), df=df.raw,
+model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), data=data,
                tau.0=tau.0, lambda1.0=lambda1.0, lambda2.0=lambda2.0)
 print(model)
 plot(model, pages=1)

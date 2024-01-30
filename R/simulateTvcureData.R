@@ -1,5 +1,5 @@
 #' Simulation of survival data with a cure fraction and time-varying covariates.
-#' 
+#'
 #' @description
 #' Simulation of cure survival data in a counting process format with time-varying covariates.
 #' The population hazard at time t  underlying the tvcure model is, for given covariate values,
@@ -10,16 +10,16 @@
 #'  \eta_F(\tilde{{\bf v}}(t)) = \gamma_1 z_3(t) +  \gamma_2 z_4 +  \tilde{f}_1(x_3(t)) + \tilde{f}_2(x_4(t))}
 #' where \eqn{{\bf v}(t)=(z_1(t),z_2,x_1(t),x_2(t))}, \eqn{\tilde{\bf v}(t)=(z_3(t),z_4,x_3(t),x_4(t))},
 #' with \eqn{x_3(t)=x_1(t)} a time-varying covariate shared by the 2 submodels.
-#' 
-#' The density \eqn{f_0(t)} governing the reference cumulative hazard dynamic is, 
-#' by default, a Weibull with shape parameter 2.65 and scale parameter 100, 
+#'
+#' The density \eqn{f_0(t)} governing the reference cumulative hazard dynamic is,
+#' by default, a Weibull with shape parameter 2.65 and scale parameter 100,
 #' ensuring that all susceptible units will experience the monitored event by time Tmax=300.
-#' 
+#'
 #' The functions defining the additive terms are
 #'  \deqn{f_1(x_1)= -.63 + .57\arctan(4x_1) ~;~f_2(x_2)= -.5 \cos(2\pi x_2)}
 #'  \deqn{\tilde{f}_1(\tilde{x}_3) = .15 - .5 \cos\big(\pi(\tilde{x}_3-.75)\big)~;~
 #'  \tilde{f}_2(\tilde{x}_4) = .8\big(\tilde{x}_4-.5\big)}
-#'  
+#'
 #' Covariates are generated as follows:
 #' \itemize{
 #'  \item{ } \eqn{z_1(t), z_3(t)} are recentered time-varying Bernoulli(0.5) on \eqn{(0,T_{max})} ;
@@ -27,9 +27,9 @@
 #'  \item{ } \eqn{x_1(t), x_2(t), x_4(t)} follow random cubic polynomial trajectories on \eqn{(0,T_{max})}.
 #' }
 #' More details can be found in Lambert and Kreyenfeld (2024).
-#' 
+#'
 #' @usage simulateTVcureData(n, seed, Tmax=300,
-#'        f0F0 = list(f0=function(x) dweibull(x, 2.65, 100), 
+#'        f0F0 = list(f0=function(x) dweibull(x, 2.65, 100),
 #'                    F0=function(x) pweibull(x, 2.65, 100)),
 #'        beta, gam, RC.dist=c("uniform","exponential","Tmax"),
 #'        tRC.min = 120, mu.cens=40, get.details=TRUE)
@@ -42,7 +42,7 @@
 #' @param RC.dist Right-censoring distribution: "uniform" (Uniform on (\code{tRC.min},\code{Tmax})),"exponential" (with mean \code{mu.cens}) or "Tmax" (when right-censoring occurs at Tmax)
 #' @param tRC.min Minimum right-censoring time value if the right-censoring time distribution is Uniform. (Default: 120).
 #' @param mu.cens Mean of the right-censoring time distribution if it is Exponential. (Default: 40).
-#' @param get.details Logical indicating if a detailed data frame \code{df.raw} including the sequence of time-varying covariate values should also be reported. (Default: TRUE).
+#' @param get.details Logical indicating if a detailed data frame \code{rawdata} including the sequence of time-varying covariate values should also be reported. (Default: TRUE).
 #'
 #' @return A list with following elements:
 #' \itemize{
@@ -51,14 +51,14 @@
 #' \item{\code{RC.dist} : \verb{ }}{Right-censoring distribution ("Uniform", "Exponential" or "Tmax").}
 #' \item{\code{cure.rate} : \verb{ }}{Underlying proportion of cured units (i.e. without an observed event by \code{Tmax} if the follow-up is not interrupted by that time due to right-censoring).}
 #' \item{\code{RC.rate} : \verb{ }}{Observed right-censoring rate.}
-#' \item{\code{df.raw} : \verb{ }}{Data frame containing the generated data in a counting process format with the detailed follow-up for each unit until the event or right-censoring occurs:}
+#' \item{\code{rawdata} : \verb{ }}{Data frame containing the generated data in a counting process format with the detailed follow-up for each unit until the event or right-censoring occurs:}
 #'   \itemize{
 #'   \item{\code{id} : \verb{ }}{Unit identificator for each row.}
 #'   \item{\code{time} : \verb{ }}{Discrete observation times, starting at 1 for a given unit, until the end of its follow-up. The number of rows associated to a given unit corresponds to the follow-up duration.}
 #'   \item{\code{event} : \verb{ }}{Event indicator (1 if it occured, 0 otherwise) for given unit at a given time.}
 #'   \item{\code{z1, z2, z3, z4, x1, x2, x3, x4} : \verb{ }}{Covariate values for a given unit at a given time.}
 #'   }
-#' \item{\code{df.summary} : \verb{ }}{Data frame with n rows containing summarized information on the generated data for each unit:}
+#' \item{\code{data.summary} : \verb{ }}{Data frame with n rows containing summarized information on the generated data for each unit:}
 #'   \itemize{
 #'   \item{\code{id} : \verb{ }}{Unit identificator (the ith row corresponding to the ith unit).}
 #'   \item{\code{t.obs} : \verb{ }}{Observed event or right-censoring time.}
@@ -78,25 +78,25 @@
 #'   }
 #' \item{\code{call} : \verb{ }}{Function call.}
 #' }
-#' 
+#'
 #' @author Philippe Lambert \email{p.lambert@uliege.be}
 #' @references Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
 #' with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, under review.
-#' 
+#'
 #' @export
 #'
 #' @examples
 #' require(tvcure)
 #' ## Regression parameters
 #' beta = c(beta0=.4, beta1=-.2, beta2=.15) ##  beta0 tunes the cure rate
-#' gam = c(gam1=.2, gam2=.2) 
+#' gam = c(gam1=.2, gam2=.2)
 #' ## Data simulation
 #' temp = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
 #'                           RC.dist="exponential",mu.cens=550)
-#' head(temp$df.raw) ## Overview of the simulated raw data 
-#' head(temp$df.summary) ## Overview of the summarized data
+#' head(temp$rawdata) ## Overview of the simulated raw data
+#' head(temp$data.summary) ## Overview of the summarized data
 #' with(temp, c(cure.rate=cure.rate,RC.rate=RC.rate)) ## Cure and RC rates
-#' 
+#'
 simulateTVcureData = function(n, seed, Tmax=300,
                         f0F0 = list(f0=function(x) dweibull(x, 2.65, 100), F0=function(x) pweibull(x, 2.65, 100)),
                         beta, gam, RC.dist=c("uniform","exponential","Tmax"),
@@ -185,7 +185,7 @@ simulateTVcureData = function(n, seed, Tmax=300,
         ## ------------------------------
         ## Cure suvival model: Sp(t) = exp(-theta(x) F(t|x))
         ##  with theta(x) = exp(eta1(x))  &  1-F(t|x) = (1-F0(t))^exp(eta2(x))
-        ## 
+        ##
         ## f0 = function(x) dweibull(x, 2.65, 100)
         ## F0 = function(x) pweibull(x, 2.65, 100)
         f0 = f0F0[[1]] ; F0 = f0F0[[2]]
@@ -225,13 +225,13 @@ simulateTVcureData = function(n, seed, Tmax=300,
         ##
         loghaz = eta.v + eta.F + log(f0.t) + (exp(eta.F)-1) * log(1-F0.t)
         ##
-        df = data.frame(t=t,
+        data = data.frame(t=t,
                         loghaz=loghaz,
                         z1=z1t, z2=z2,
                         x1=x1t, x2=x2t,
                         z3=z3t, z4=z4,
                         x3=x3t, x4=x4t)
-        ans = list(df=df,
+        ans = list(data=data,
                    beta=beta,
                    gam=gam,
                    f.theta=c(f1=f1.theta,f2=f2.theta),
@@ -256,7 +256,7 @@ simulateTVcureData = function(n, seed, Tmax=300,
         t.mid = t.grid - .5*dt
         ## Log-hazard on time grid for given covariate history
         obj.lht = loghaz(t.mid, Xt=Xt, beta=beta, gam=gam)
-        lht = obj.lht$df$loghaz
+        lht = obj.lht$data$loghaz
         ## ht, St, Ft, Fmax
         ht = exp(lht)
         Ht = cumsum(ht*dt)
@@ -286,18 +286,18 @@ simulateTVcureData = function(n, seed, Tmax=300,
         event = 0*t.grid ; event[length(idx)] = delta
         ##
         if (get.details){ ## Include lht,ht,Ht,St,Ft
-            df = data.frame(t.mid=t.mid,
+            data = data.frame(t.mid=t.mid,
                             time=t.grid,
                             event=event,
                             lht=lht, ht=ht, Ht=Ht,
                             St=St, Ft=Ft)[idx,]
         } else {
-            df = data.frame(time=t.grid,
+            data = data.frame(time=t.grid,
                             event=event)[idx,]
         }
-        df = cbind(df, obj.lht$df[idx,-(1:2)]) ## Add covariate values
+        data = cbind(data, obj.lht$data[idx,-(1:2)]) ## Add covariate values
         ##
-        ans = list(df=df,
+        ans = list(data=data,
                    cured=cured, T=T,
                    Fmax=Fmax,
                    u=u, t.true=t.true,
@@ -316,7 +316,7 @@ simulateTVcureData = function(n, seed, Tmax=300,
     set.seed(seed)
     seeds = sample(1:(2^19),n,replace=FALSE) ##seed + (1:n) - 1
     donnees = list()
-    df.raw = c()
+    rawdata = c()
     t.true = t.obs = delta = t.cens= cured = numeric(n)
     for (i in 1:n){
         Xt = cov.gen(seed=seeds[i])
@@ -330,18 +330,18 @@ simulateTVcureData = function(n, seed, Tmax=300,
         cured[i]  = obj.i$cured
         ## Data frame in a person-month format
         id = rep(i, obj.i$t.obs)
-        df = cbind(id=id, obj.i$df) ## Data frame for unit i
+        data = cbind(id=id, obj.i$data) ## Data frame for unit i
         ## Data frame combining all units
-        if (get.details) df.raw = rbind(df.raw,df)
+        if (get.details) rawdata = rbind(rawdata,data)
     }
     ## Also return a data frame in a summarized format (1 line per unit)
-    df.summary = data.frame(id=1:n,
+    data.summary = data.frame(id=1:n,
                             t.obs=t.obs, delta=delta,
                             t.true=t.true, t.cens=t.cens,
                             cured=cured)
     ##
     if (!get.details){
-        ans = list(df.summary=df.summary,
+        ans = list(data.summary=data.summary,
                    n=n,beta=beta,gam=gam,
                    cure.rate = sum(cured)/n,
                    RC.rate = sum(t.obs==t.cens)/n)
@@ -352,8 +352,8 @@ simulateTVcureData = function(n, seed, Tmax=300,
                    tRC.min=tRC.min, RC.dist=RC.dist,
                    cure.rate = sum(cured)/n,
                    RC.rate = sum(t.obs==t.cens)/n,
-                   df.raw=df.raw,
-                   df.summary=df.summary,
+                   rawdata=rawdata,
+                   data.summary=data.summary,
                    parameters=obj.i$parameters,
                    call=cl)
     return(donnees)

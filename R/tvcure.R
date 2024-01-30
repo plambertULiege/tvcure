@@ -1,24 +1,10 @@
-## require(cubicBsplines)
-## require(numDeriv)
-## require(ggplot2) ; require(gridExtra)
-## require(Rfast)  ## Fast Crossprod
-## require(Matrix) ## Sparse matrices
-## require(tictoc) ## To evaluate computation times of code chunks:  tic("ici") ; ...code... ; toc()
-
-## source("centeredBasis_gen.R")
-## source("DesignFormula.R")
-## source("s.R")
-## source("qknots.R")
-## source("Pcal_fun.R")
-## source("additive.tvcure2.R")
-
-## df.raw structure:
-##  id time event     z1 z2 x1 x2
+## data structure:
+##  id time event  + columns with covariate values
 ## NOTE: time must take positive integer values (1 being the unit of measurement for time)
 
 #' Fit of a tvcure model.
 #' @description Fit of a double additive cure survival model with exogenous time-varying covariates.
-#' @usage tvcure(formula1, formula2, df,
+#' @usage tvcure(formula1, formula2, data,
 #'        baseline=c("S0","F0"), K0=20, pen.order0=2,
 #'        K1=10, pen.order1=2, K2=10, pen.order2=2,
 #'        phi.0=NULL, beta.0=NULL, gamma.0=NULL,
@@ -33,7 +19,7 @@
 #'        iterlim=50, iter.verbose=FALSE, verbose=FALSE)
 #' @param formula1 A formula describing the linear predictor in the long-term (cure) survival (or quantum) submodel.
 #' @param formula2 A formula describing the linear predictor in the short-term (cure) survival (or timing) submodel.
-#' @param df A data frame for survival data in a counting process format. It should always contain at least the following entries:
+#' @param data A data frame with survival data in a counting process format. It should always contain at least the following entries:
 #' \itemize{
 #' \item{\code{id} : \verb{ }}{the <id> of the unit associated to the data in a given line in the data frame.}
 #' \item{\code{time} : \verb{ }}{the integer time at which the observations are reported. For a given unit, it should be a sequence of CONSECUTIVE integers starting at 1 for the first observation.}
@@ -97,18 +83,18 @@
 #' require(tvcure)
 #' ## Simulated data generation
 #' beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2)
-#' df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
-#'                           RC.dist="exponential",mu.cens=550)$df.raw
+#' data = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
+#'                           RC.dist="exponential",mu.cens=550)$rawdata
 #' ## TVcure model fitting
 #' tau.0 = 2.7 ; lambda1.0 = c(40,15) ; lambda2.0 = c(25,70) ## Optional
-#' model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), df=df.raw,
+#' model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), data=data,
 #'                tau.0=tau.0, lambda1.0=lambda1.0, lambda2.0=lambda2.0)
 #' print(model)
 #' plot(model, pages=1)
 #'
 #' @export
 #'
-tvcure = function(formula1, formula2, df,
+tvcure = function(formula1, formula2, data,
                   baseline=c("S0","F0"),
                   K0=20, pen.order0=2,
                   K1=10, pen.order1=2,
@@ -137,58 +123,58 @@ tvcure = function(formula1, formula2, df,
     lambda.method = match.arg(lambda.method)
     if (missing(formula1)) {message("Missing model formula <formula1> for long-term survival !") ; return(NULL)}
     if (missing(formula2)) {message("Missing model formula <formula2> for short-term survival !") ; return(NULL)}
-    ## Check that <id>, <time> and <event> entries in <df>
+    ## Check that <id>, <time> and <event> entries in <data>
     ## ---------------------------------------------------
-    if (missing(df)) {message("Missing data frame <df> with <id>, <time>, event indicator <event>, and covariate values !") ; return(NULL)}
-    if (!"id" %in% colnames(df)) stop("Missing <id> column in the data frame <df> !!")
-    if (!"time" %in% colnames(df)) stop("Missing <time> column in the data frame <df> !!")
-    if (!"event" %in% colnames(df)) stop("Missing <event> column in the data frame <df> !!")
-    ## Some check on df$time values
+    if (missing(data)) {message("Missing data frame <data> with <id>, <time>, event indicator <event>, and covariate values !") ; return(NULL)}
+    if (!"id" %in% colnames(data)) stop("Missing <id> column in the data frame <data> !!")
+    if (!"time" %in% colnames(data)) stop("Missing <time> column in the data frame <data> !!")
+    if (!"event" %in% colnames(data)) stop("Missing <event> column in the data frame <data> !!")
+    ## Some check on data$time values
     ## ----------------------------
     ## Check 0: for a given <id>, <event> can only contain 0's finished by 0 or 1
-    if (!all(sort(unique(df$event)) %in% c(0,1))) stop("<event> can only contain 0 and 1 values !!")
+    if (!all(sort(unique(data$event)) %in% c(0,1))) stop("<event> can only contain 0 and 1 values !!")
     fun0 = function(x) x[length(x)] %in% c(0,1) && sum(x[-length(x)])==0
-    check0 = all(unlist(by(df$event, df$id, fun0)))
+    check0 = all(unlist(by(data$event, data$id, fun0)))
     if (!check0) stop("<event> can only contain 0's (with 0 or 1 at the end) for a given <id> !!")
     ## Check 1: <time> starts at 1 for a given <id>
     fun1 = function(x) x[1]==1
-    check1 = all(as.vector(by(df$time, df$id, fun1))) ## Should be true
+    check1 = all(as.vector(by(data$time, data$id, fun1))) ## Should be true
     if (!check1) stop("<time> should start at 1 for a given <id> !!")
     ## Check 2: Make sure that <time> takes integer values !!
-    temp = as.integer(abs(df$time))
-    check2 = all(temp == df$time)
+    temp = as.integer(abs(data$time))
+    check2 = all(temp == data$time)
     if (!check2) stop("<time> must take positive integer values !!")
-    df$time = temp
-    T = max(df$time) ## Maximum follow-up time (that should be RC)
+    data$time = temp
+    T = max(data$time) ## Maximum follow-up time (that should be RC)
     ## Check 3: <time> should be a sequence of consecutive integers for a given <id>
     fun3 = function(x) all(diff(x)==1)
-    check3 = c(by(df$time, df$id, fun3)) ## Should be true for a given <id>
+    check3 = c(by(data$time, data$id, fun3)) ## Should be true for a given <id>
     id.discarded = names(check3)[!check3]
     n.id = length(check3)
     if (sum(check3) < .1*n.id) stop("<time> should be a sequence of consecutive integers for a given <id> !!")
     if (!all(check3)){
         word = ifelse(sum(!check3)>1, " units", " unit")
-        cat(sum(!check3),word," (out of ",length(unique(df$id)),") with non-consecutive integer values for <time> detected\n",sep="")
+        cat(sum(!check3),word," (out of ",length(unique(data$id)),") with non-consecutive integer values for <time> detected\n",sep="")
         ##        cat("   <id> value(s):",id.discarded,"\n")
         fun4 = function(x) as.logical(cumprod(c(TRUE,diff(x)==1)))
-        rows.ok =  unlist(by(df$time, df$id, fun4)) ## Rows with consecutive <time> values within a given <id>
+        rows.ok =  unlist(by(data$time, data$id, fun4)) ## Rows with consecutive <time> values within a given <id>
         ##
-        temp = c(by(df$id[!rows.ok],df$id[!rows.ok],function(x) length(x)))
+        temp = c(by(data$id[!rows.ok],data$id[!rows.ok],function(x) length(x)))
         temp = c(temp,sum(temp)) ; names(temp)[length(temp)] = "Total"
-        cat("Number of discarded time entries (out of ",nrow(df),") per problematic unit <id>:\n",sep="")
+        cat("Number of discarded time entries (out of ",nrow(data),") per problematic unit <id>:\n",sep="")
         print(temp)
-        df = df[rows.ok,]  ## Only keep rows with consecutive <time> values for a given <id>
+        data = data[rows.ok,]  ## Only keep rows with consecutive <time> values for a given <id>
     }
     ## Number of units and their id's
     ## ------------------------------
-    id = unique(df$id) ## Unit ids
+    id = unique(data$id) ## Unit ids
     n = length(id)     ## Number of units
     ## Preliminary NP estimation of S(t)
     ## ---------------------------------
-    ## df2 = array2DF(by(df[,c("id","time","event")], df$id, function(x) x[nrow(x),-1]))[,-1]
-    ## temp = with(df2, survfit(Surv(time,event) ~ 1))
+    ## data2 = array2DF(by(data[,c("id","time","event")], data$id, function(x) x[nrow(x),-1]))[,-1]
+    ## temp = with(data2, survfit(Surv(time,event) ~ 1))
     ## t.hat = temp$time ; H0.hat = temp$cumhaz
-    tab = with(df, table(time,event))
+    tab = with(data, table(time,event))
     n.risk = rowSums(tab) ; n.event = tab[,2]
     h0.hat = n.event / n.risk ; H0.hat = cumsum(h0.hat) ; lS0.hat = -H0.hat
     ## Significance level
@@ -202,8 +188,8 @@ tvcure = function(formula1, formula2, df,
     if (!is.null(gamma.0)) K2 = length(gamma.0)
     ## Regression models for long-term (formula1) & short-term (formula2) survival
     ## ---------------------------------------------------------------------------
-    regr1 = DesignFormula(formula1, data=df, K=K1, pen.order=pen.order1) ##, n=n)
-    regr2 = DesignFormula(formula2, data=df, K=K2, pen.order=pen.order2, nointercept=TRUE) ##, n=n)
+    regr1 = DesignFormula(formula1, data=data, K=K1, pen.order=pen.order1) ##, n=n)
+    regr2 = DesignFormula(formula2, data=data, K=K2, pen.order=pen.order2, nointercept=TRUE) ##, n=n)
     q1 = ncol(regr1$Xcal) ## Total number of regression and spline parameters in long-term survival
     q2 = ncol(regr2$Xcal) ## Total number of regression and spline parameters in short-term survival
     if (is.null(q2)){
@@ -261,7 +247,7 @@ tvcure = function(formula1, formula2, df,
         return(list(ldet0=ldet0,lambda1=lambda1,dj=dj))
     }
     ## Eigenvalues associated to additive terms
-    id1 = as.logical(df$event) ##which(event==1)
+    id1 = as.logical(data$event) ##which(event==1)
     ev1.lst = ev2.lst = list()
     Hes.beta0 = NULL
     ## ... in long-term survival submodel
@@ -351,7 +337,7 @@ tvcure = function(formula1, formula2, df,
     k.ref = ceiling(K0/2)
     phi.0 = phi.0 - phi.0[k.ref]
     colnames(B0.grid) = names(phi.0)
-    tB0B0 = t(B0.grid[df$time,-k.ref]) %*% B0.grid[df$time,-k.ref]
+    tB0B0 = t(B0.grid[data$time,-k.ref]) %*% B0.grid[data$time,-k.ref]
     ##
     ## -----------------------------------------------------------------------------------------
     ##  ff: key function computing llik, lpen, gradients, Hessians, etc.
@@ -365,7 +351,7 @@ tvcure = function(formula1, formula2, df,
             hessian = Dphi = D2phi = Dbeta = TRUE
             Dgamma = !nogamma
         }
-        Delta = 1 ## Unit of measurement for df$time
+        Delta = 1 ## Unit of measurement for data$time
         eta.grid = c(B0.grid %*% phi)
         pi.grid = exp(eta.grid) / sum(exp(eta.grid))
         B.tilde = t(t(B0.grid) - c(t(B0.grid)%*%pi.grid)) ## TxS matrix
@@ -383,7 +369,7 @@ tvcure = function(formula1, formula2, df,
         } else {
             eta.2 = c(regr2$Xcal %*% gamma) ## Linear predictors in short-term survival
         }
-        time = df$time ; event = df$event ; id1 = as.logical(event) ##which(event==1)
+        time = data$time ; event = data$event ; id1 = as.logical(event) ##which(event==1)
         ##
         switch(baseline,
             "F0" = {

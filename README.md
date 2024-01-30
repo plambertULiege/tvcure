@@ -75,9 +75,9 @@ library(tvcure)
     
 ## Data simulation
 beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2)
-df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
-                        RC.dist="exponential",mu.cens=550)$df.raw
-round(head(df.raw),3)
+data = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
+                        RC.dist="exponential",mu.cens=550)$rawdata
+round(head(data),3)
 ```
 
     ##   id time event  z1     z2    x1    x2  z3     z4    x3    x4
@@ -115,14 +115,14 @@ Let us fit a double additive tvcure model to these data with:
 
 ``` r
 model = tvcure(~z1+z2+s(x1)+s(x2),
-               ~z3+z4+s(x3)+s(x4), df=df.raw)
+               ~z3+z4+s(x3)+s(x4), data=data)
 print(model)
 ```
 
     ## 
     ## Call:
     ## tvcure(formula1 = ~z1 + z2 + s(x1) + s(x2), formula2 = ~z3 + 
-    ##     z4 + s(x3) + s(x4), df = df.raw)
+    ##     z4 + s(x3) + s(x4), data = data)
     ## 
     ## >> log(theta(x)) - Long-term survival (Quantum) <<
     ## Formula: ~z1 + z2 + s(x1) + s(x2) 
@@ -163,7 +163,7 @@ print(model)
     ## ------------------------------------------------------------------------
     ##  logEvid: -2002.59   Dev: 3161.93   AIC: 3194.52   BIC: 3257.523 
     ##  edf: 16.29  nobs: 50672  n: 500 (units)  d: 353 (events)
-    ##  Elapsed time: 2.9 seconds  (6 iterations)
+    ##  Elapsed time: 2.7 seconds  (6 iterations)
     ## ------------------------------------------------------------------------
 
 The estimated reference hazard $\mathrm{e}^{\beta_0}f_0(t)$ and the
@@ -197,7 +197,7 @@ interpretation of the other model parameters:
 
 ``` r
 model = tvcure(~z1+z2+s(x1,ref=.75)+s(x2,ref=.5), 
-               ~z3+z4+s(x3,ref=.75)+s(x4,ref=.5), df=df.raw)
+               ~z3+z4+s(x3,ref=.75)+s(x4,ref=.5), data=data)
 plot(model, select=1:4, pages=1) ## The 4 additive terms in the model
 ```
 
@@ -210,8 +210,8 @@ Consider for example unit 1 for which no event was observed by the end
 of the follow-up:
 
 ``` r
-df1 = subset(df.raw, df.raw$id==1) ## Data for unit 1
-round(tail(df1, n=1),3) ## Data at the last observation time
+data1 = subset(data, data$id==1) ## Data for unit 1
+round(tail(data1, n=1),3) ## Data at the last observation time
 ```
 
     ##     id time event   z1     z2    x1    x2   z3     z4    x3    x4
@@ -221,7 +221,7 @@ The estimated population survival function of a subject sharing the same
 covariate history can be computed and visualized,
 
 ``` r
-obj = predict(model, ci.level=0.95, df=df1)
+obj = predict(model, ci.level=0.95, newdata=data1)
 matplot(obj$Sp, ylim=c(0,1),
         type="l", lty=c(1,2,2), col=1, las=1,
         xlab="time", ylab=bquote(S[p](t)))
@@ -268,7 +268,7 @@ covariates in double additive cure survival model with application to
 fertility. Journal of the Royal Statistical Society, Series A, under
 review. Preprint: [*arXiv:2302.00331*](https://arxiv.org/abs/2302.00331)
 
-\[2\] Lambert, P. (2024). R-package *tvcure* - Version 0.6.2. GitHub:
+\[2\] Lambert, P. (2024). R-package *tvcure* - Version 0.6.3. GitHub:
 [plambertULiege/tvcure](https://github.com/plambertULiege/tvcure)
 
 ### Complementary references

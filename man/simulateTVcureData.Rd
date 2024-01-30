@@ -5,7 +5,7 @@
 \title{Simulation of survival data with a cure fraction and time-varying covariates.}
 \usage{
 simulateTVcureData(n, seed, Tmax=300,
-       f0F0 = list(f0=function(x) dweibull(x, 2.65, 100), 
+       f0F0 = list(f0=function(x) dweibull(x, 2.65, 100),
                    F0=function(x) pweibull(x, 2.65, 100)),
        beta, gam, RC.dist=c("uniform","exponential","Tmax"),
        tRC.min = 120, mu.cens=40, get.details=TRUE)
@@ -29,7 +29,7 @@ simulateTVcureData(n, seed, Tmax=300,
 
 \item{mu.cens}{Mean of the right-censoring time distribution if it is Exponential. (Default: 40).}
 
-\item{get.details}{Logical indicating if a detailed data frame \code{df.raw} including the sequence of time-varying covariate values should also be reported. (Default: TRUE).}
+\item{get.details}{Logical indicating if a detailed data frame \code{rawdata} including the sequence of time-varying covariate values should also be reported. (Default: TRUE).}
 }
 \value{
 A list with following elements:
@@ -39,14 +39,14 @@ A list with following elements:
 \item{\code{RC.dist} : \verb{ }}{Right-censoring distribution ("Uniform", "Exponential" or "Tmax").}
 \item{\code{cure.rate} : \verb{ }}{Underlying proportion of cured units (i.e. without an observed event by \code{Tmax} if the follow-up is not interrupted by that time due to right-censoring).}
 \item{\code{RC.rate} : \verb{ }}{Observed right-censoring rate.}
-\item{\code{df.raw} : \verb{ }}{Data frame containing the generated data in a counting process format with the detailed follow-up for each unit until the event or right-censoring occurs:}
+\item{\code{rawdata} : \verb{ }}{Data frame containing the generated data in a counting process format with the detailed follow-up for each unit until the event or right-censoring occurs:}
   \itemize{
   \item{\code{id} : \verb{ }}{Unit identificator for each row.}
   \item{\code{time} : \verb{ }}{Discrete observation times, starting at 1 for a given unit, until the end of its follow-up. The number of rows associated to a given unit corresponds to the follow-up duration.}
   \item{\code{event} : \verb{ }}{Event indicator (1 if it occured, 0 otherwise) for given unit at a given time.}
   \item{\code{z1, z2, z3, z4, x1, x2, x3, x4} : \verb{ }}{Covariate values for a given unit at a given time.}
   }
-\item{\code{df.summary} : \verb{ }}{Data frame with n rows containing summarized information on the generated data for each unit:}
+\item{\code{data.summary} : \verb{ }}{Data frame with n rows containing summarized information on the generated data for each unit:}
   \itemize{
   \item{\code{id} : \verb{ }}{Unit identificator (the ith row corresponding to the ith unit).}
   \item{\code{t.obs} : \verb{ }}{Observed event or right-censoring time.}
@@ -78,15 +78,15 @@ with linear predictors
 where \eqn{{\bf v}(t)=(z_1(t),z_2,x_1(t),x_2(t))}, \eqn{\tilde{\bf v}(t)=(z_3(t),z_4,x_3(t),x_4(t))},
 with \eqn{x_3(t)=x_1(t)} a time-varying covariate shared by the 2 submodels.
 
-The density \eqn{f_0(t)} governing the reference cumulative hazard dynamic is, 
-by default, a Weibull with shape parameter 2.65 and scale parameter 100, 
+The density \eqn{f_0(t)} governing the reference cumulative hazard dynamic is,
+by default, a Weibull with shape parameter 2.65 and scale parameter 100,
 ensuring that all susceptible units will experience the monitored event by time Tmax=300.
 
 The functions defining the additive terms are
  \deqn{f_1(x_1)= -.63 + .57\arctan(4x_1) ~;~f_2(x_2)= -.5 \cos(2\pi x_2)}
  \deqn{\tilde{f}_1(\tilde{x}_3) = .15 - .5 \cos\big(\pi(\tilde{x}_3-.75)\big)~;~
  \tilde{f}_2(\tilde{x}_4) = .8\big(\tilde{x}_4-.5\big)}
- 
+
 Covariates are generated as follows:
 \itemize{
  \item{ } \eqn{z_1(t), z_3(t)} are recentered time-varying Bernoulli(0.5) on \eqn{(0,T_{max})} ;
@@ -99,12 +99,12 @@ More details can be found in Lambert and Kreyenfeld (2024).
 require(tvcure)
 ## Regression parameters
 beta = c(beta0=.4, beta1=-.2, beta2=.15) ##  beta0 tunes the cure rate
-gam = c(gam1=.2, gam2=.2) 
+gam = c(gam1=.2, gam2=.2)
 ## Data simulation
 temp = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
                           RC.dist="exponential",mu.cens=550)
-head(temp$df.raw) ## Overview of the simulated raw data 
-head(temp$df.summary) ## Overview of the summarized data
+head(temp$rawdata) ## Overview of the simulated raw data
+head(temp$data.summary) ## Overview of the summarized data
 with(temp, c(cure.rate=cure.rate,RC.rate=RC.rate)) ## Cure and RC rates
 
 }

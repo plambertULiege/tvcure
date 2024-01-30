@@ -4,19 +4,19 @@
 \alias{predict.tvcure}
 \title{Predict method for tvcure model fits}
 \usage{
-\method{predict}{tvcure}(x, df.new, ci.level=.95, ...)
+\method{predict}{tvcure}(x, newdata, ci.level=.95, ...)
 }
 \arguments{
 \item{x}{A \code{\link{tvcure.object}}.}
 
-\item{df.new}{A data frame in which to look for the 'id' (distinguishing the different units), 'time' and covariate values for which 'predictions' should be made. Time values for a given 'id' should be a series of consecutive integers starting with 1. If \code{df.new$id} does not exist, then predictions are assumed to concern a single unit with consecutive time values starting with 1.}
+\item{newdata}{A data frame in which to look for the 'id' (distinguishing the different units), 'time' and covariate values for which 'predictions' should be made. Time values for a given 'id' should be a series of consecutive integers starting with 1. If \code{newdata$id} does not exist, then predictions are assumed to concern a single unit with consecutive time values starting with 1.}
 
 \item{ci.level}{Credible level for the reported estimates. (Default: 0.95).}
 
 \item{...}{additional generic arguments.}
 }
 \value{
-A list containing, in addition to the optional \code{df.new} entries, the following elements:
+A list containing, in addition to the optional \code{newdata} entries, the following elements:
 \itemize{
 \item{\code{Hp} : \verb{ }}{Matrix containing estimates of the cumulative population hazard \eqn{H_p(t|x_{1:t})} with its credible interval bounds at time \eqn{t} given the history of covariates.}
 \item{\code{lHp} : \verb{ }}{Matrix containing estimates of the log cumulative population hazard \eqn{\log H_p(t|x_{1:t})} with its standard error and credible interval bounds at time \eqn{t} given the history of covariates.}
@@ -37,16 +37,16 @@ Predicted values based on a tvcure object.
 require(tvcure)
 ## Simulated data generation
 beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2)
-df.raw = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
-                          RC.dist="exponential",mu.cens=550)$df.raw
+data = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
+                          RC.dist="exponential",mu.cens=550)$rawdata
 ## TVcure model fitting
 tau.0 = 2.7 ; lambda1.0 = c(40,15) ; lambda2.0 = c(25,70) ## Optional
-model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), df=df.raw,
+model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), data=data,
                tau.0=tau.0, lambda1.0=lambda1.0, lambda2.0=lambda2.0)
 
 ## Covariate profiles for which 'predicted' values are requested
-df.new = subset(df.raw, id==1 | id==4)[,-3] ## Focus on units 1 & 4
-pred = predict(model,df.new)
+newdata = subset(data, id==1 | id==4)[,-3] ## Focus on units 1 & 4
+pred = predict(model,newdata)
 
 ## Visualize the estimated population survival fns for units 1 & 4
 ## par(mfrow=c(1,2))
