@@ -5,6 +5,7 @@
 #' Fit of a tvcure model.
 #' @description Fit of a double additive cure survival model with exogenous time-varying covariates.
 #' @usage tvcure(formula1, formula2, data,
+#'        model0=NULL,
 #'        baseline=c("S0","F0"), K0=20, pen.order0=2,
 #'        K1=10, pen.order1=2, K2=10, pen.order2=2,
 #'        phi.0=NULL, beta.0=NULL, gamma.0=NULL,
@@ -15,7 +16,7 @@
 #'        observed.hessian=TRUE, use.Rfast=TRUE, Wood.test=FALSE,
 #'        ci.level=.95,
 #'        criterion=c("levidence","deviance","lpen","AIC","BIC","gradient"),
-#'        criterion.tol=1e-1, grad.tol=1e-2,
+#'        criterion.tol=1e-2, grad.tol=1e-2,
 #'        iterlim=50, iter.verbose=FALSE, verbose=FALSE)
 #' @param formula1 A formula describing the linear predictor in the long-term (cure) survival (or quantum) submodel.
 #' @param formula2 A formula describing the linear predictor in the short-term (cure) survival (or timing) submodel.
@@ -25,6 +26,7 @@
 #' \item{\code{time} : \verb{ }}{the integer time at which the observations are reported. For a given unit, it should be a sequence of CONSECUTIVE integers starting at 1 for the first observation.}
 #' \item{\code{event} : \verb{ }}{a sequence of 0-1 event indicators. For the lines corresponding to a given unit, it starts with 0 values concluded by a 0 in case of right-censoring or by a 1 if the event is observed at the end of the follow-up.}
 #' }
+#' @param model0 (Optional) tvcure object from which starting values for the regression parameters, spline and penalty parameters are extracted. Make sure that it corresponds to the same model specification. That possibility can be found useful to accelerate the fit of the same model on other data or for fixed given penalty parameter values. (Default: NULL).
 #' @param baseline Baseline ("S0" or "F0") used to specify the dependence of the cumulative hazard dynamics on covariates (Default: "S0"):
 #' Baseline S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Baseline F0: \eqn{F(t|x) = F_0(t)^{\exp{\gamma'x}}}
 #' @param K0 Number of B-splines used to specify \eqn{\log f_0(t)} (Default: 20).
@@ -66,7 +68,7 @@
 #' \item{\code{BIC} : \verb{ }}{Bayesian (or Schwarz) information criterion ;}
 #' \item{\code{gradient} : \verb{ }}{L2 norm of the gradient of the log of the joint posterior w.r.t. the regression and spline parameters.}
 #' }
-#' @param criterion.tol Maximum absolute difference between the successive values of the \code{criterion} values (when different from "gradient") to declare convergence. (Default: 1e-1).
+#' @param criterion.tol Maximum absolute difference between the successive values of the \code{criterion} values (when different from "gradient") to declare convergence. (Default: 1e-2).
 #' @param grad.tol Tolerance value to declare convergence based on gradient values in an optimization procedure (such as Newton-Raphson). (Default: 1e-2).
 #' @param iterlim Maximum number of iterations. (Default: 50).
 #' @param iter.verbose Logical indicating if the values of the convergence criterions should be printed after each iteration. (Default: FALSE).
@@ -95,6 +97,7 @@
 #' @export
 #'
 tvcure = function(formula1, formula2, data,
+                  model0=NULL,
                   baseline=c("S0","F0"),
                   K0=20, pen.order0=2,
                   K1=10, pen.order1=2,
@@ -111,18 +114,23 @@ tvcure = function(formula1, formula2, data,
                   Wood.test=FALSE,
                   ci.level=.95,
                   criterion=c("levidence","deviance","lpen","AIC","BIC","gradient"),
-                  criterion.tol=1e-1,
+                  criterion.tol=1e-2,
                   grad.tol=1e-2,
                   iterlim=50,iter.verbose=FALSE,verbose=FALSE){
     ##
     cl <- match.call()
     aa = a ; bb = b
     baseline = match.arg(baseline) ## "S0": S(t|x) = S0(t)^exp(gamma'x) ;  "F0": F(t|x) = F0(t)^exp(gamma'x)
+    if (!is.null(model0)) baseline = model0$baseline
     criterion = match.arg(criterion) ## Criterion to assess convergence of the global algorithm
     tau.method = match.arg(tau.method)
     lambda.method = match.arg(lambda.method)
     if (missing(formula1)) {message("Missing model formula <formula1> for long-term survival !") ; return(NULL)}
     if (missing(formula2)) {message("Missing model formula <formula2> for short-term survival !") ; return(NULL)}
+    ## Make sure that the 's' function for additive terms in formulas is tvcure::s
+    ## ---------------------------------------------------------------------------
+    s <- tvcure::s
+    environment(formula1) <- environment(formula2) <- environment()
     ## Check that <id>, <time> and <event> entries in <data>
     ## ---------------------------------------------------
     if (missing(data)) {message("Missing data frame <data> with <id>, <time>, event indicator <event>, and covariate values !") ; return(NULL)}
@@ -155,7 +163,6 @@ tvcure = function(formula1, formula2, data,
     if (!all(check3)){
         word = ifelse(sum(!check3)>1, " units", " unit")
         cat(sum(!check3),word," (out of ",length(unique(data$id)),") with non-consecutive integer values for <time> detected\n",sep="")
-        ##        cat("   <id> value(s):",id.discarded,"\n")
         fun4 = function(x) as.logical(cumprod(c(TRUE,diff(x)==1)))
         rows.ok =  unlist(by(data$time, data$id, fun4)) ## Rows with consecutive <time> values within a given <id>
         ##
@@ -181,6 +188,29 @@ tvcure = function(formula1, formula2, data,
     ## ------------------
     alpha = 1-ci.level
     z.alpha = qnorm(1-.5*alpha)
+    ## Initial values
+    ## --------------
+    Hes.xi1 = Hes.xi2 = Hes.lam1 = Hes.lam2 = NULL
+    se.lambda1 = se.loglambda1 = se.lambda2 = se.loglambda2 = NULL
+    ## When provided, use estimates in <model0> as initial values in the absence of specific initial values
+    if (!is.null(model0)){
+        if (is.null(phi.0)) phi.0 = c(model0$fit$phi[,1])
+        if (is.null(beta.0)) beta.0 = c(model0$fit$beta[,1])
+        if (is.null(gamma.0)) gamma.0 = c(model0$fit$gamma[,1])
+        if (is.null(tau.0)) tau.0 = c(model0$fit$tau)
+        if (is.null(lambda1.0)) lambda1.0 = model0$fit$lambda1
+        if (is.null(lambda2.0)) lambda2.0 = model0$fit$lambda2
+        if (lambda.method!="none"){
+            se.lambda1 = model0$fit$se.lambda1
+            se.loglambda1 = model0$fit$se.loglambda1
+            se.lambda2 = model0$fit$se.lambda2
+            se.loglambda2 = model0$fit$se.loglambda2
+            Hes.xi1 = model0$fit$Hes.xi1
+            Hes.xi2 = model0$fit$Hes.xi2
+            Hes.lam1 = model0$fit$Hes.lam1
+            Hes.lam2 = model0$fit$Hes.lam2
+        }
+    }
     ## Length of spline vectors
     ## -------------------------
     if (!is.null(phi.0)) K0 = length(phi.0)
@@ -211,7 +241,8 @@ tvcure = function(formula1, formula2, data,
     ## Log-determinant of a positive definite matrix based on Choleski
     ##  Note: faster than methods based on functions svd, qr or determinant
     ## ---------------------------------------------------------------------
-    ldet.fun = function(x) c(determinant(x,logarithm=TRUE)$mod)
+    ldet.fun  = function(x) sum(log(abs(diag(qr(x)$qr))))
+    ## ldet.fun = function(x) c(determinant(x,logarithm=TRUE)$mod)
     ## ldet.fun = function(x) 2*sum(log(diag(chol(x))))
     ## End ldet.fun
     ##
@@ -690,42 +721,59 @@ tvcure = function(formula1, formula2, data,
     ##    with an underlying computation of |B'WB + lamdba Pd| using precomputed eigenvalues
     ##    and the fixed point method to find lambda.MAP
     ## --------------------------------------------------------------------------------------
-    select.lambda.LPS = function(itermax=50){
-        ## Generic update of lambda
+    select.lambda.LPS = function(lambda1,lambda2, itermax=50){
+        logscale = FALSE
+        ## Generic update of a single penalty parameter
         update.lambda.fun = function(lambda,quad,ev,rk){
             ok.lam = FALSE ; iter.lam = 0
             while(!ok.lam){
                 iter.lam = iter.lam + 1
                 lambda.old = lambda
                 ttr = sum(1 / (lambda+ev))
-                lambda = (2*(aa-1) + rk) / (2*bb + quad + ttr)
+                if (!logscale){
+                    lambda = (2*(aa-1) + rk) / (2*bb + quad + ttr)
+                } else {
+                    lambda = (2*aa + rk) / (2*bb + quad + ttr)
+                }
                 lam.dif = abs(lambda - lambda.old)
-                ok.lam = (lam.dif < 1) | (iter.lam >= itermax)
+                ok.lam = (lam.dif < .1) | (iter.lam >= itermax)
             }
-            return(lambda)
+            se.lambda = 1 / sqrt(.5 * sum(ev/(lambda*(lambda+ev)^2)))
+            se.loglambda = 1 / sqrt(lambda * (bb+.5*quad + .5*sum(ev/(lambda+ev)^2)))
+            return(list(lambda=lambda, se.lambda=se.lambda, se.loglambda=se.loglambda))
         }
         ## Update <lambda1> if (J1 > 0)
         if (J1 > 0){
+            se.lambda1 = 0*lambda1
             for (j in 1:J1){ ## Loop over additive terms in the long-term survival sub-model
-                ## Update lambda1.cur
+                ## Update lambda1
                 idx = nfixed1 + (j-1)*K1 + (1:K1)
                 theta.j = beta.cur[idx]
                 quad.j = sum(theta.j*c(Pd1.x%*%theta.j))
-                lambda1.cur[j] = update.lambda.fun(lambda1.cur[j],quad.j,ev1.lst[[j]],rk1)
+                temp = update.lambda.fun(lambda1[j],quad.j,ev1.lst[[j]],rk1)
+                lambda1[j] = temp$lambda
+                se.lambda1[j] = temp$se.lambda
+                se.loglambda1[j] = temp$se.loglambda
             }
         }
         ## Update <lambda2> if (J2 > 0)
         if (J2 > 0){
+            se.lambda2 = 0*lambda2
             for (j in 1:J2){ ## Loop over additive terms in the short-term survival sub-model
                 ## Update lambda2.cur
                 idx = nfixed2 + (j-1)*K2 + (1:K2)
                 theta.j = gamma.cur[idx]
                 quad.j = sum(theta.j*c(Pd2.x%*%theta.j))
-                lambda2.cur[j] = update.lambda.fun(lambda2.cur[j],quad.j,ev2.lst[[j]],rk2)
+                temp = update.lambda.fun(lambda2[j],quad.j,ev2.lst[[j]],rk2)
+                lambda2[j] = temp$lambda
+                se.lambda2[j] = temp$se.lambda
+                se.loglambda2[j] = temp$se.loglambda
             }
         }
         ##
-        return(list(lambda1=lambda1.cur,lambda2=lambda2.cur))
+        return(list(lambda1=lambda1, lambda2=lambda2,
+                    se.lambda1=se.lambda1, se.lambda2=se.lambda2,
+                    se.loglambda1=se.loglambda1, se.loglambda2=se.loglambda2))
     } ## End select.lambda.LPS
     ##
     ## Function 2: Penalty parameter selection using Laplace approximation to  p(lambda|data)
@@ -1061,9 +1109,27 @@ tvcure = function(formula1, formula2, data,
     ##
     ## Starting values
     ## ---------------
+    ## if (!is.null(model0)){
+    ##     phi.cur = c(model0$fit$phi[,1])
+    ##     beta.cur = c(model0$fit$beta[,1])
+    ##     gamma.cur = c(model0$fit$gamma[,1])
+    ##     tau.cur = c(model0$fit$tau)
+    ##     lambda1.cur = model0$fit$lambda1
+    ##     lambda2.cur = model0$fit$lambda2
+    ##     se.lambda1 = model0$fit$se.lambda1
+    ##     se.loglambda1 = model0$fit$se.loglambda1
+    ##     se.lambda2 = model0$fit$se.lambda2
+    ##     se.loglambda2 = model0$fit$se.loglambda2
+    ##     Hes.xi1 = model0$fit$Hes.xi1
+    ##     Hes.xi2 = model0$fit$Hes.xi2
+    ##     Hes.lam1 = model0$fit$Hes.lam1
+    ##     Hes.lam2 = model0$fit$Hes.lam2
+    ## } else {
     phi.cur = phi.0 ; beta.cur = beta.0 ; gamma.cur = gamma.0
     tau.cur = tau.0 ; lambda1.cur = lambda1.0 ; lambda2.cur = lambda2.0
-    Hes.xi1 = Hes.xi2 = Hes.lam1 = Hes.lam2 = NULL
+    ## se.lambda1 = se.loglambda1  = NA*lambda1.cur ; se.lambda2 = se.loglambda2 = NA*lambda2.cur
+    ## Hes.xi1 = Hes.xi2 = Hes.lam1 = Hes.lam2 = NULL
+    ## }
     tau.iter = c()
     ## Functions to handle identification issue in polytomial logistic estimation of <f0>
     ## ----------------------------------------------------------------------------------
@@ -1312,9 +1378,9 @@ tvcure = function(formula1, formula2, data,
                     }
                 }
                 if (J1 > 0 | J2 > 0){
-                    temp = select.lambda.LPS()
-                    lambda1.cur = temp$lambda1
-                    lambda2.cur = temp$lambda2
+                    temp = select.lambda.LPS(lambda1=lambda1.cur,lambda2=lambda2.cur)
+                    lambda1.cur = temp$lambda1 ; se.lambda1 = temp$se.lambda1 ; se.loglambda1 = temp$se.loglambda1
+                    lambda2.cur = temp$lambda2 ; se.lambda2 = temp$se.lambda2 ; se.loglambda2 = temp$se.loglambda2
                 }
             }
         } ## Endif lambda.method == "LPS"
@@ -1568,7 +1634,7 @@ tvcure = function(formula1, formula2, data,
     ## Penalty parameters
     ## ------------------
     if (J1 > 0){
-        fit$lambda1 = lambda1.cur
+        fit$lambda1 = lambda1.cur ; fit$se.lambda1 = se.lambda1 ; fit$se.loglambda1 = se.loglambda1
         if ((lambda.method == "Schall") || (lambda.method == "LPS2")){
             fit$xi1 = log(lambda1.cur-lambda1.min)
             fit$Hes.xi1 = Hes.xi1
@@ -1576,7 +1642,7 @@ tvcure = function(formula1, formula2, data,
         fit$pen.order1 = pen.order1
     }
     if (J2 > 0){
-        fit$lambda2 = lambda2.cur
+        fit$lambda2 = lambda2.cur ; fit$se.lambda2 = se.lambda2 ; fit$se.loglambda2 = se.loglambda2
         if ((lambda.method == "Schall") || (lambda.method == "LPS2")){
             fit$xi2 = log(lambda2.cur-lambda2.min)
             fit$Hes.xi2 = Hes.xi2

@@ -1,7 +1,7 @@
 Package: tvcure
 Type: Package
 Title: Additive cure survival model with exogenous time-varying covariates
-Version: 0.6.3
+Version: 0.6.4
 Authors@R: person("Philippe","Lambert", 
  email="p.lambert@uliege.be", role=c("aut","cre"),
  comment=c(ORCID ="0000-0002-3670-3328"))

@@ -5,6 +5,7 @@
 \title{Fit of a tvcure model.}
 \usage{
 tvcure(formula1, formula2, data,
+       model0=NULL,
        baseline=c("S0","F0"), K0=20, pen.order0=2,
        K1=10, pen.order1=2, K2=10, pen.order2=2,
        phi.0=NULL, beta.0=NULL, gamma.0=NULL,
@@ -15,7 +16,7 @@ tvcure(formula1, formula2, data,
        observed.hessian=TRUE, use.Rfast=TRUE, Wood.test=FALSE,
        ci.level=.95,
        criterion=c("levidence","deviance","lpen","AIC","BIC","gradient"),
-       criterion.tol=1e-1, grad.tol=1e-2,
+       criterion.tol=1e-2, grad.tol=1e-2,
        iterlim=50, iter.verbose=FALSE, verbose=FALSE)
 }
 \arguments{
@@ -29,6 +30,8 @@ tvcure(formula1, formula2, data,
 \item{\code{time} : \verb{ }}{the integer time at which the observations are reported. For a given unit, it should be a sequence of CONSECUTIVE integers starting at 1 for the first observation.}
 \item{\code{event} : \verb{ }}{a sequence of 0-1 event indicators. For the lines corresponding to a given unit, it starts with 0 values concluded by a 0 in case of right-censoring or by a 1 if the event is observed at the end of the follow-up.}
 }}
+
+\item{model0}{(Optional) tvcure object from which starting values for the regression parameters, spline and penalty parameters are extracted. Make sure that it corresponds to the same model specification. That possibility can be found useful to accelerate the fit of the same model on other data or for fixed given penalty parameter values. (Default: NULL).}
 
 \item{baseline}{Baseline ("S0" or "F0") used to specify the dependence of the cumulative hazard dynamics on covariates (Default: "S0"):
 Baseline S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Baseline F0: \eqn{F(t|x) = F_0(t)^{\exp{\gamma'x}}}}
@@ -98,7 +101,7 @@ Baseline S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Baseline F0: \eqn{F(t|x)
 \item{\code{gradient} : \verb{ }}{L2 norm of the gradient of the log of the joint posterior w.r.t. the regression and spline parameters.}
 }}
 
-\item{criterion.tol}{Maximum absolute difference between the successive values of the \code{criterion} values (when different from "gradient") to declare convergence. (Default: 1e-1).}
+\item{criterion.tol}{Maximum absolute difference between the successive values of the \code{criterion} values (when different from "gradient") to declare convergence. (Default: 1e-2).}
 
 \item{grad.tol}{Tolerance value to declare convergence based on gradient values in an optimization procedure (such as Newton-Raphson). (Default: 1e-2).}
 

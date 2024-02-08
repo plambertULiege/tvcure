@@ -128,19 +128,19 @@ print(model)
     ## Formula: ~z1 + z2 + s(x1) + s(x2) 
     ## 
     ## Parametric coefficients:
-    ##                 est      se     low      up     Z    Pval    
-    ## (Intercept)  0.5124  0.0682  0.3787  0.6462  7.51   6e-14 ***
-    ## z1          -0.1090  0.1073 -0.3194  0.1013 -1.02 0.30965    
-    ## z2           0.2113  0.0548  0.1039  0.3187  3.86 0.00011 ***
+    ##                 est      se     low      up     Z   Pval    
+    ## (Intercept)  0.5108  0.0681  0.3774  0.6442  7.51 <0.001 ***
+    ## z1          -0.1088  0.1073 -0.3191  0.1016 -1.01   0.31    
+    ## z2           0.2113  0.0548  0.1039  0.3187  3.86 <0.001 ***
     ## 
-    ##    exp(est) exp(-est)   low   up    Pval    
-    ## z1    0.897     1.115 0.727 1.11 0.30965    
-    ## z2    1.235     0.810 1.110 1.38 0.00011 ***
+    ##    exp(est) exp(-est)   low   up   Pval    
+    ## z1    0.897     1.115 0.727 1.11   0.31    
+    ## z2    1.235     0.810 1.110 1.38 <0.001 ***
     ## 
     ## Approximate significance of smooth terms (using Wood's <Tr> or Chi2):
-    ##             edf       Tr     Pval Chi2    Pval    
-    ## f1(x1) 3.00e+00 1.69e+01 7.34e-04 17.4 0.00058 ***
-    ## f1(x2) 3.32e+00 2.40e+01 2.65e-05 29.1 3.2e-06 ***
+    ##         edf   Tr     Pval Chi2   Pval    
+    ## f1(x1) 2.87 16.6 9.05e-04 16.9 <0.001 ***
+    ## f1(x2) 3.27 24.0 2.36e-05 29.0 <0.001 ***
     ## 
     ## 
     ## >> eta(x) - Short-term survival (Timing) <<
@@ -148,22 +148,22 @@ print(model)
     ## 
     ## Parametric coefficients:
     ##        est      se     low      up    Z   Pval   
-    ## z3  0.2121  0.1382 -0.0587  0.4829 1.54 0.1247   
-    ## z4  0.1818  0.0703  0.0440  0.3197 2.59 0.0097 **
+    ## z3  0.2147  0.1375 -0.0547  0.4842 1.56 0.1183   
+    ## z4  0.1820  0.0698  0.0451  0.3188 2.61 0.0092 **
     ## 
     ##    exp(est) exp(-est)   low   up   Pval   
-    ## z3    1.236     0.809 0.943 1.62 0.1247   
-    ## z4    1.199     0.834 1.045 1.38 0.0097 **
+    ## z3    1.240     0.807 0.947 1.62 0.1183   
+    ## z4    1.200     0.834 1.046 1.38 0.0092 **
     ## 
     ## Approximate significance of smooth terms (using Wood's <Tr> or Chi2):
-    ##           edf     Tr   Pval Chi2  Pval  
-    ## f2(x3) 2.7545 9.5439 0.0298 9.51 0.019 *
-    ## f2(x4) 2.2125 2.5907 0.2831 2.99 0.259  
+    ##         edf   Tr   Pval Chi2  Pval  
+    ## f2(x3) 2.69 9.57 0.0275 9.53 0.018 *
+    ## f2(x4) 2.19 2.64 0.2745 3.01 0.252  
     ## 
     ## ------------------------------------------------------------------------
-    ##  logEvid: -2002.59   Dev: 3161.93   AIC: 3194.52   BIC: 3257.523 
-    ##  edf: 16.29  nobs: 50672  n: 500 (units)  d: 353 (events)
-    ##  Elapsed time: 2.7 seconds  (6 iterations)
+    ##  logEvid: -2002.43   Dev: 3161.19   AIC: 3193.229   BIC: 3255.159 
+    ##  edf: 16.02  nobs: 50672  n: 500 (units)  d: 353 (events)
+    ##  Elapsed time: 4.1 seconds  (12 iterations)
     ## ------------------------------------------------------------------------
 
 The estimated reference hazard $\mathrm{e}^{\beta_0}f_0(t)$ and the
@@ -237,8 +237,8 @@ credible bounds):
 print(tail(obj$Sp,n=1)) ## Cure probability
 ```
 
-    ##             est        up       low
-    ## [275,] 0.318313 0.2161857 0.4250469
+    ##             est       up       low
+    ## [275,] 0.320633 0.218638 0.4269867
 
 More details can be found in Lambert & Kreyenfeld (2023) and in the
 documentation of the *tvcure* package.
@@ -268,7 +268,7 @@ covariates in double additive cure survival model with application to
 fertility. Journal of the Royal Statistical Society, Series A, under
 review. Preprint: [*arXiv:2302.00331*](https://arxiv.org/abs/2302.00331)
 
-\[2\] Lambert, P. (2024). R-package *tvcure* - Version 0.6.3. GitHub:
+\[2\] Lambert, P. (2024). R-package *tvcure* - Version 0.6.4. GitHub:
 [plambertULiege/tvcure](https://github.com/plambertULiege/tvcure)
 
 ### Complementary references
