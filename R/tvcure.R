@@ -10,7 +10,7 @@
 #'        K1=10, pen.order1=2, K2=10, pen.order2=2,
 #'        phi.0=NULL, beta.0=NULL, gamma.0=NULL,
 #'        a.tau=1, b.tau=1e-6, a=1, b=1e-2,
-#'        tau.0=100, tau.min=1, tau.method = c("LPS","LPS2","Schall","grid","none"),
+#'        tau.0=NULL, tau.min=1, tau.method = c("LPS","LPS2","Schall","grid","none"),
 #'        lambda1.0=NULL, lambda1.min=1, lambda2.0=NULL, lambda2.min=1,
 #'        lambda.method=c("LPS","LPS2","LPS3","Schall","nlminb","none"),
 #'        observed.hessian=TRUE, use.Rfast=TRUE, Wood.test=FALSE,
@@ -42,7 +42,7 @@
 #' @param b.tau Hyperprior parameter in the \eqn{Gamma(a.tau,b.tau)} prior for the penalty parameter \eqn{\tau} tuning the smoothness of \eqn{\log f_0(t)} (Default: 1e-6).
 #' @param a Hyperprior parameter in the \eqn{Gamma(a,b)} priors for the penalty parameters \eqn{\lambda_1} and \eqn{\lambda_2} tuning the smoothness of the additive terms in the long-term (quantum) and short-term (timing) survival submodels. (Default: 1.0).
 #' @param b Hyperprior parameter in the \eqn{Gamma(a,b)} priors for the penalty parameters \eqn{\lambda_1} and \eqn{\lambda_2} tuning the smoothness of the additive terms in the long-term (quantum) and short-term (timing) survival submodels. (Default: 1e-2).
-#' @param tau.0 Starting value for \eqn{\tau}. (Default: 100).
+#' @param tau.0 Starting value for \eqn{\tau}.
 #' @param tau.min Minimal value for the penalty parameter \eqn{\tau}. (Default: 1.0).
 #' @param tau.method Method used to calculate the posterior mode of \eqn{p(\tau|data)}: "LPS", "LPS2", "Schall" (Fellner-Schall algorithm), "grid" (best choice in a regular grid on the log-scale) or "none" (stick to the initial value tau.0). LPS and LPS2, based on Laplace P-splines, both maximize the marginal posterior of the penalty parameter \eqn{\tau} using a fixed-point method, with LPS relying on the prior calculation of eigenvalues. (Default: "LPS").
 #' @param lambda1.0 (Optional) J1-vector with starting values for the penalty parameters of the additive terms in the long-term survival (or quantum) submodel.
@@ -105,7 +105,7 @@ tvcure = function(formula1, formula2, data,
                   phi.0=NULL, beta.0=NULL, gamma.0=NULL,
                   a.tau=1, b.tau=1e-6,  ## Prior on penalty parameter <tau> for log f0(t): Gamma(a.tau,b.tau)
                   a=1, b=1e-2, ## Prior on penalty parameters for the additive terms: Gamma(a,b)
-                  tau.0=100, tau.min=1,
+                  tau.0=NULL, tau.min=1,
                   tau.method = c("LPS","LPS2","Schall","grid","none"),
                   lambda1.0=NULL, lambda1.min=1, lambda2.0=NULL, lambda2.min=1,
                   lambda.method=c("LPS","LPS2","LPS3","Schall","nlminb","none"), ## Penalty selection method for additive terms
@@ -194,6 +194,7 @@ tvcure = function(formula1, formula2, data,
     se.lambda1 = se.loglambda1 = se.lambda2 = se.loglambda2 = NULL
     ## When provided, use estimates in <model0> as initial values in the absence of specific initial values
     if (!is.null(model0)){
+        K1 = model0$regr1$K ; K2 = model0$regr2$K
         if (is.null(phi.0)) phi.0 = c(model0$fit$phi[,1])
         if (is.null(beta.0)) beta.0 = c(model0$fit$beta[,1])
         if (is.null(gamma.0)) gamma.0 = c(model0$fit$gamma[,1])
@@ -214,8 +215,9 @@ tvcure = function(formula1, formula2, data,
     ## Length of spline vectors
     ## -------------------------
     if (!is.null(phi.0)) K0 = length(phi.0)
-    if (!is.null(beta.0))  K1 = length(beta.0)
-    if (!is.null(gamma.0)) K2 = length(gamma.0)
+    ## if (!is.null(beta.0))  K1 = length(beta.0)
+    ## if (!is.null(gamma.0)) K2 = length(gamma.0)
+    ##
     ## Regression models for long-term (formula1) & short-term (formula2) survival
     ## ---------------------------------------------------------------------------
     regr1 = DesignFormula(formula1, data=data, K=K1, pen.order=pen.order1) ##, n=n)
@@ -347,7 +349,8 @@ tvcure = function(formula1, formula2, data,
         if (is.null(gamma.0)) gamma.0 = rep(0,q2)
         names(gamma.0) = regr2.lab
     }
-    ## ... for the penalty parameters in regression part
+    ## ... for the penalty parameters
+    if (is.null(tau.0)) tau.0 = 100
     if ((J1 > 0) & is.null(lambda1.0)) lambda1.0 = rep(10,J1)
     if ((J2 > 0) & is.null(lambda2.0)) lambda2.0 = rep(10,J2)
     ##

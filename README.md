@@ -163,7 +163,7 @@ print(model)
     ## ------------------------------------------------------------------------
     ##  logEvid: -2002.43   Dev: 3161.19   AIC: 3193.229   BIC: 3255.159 
     ##  edf: 16.02  nobs: 50672  n: 500 (units)  d: 353 (events)
-    ##  Elapsed time: 4.1 seconds  (12 iterations)
+    ##  Elapsed time: 3.8 seconds  (12 iterations)
     ## ------------------------------------------------------------------------
 
 The estimated reference hazard $\mathrm{e}^{\beta_0}f_0(t)$ and the

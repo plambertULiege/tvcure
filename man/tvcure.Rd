@@ -10,7 +10,7 @@ tvcure(formula1, formula2, data,
        K1=10, pen.order1=2, K2=10, pen.order2=2,
        phi.0=NULL, beta.0=NULL, gamma.0=NULL,
        a.tau=1, b.tau=1e-6, a=1, b=1e-2,
-       tau.0=100, tau.min=1, tau.method = c("LPS","LPS2","Schall","grid","none"),
+       tau.0=NULL, tau.min=1, tau.method = c("LPS","LPS2","Schall","grid","none"),
        lambda1.0=NULL, lambda1.min=1, lambda2.0=NULL, lambda2.min=1,
        lambda.method=c("LPS","LPS2","LPS3","Schall","nlminb","none"),
        observed.hessian=TRUE, use.Rfast=TRUE, Wood.test=FALSE,
@@ -62,7 +62,7 @@ Baseline S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Baseline F0: \eqn{F(t|x)
 
 \item{b}{Hyperprior parameter in the \eqn{Gamma(a,b)} priors for the penalty parameters \eqn{\lambda_1} and \eqn{\lambda_2} tuning the smoothness of the additive terms in the long-term (quantum) and short-term (timing) survival submodels. (Default: 1e-2).}
 
-\item{tau.0}{Starting value for \eqn{\tau}. (Default: 100).}
+\item{tau.0}{Starting value for \eqn{\tau}.}
 
 \item{tau.min}{Minimal value for the penalty parameter \eqn{\tau}. (Default: 1.0).}
 
