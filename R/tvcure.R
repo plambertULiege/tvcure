@@ -699,9 +699,9 @@ tvcure = function(formula1, formula2, data,
             ev.beta = svd(-Hes.beta)$d
             ev.gamma = 0
             if (!nogamma) ev.gamma = svd(-Hes.gamma)$d
-            levidence = lpen -.5*sum(log(ev.beta[ev.beta>1-6]))
+            levidence = lpen -.5*sum(log(ev.beta[ev.beta>1e-6]))
             if (!nogamma) levidence = levidence -.5*sum(log(ev.gamma[ev.gamma>1e-6]))
-            levidence = levidence -.5*sum(log(ev.psi[ev.psi>1-6]))
+            levidence = levidence -.5*sum(log(ev.psi[ev.psi>1e-6]))
         }
         ans = list(llik=llik, lpen=lpen, dev=dev, levidence=levidence,
                    res=(event-mu.ij)/sqrt(mu.ij),
@@ -1484,16 +1484,16 @@ tvcure = function(formula1, formula2, data,
                              Dphi=FALSE, Dbeta=TRUE, Dgamma=TRUE, Dlambda=FALSE)
                 ## ev.phi = svd(-obj.cur$Hes.phi)$d
                 ## ev.beta = svd(-obj.cur$Hes.beta)$d
-                ## levidence = obj.cur$lpen -.5*sum(log(ev.beta[ev.beta>1-6]))
+                ## levidence = obj.cur$lpen -.5*sum(log(ev.beta[ev.beta>1e-6]))
                 levidence = obj.cur$lpen -.5*ldet.fun(-obj.cur$Hes.beta)
                 if (!nogamma){
                     ## ev.gamma = svd(-obj.cur$Hes.gamma)$d
-                    ## levidence = levidence -.5*sum(log(ev.gamma[ev.gamma>1-6]))
+                    ## levidence = levidence -.5*sum(log(ev.gamma[ev.gamma>1e-6]))
                     levidence = levidence -.5*ldet.fun(-obj.cur$Hes.gamma)
                 }
-                ## levidence = obj.cur$lpen -.5*sum(log(ev.phi[ev.phi>1-6])) -.5*sum(log(ev.beta[ev.beta>1-6])) -.5*sum(log(ev.gamma[ev.gamma>1-6]))
+                ## levidence = obj.cur$lpen -.5*sum(log(ev.phi[ev.phi>1e-6])) -.5*sum(log(ev.beta[ev.beta>1e-6])) -.5*sum(log(ev.gamma[ev.gamma>1e-6]))
                 ## ev.regr = svd(-obj.cur$Hes.regr)$d
-                ## levidence = obj.cur$lpen -.5*sum(log(ev.phi[ev.phi>1-6])) -.5*sum(log(ev.regr[ev.regr>1-6]))
+                ## levidence = obj.cur$lpen -.5*sum(log(ev.phi[ev.phi>1e-6])) -.5*sum(log(ev.regr[ev.regr>1e-6]))
                 ans = -levidence
                 return(ans)
             } ## End loglambda.loss
@@ -1543,13 +1543,13 @@ tvcure = function(formula1, formula2, data,
         ## ev.beta = svd(-obj.cur$Hes.beta)$d
         ## ev.gamma = 0
         ## if (!nogamma) ev.gamma = svd(-obj.cur$Hes.gamma)$d
-        ## levidence = obj.cur$lpen -.5*sum(log(ev.beta[ev.beta>1-6]))
-        ## if (!nogamma) levidence = levidence -.5*sum(log(ev.gamma[ev.gamma>1-6]))
-        ## levidence = levidence -.5*sum(log(ev.psi[ev.psi>1-6])) ## NEW NEW NEW <-----
+        ## levidence = obj.cur$lpen -.5*sum(log(ev.beta[ev.beta>1e-6]))
+        ## if (!nogamma) levidence = levidence -.5*sum(log(ev.gamma[ev.gamma>1e-6]))
+        ## levidence = levidence -.5*sum(log(ev.psi[ev.psi>1e-6])) ## NEW NEW NEW <-----
         ## cat("levidence:",levidence,obj.cur$levidence,"\n")
         ##
         ## ev.regr = svd(-obj.cur$Hes.regr)$d
-        ## levidence = obj.cur$lpen -.5*sum(log(ev.phi[ev.phi>1-6])) -.5*sum(log(ev.regr[ev.regr>1-6]))
+        ## levidence = obj.cur$lpen -.5*sum(log(ev.phi[ev.phi>1e-6])) -.5*sum(log(ev.regr[ev.regr>1e-6]))
         ##
         ## Some output at the end of an iteration
         ## --------------------------------------
@@ -1686,9 +1686,9 @@ tvcure = function(formula1, formula2, data,
     ## ev.beta = svd(-obj.cur$Hes.beta)$d
     ## ev.gamma = 0
     ## if (!nogamma) ev.gamma = svd(-obj.cur$Hes.gamma)$d
-    ## levidence = obj.cur$lpen -.5*sum(log(ev.beta[ev.beta>1-6]))
-    ## if (!nogamma) levidence = levidence -.5*sum(log(ev.gamma[ev.gamma>1-6]))
-    ## levidence = levidence -.5*sum(log(ev.psi[ev.psi>1-6]))
+    ## levidence = obj.cur$lpen -.5*sum(log(ev.beta[ev.beta>1e-6]))
+    ## if (!nogamma) levidence = levidence -.5*sum(log(ev.gamma[ev.gamma>1e-6]))
+    ## levidence = levidence -.5*sum(log(ev.psi[ev.psi>1e-6]))
     ## fit$levidence = levidence
     ##
     ## Iterations and Computation time
