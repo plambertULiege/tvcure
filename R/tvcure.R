@@ -513,7 +513,6 @@ tvcure = function(formula1, formula2, data,
                       }
                     }
                     inv.tZWZ.1 = try(solve(tZWZ.1),TRUE)
-                    ## if (!is.matrix(inv.tZWZ.1)) return(stopthis())
                     ##
                     ## Mcal.1 required to update <lambda1>
                     if (observed.hessian){
