@@ -7,7 +7,10 @@
 #' \itemize{
 #' \item{\code{formula1} : \verb{ }}{A formula describing the linear predictor in the long-term (cure) survival (or quantum) submodel.}
 #' \item{\code{formula2} : \verb{ }}{A formula describing the linear predictor in the short-term (cure) survival (or timing) submodel.}
-#' \item{\code{method} : \verb{ }}{Method ("S0" or "F0") used to specify the dependence of the cumulative hazard dynamics on covariates.}
+#' \item{\code{baseline} : \verb{ }}{Baseline ("S0" or "F0") used to specify the dependence of the cumulative hazard dynamics on covariates.}
+#' \item{\code{id} : \verb{ }}{the <id> of the unit associated to the data in a given line in the data frame.}
+#' \item{\code{time} : \verb{ }}{the integer time at which the observations are reported. For a given unit, it should be a sequence of CONSECUTIVE integers starting at 1 for the first observation.}
+#' \item{\code{event} : \verb{ }}{a sequence of 0-1 event indicators. For the lines corresponding to a given unit, it starts with 0 values concluded by a 0 in case of right-censoring or by a 1 if the event is observed at the end of the follow-up.}
 #' \item{\code{regr1} : \verb{ }}{List returned by \code{\link{DesignFormula}} when evaluated on \code{formula1}.}
 #' \item{\code{regr2} : \verb{ }}{List returned by \code{\link{DesignFormula}} when evaluated on \code{formula2}.}
 #' \item{\code{K0} : \verb{ }}{Number of B-splines used to specify \eqn{\log f_0(t)}.}
@@ -16,9 +19,12 @@
 #'   \item{\code{llik} : \verb{ }}{Log likelihood value of the fitted tvcure model at convergence.}
 #'   \item{\code{lpen} : \verb{ }}{Log of the penalized joint posterior at convergence.}
 #'   \item{\code{dev} : \verb{ }}{Deviance of the fitted tvcure model at convergence.}
-#'   \item{\code{res} : \verb{ }}{Standardized residual \eqn{(d_{ij}-\mu_{ij})/\sqrt{\mu_{ij}}} for unit \eqn{i} at time \eqn{t_{ij}} where \eqn{\mu_{j}=h_p(t_{ij}|z(t_{ij}),x(t_{ij}))} and \eqn{d_{ij}} is the event indicator.}
+#'   \item{\code{mu.ij} : \verb{ }}{Expected value \eqn{\mu_{ij}=h_p(t_{ij}|z(t_{ij}),x(t_{ij}))} for the event indicator of unit \eqn{i} at time \eqn{t_{ij}}.}
+#'   \item{\code{res} : \verb{ }}{Standardized residual \eqn{(d_{ij}-\mu_{ij})/\sqrt{\mu_{ij}}} for unit \eqn{i} at time \eqn{t_{ij}} where \eqn{\mu_{ij}=h_p(t_{ij}|z(t_{ij}),x(t_{ij}))} and \eqn{d_{ij}} is the event indicator.}
 #'   \item{\code{phi} : \verb{ }}{Vector of length \eqn{K_0} containing the estimated B-splines coefficients in \eqn{\log f_0(t)}.}
+#'    \item{\code{marginalized} : \verb{ }}{Marginalization indicator (over penalty parameters) when reporting regression and spline parameter estimates.}
 #'   \item{\code{nbeta} : \verb{ }}{Number of regression and spline parameters in the long-term (cure) survival (or quantum) submodel.}
+#'   \item{\code{ci.level} : \verb{ }}{Selected level for credible intervals.}
 #'   \item{\code{beta} : \verb{ }}{(nbeta x 6) matrix containing the point estimates, standard errors, credible intervals, Z-scores and P-values of the regression and spline parameters in the long-term (cure) survival (or quantum) submodel.}
 #'   \item{\code{ngamma} : \verb{ }}{Number of regression and spline parameters in the short-term (cure) survival (or timing) submodel.}
 #'   \item{\code{gamma} : \verb{ }}{(ngamma x 6) matrix containing the point estimates, standard errors, credible intervals, Z-scores and P-values of the regression and spline parameters in the short-term (cure) survival (or timing) submodel.}
@@ -54,6 +60,7 @@
 #'   \item{\code{Hes.psi} : \verb{ }}{Hessian of the log joint posterior of <phi[-k.ref]>.}
 #'   \item{\code{tau} : \verb{ }}{Selected value for the penalty parameter \eqn{\tau} tuning the smoothness of \eqn{\log f_0(t)}.}
 #'   \item{\code{pen.order0} : \verb{ }}{Penalty order for the P-splines used to specify \eqn{\log f_0(t)}.}
+#'   \item{\code{logscale} : \verb{ }}{Logical: when TRUE, select \eqn{\lambda_1} or \eqn{\lambda_2} by maximizing \eqn{p(\log(\lambda_k)|D)},  maximize \eqn{p(\lambda_k|D)} otherwise. (Default= TRUE).}
 #'   \item{\code{lambda1} : \verb{ }}{Selected values for the penalty parameters \eqn{\lambda_1} tuning the smoothness of the additive terms in the long-term (cure) survival (or quantum) submodel.}
 #'   \item{\code{pen.order1} : \verb{ }}{Penalty order for the P-splines in the long-term survival (or quantum) submodel.}
 #'   \item{\code{lambda2} : \verb{ }}{Selected values for the penalty parameters \eqn{\lambda_2} tuning the smoothness of the additive terms in the short-term (cure) survival (or timing) submodel.}

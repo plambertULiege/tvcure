@@ -6,10 +6,11 @@
 #' \deqn{h_p(t|{\bf v}(t),\tilde{\bf v}(t)) = \mathrm{e}^{\eta_\vartheta({\bf v}(t))+\eta_F(\tilde{\bf v}(t))}
 #' f_0(t)S_0(t)^{\exp(\eta_F(\tilde{\bf v}(t)))-1}}
 #' with linear predictors
-#' \deqn{\eta_\vartheta({\bf v}(t)) = \beta_0 + \beta_1 z_1(t) + \beta_2 z_2 + f_1(x_1(t)) + f_2(x_2(t)) ~;~
-#'  \eta_F(\tilde{{\bf v}}(t)) = \gamma_1 z_3(t) +  \gamma_2 z_4 +  \tilde{f}_1(x_3(t)) + \tilde{f}_2(x_4(t))}
+#' \deqn{\eta_\vartheta({\bf v}(t)) = \beta_0 + \beta_1 z_1(t) + \beta_2 z_2 + f_1(x_1(t)) + f_2(x_2(t))}
+#' \deqn{\eta_F(\tilde{{\bf v}}(t)) = \gamma_1 z_3(t) +  \gamma_2 z_4 +  \tilde{f}_1(x_3(t)) + \tilde{f}_2(x_4(t))}
 #' where \eqn{{\bf v}(t)=(z_1(t),z_2,x_1(t),x_2(t))}, \eqn{\tilde{\bf v}(t)=(z_3(t),z_4,x_3(t),x_4(t))},
-#' with \eqn{x_3(t)=x_1(t)} a time-varying covariate shared by the 2 submodels.
+#' with time-varying covariates \eqn{x_1(t)}, \eqn{x_3(t)} assumed identical and shared by the 2 submodels when
+#' \code{shared.cov} is TRUE.
 #'
 #' The density \eqn{f_0(t)} governing the reference cumulative hazard dynamic is,
 #' by default, a Weibull with shape parameter 2.65 and scale parameter 100,
@@ -24,14 +25,15 @@
 #' \itemize{
 #'  \item{ } \eqn{z_1(t), z_3(t)} are recentered time-varying Bernoulli(0.5) on \eqn{(0,T_{max})} ;
 #'  \item{ } \eqn{z_2, z_4 \sim N(0,1)} ;
-#'  \item{ } \eqn{x_1(t), x_2(t), x_4(t)} follow random cubic polynomial trajectories on \eqn{(0,T_{max})}.
+#'  \item{ } \eqn{x_1(t), x_2(t), x_3(t), x_4(t)} follow random cubic polynomial trajectories on \eqn{(0,T_{max})}.
 #' }
 #' More details can be found in Lambert and Kreyenfeld (2024).
 #'
 #' @usage simulateTVcureData(n, seed, Tmax=300,
 #'        f0F0 = list(f0=function(x) dweibull(x, 2.65, 100),
 #'                    F0=function(x) pweibull(x, 2.65, 100)),
-#'        beta, gam, RC.dist=c("uniform","exponential","Tmax"),
+#'        beta, gam, shared.cov=TRUE,
+#'        RC.dist=c("uniform","exponential","Tmax"),
 #'        tRC.min = 120, mu.cens=40, get.details=TRUE)
 #' @param n Number of units.
 #' @param seed Seed (integer) for the random TVcure data generator.
@@ -39,6 +41,7 @@
 #' @param f0F0 List of length 2 providing the density \eqn{f_0(t)} and associated cdf \eqn{F_0(t)} governing the bounded hazard dynamic on (0,Tmax), with \eqn{F_0}(Tmax)=1.0. (Default: f0F0 = list(f0=function(x) dweibull(x, 2.65, 100), F0=function(x) pweibull(x, 2.65, 100))).
 #' @param beta 3-vector with the regression coefficients <beta> in the long-term (cure) survival (or quantum) submodel.
 #' @param gam 2-vector with the regression coefficients <gamma> in the short-term (cure) survival (or timing) submodel.
+#' @param shared.cov Logical indicating whether shared covariates for both submodels are assumed, with then \eqn{x_1(t)=x_3(t)}. (Default: TRUE).
 #' @param RC.dist Right-censoring distribution: "uniform" (Uniform on (\code{tRC.min},\code{Tmax})),"exponential" (with mean \code{mu.cens}) or "Tmax" (when right-censoring occurs at Tmax)
 #' @param tRC.min Minimum right-censoring time value if the right-censoring time distribution is Uniform. (Default: 120).
 #' @param mu.cens Mean of the right-censoring time distribution if it is Exponential. (Default: 40).
@@ -99,7 +102,7 @@
 #'
 simulateTVcureData = function(n, seed, Tmax=300,
                         f0F0 = list(f0=function(x) dweibull(x, 2.65, 100), F0=function(x) pweibull(x, 2.65, 100)),
-                        beta, gam, RC.dist=c("uniform","exponential","Tmax"),
+                        beta, gam, shared.cov=TRUE, RC.dist=c("uniform","exponential","Tmax"),
                         tRC.min = 120, mu.cens=40, get.details=TRUE){
     cl <- match.call()
     ## --------------------
@@ -173,6 +176,7 @@ simulateTVcureData = function(n, seed, Tmax=300,
             x2t = poly3.gen(t1=tmin,t2=tmax,y1=0,y2=1)$fun,
             x4t = poly3.gen(t1=tmin,t2=tmax,y1=0,y2=1)$fun
         )
+        if (!shared.cov) ans$x3t = poly3.gen(t1=tmin,t2=tmax,y1=0,y2=1.5)$fun
         return(ans)
     }
     ## End of cov.gen
@@ -204,7 +208,11 @@ simulateTVcureData = function(n, seed, Tmax=300,
         z3t = Xt$z3t(t) ## TV binary
         z4 = Xt$z4 ## rnorm(n,0,1)
         ## ... Additive
-        x3t = x1t ## Shared covariate (income)
+        if (shared.cov){
+            x3t = x1t ## Shared covariate (income)
+        } else {
+            x3t = Xt$x3t(t)
+        }
         x4t = Xt$x4t(t) ## poly3 on (0,1)
         ##
         ## Regression parameters & Additive terms for cure prob

@@ -4,7 +4,7 @@
 \alias{print.tvcure}
 \title{Print summary information on a \code{tvcure.object}.}
 \usage{
-\method{print}{tvcure}(x, ci.level=.95,expEst=TRUE,digits=3,eps.Pvalue=0.001,...)
+\method{print}{tvcure}(x, ci.level=.95,expEst=TRUE,digits.est=3,digits.edf=2,digits.tst=2,digits.Pvalue=3,...)
 }
 \arguments{
 \item{x}{an object of class \code{\link{tvcure.object}}.}
@@ -13,9 +13,13 @@
 
 \item{expEst}{(optional) logical indicating if the exponential of the regression parameter estimates should also be provided (with their confidence interval) (default: TRUE).}
 
-\item{digits}{number of digits when reporting parameter estimates (default: 3).}
+\item{digits.est}{number of digits when reporting parameter estimates (default: 3).}
 
-\item{eps.Pvalue}{Value below which a P-value is just reported to be less than \code{eps.Pvalue} (defaut: 0.001).}
+\item{digits.edf}{number of digits when reporting effective degrees of freedom (default: 2).}
+
+\item{digits.tst}{number of digits when reporting test statistics (default: 2).}
+
+\item{digits.Pvalue}{number of digits when reporting P-values (default: 3).}
 
 \item{...}{additional generic printing arguments.}
 }

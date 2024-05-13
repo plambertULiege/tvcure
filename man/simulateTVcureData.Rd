@@ -7,7 +7,8 @@
 simulateTVcureData(n, seed, Tmax=300,
        f0F0 = list(f0=function(x) dweibull(x, 2.65, 100),
                    F0=function(x) pweibull(x, 2.65, 100)),
-       beta, gam, RC.dist=c("uniform","exponential","Tmax"),
+       beta, gam, shared.cov=TRUE,
+       RC.dist=c("uniform","exponential","Tmax"),
        tRC.min = 120, mu.cens=40, get.details=TRUE)
 }
 \arguments{
@@ -22,6 +23,8 @@ simulateTVcureData(n, seed, Tmax=300,
 \item{beta}{3-vector with the regression coefficients <beta> in the long-term (cure) survival (or quantum) submodel.}
 
 \item{gam}{2-vector with the regression coefficients <gamma> in the short-term (cure) survival (or timing) submodel.}
+
+\item{shared.cov}{Logical indicating whether shared covariates for both submodels are assumed, with then \eqn{x_1(t)=x_3(t)}. (Default: TRUE).}
 
 \item{RC.dist}{Right-censoring distribution: "uniform" (Uniform on (\code{tRC.min},\code{Tmax})),"exponential" (with mean \code{mu.cens}) or "Tmax" (when right-censoring occurs at Tmax)}
 
@@ -73,10 +76,11 @@ The population hazard at time t  underlying the tvcure model is, for given covar
 \deqn{h_p(t|{\bf v}(t),\tilde{\bf v}(t)) = \mathrm{e}^{\eta_\vartheta({\bf v}(t))+\eta_F(\tilde{\bf v}(t))}
 f_0(t)S_0(t)^{\exp(\eta_F(\tilde{\bf v}(t)))-1}}
 with linear predictors
-\deqn{\eta_\vartheta({\bf v}(t)) = \beta_0 + \beta_1 z_1(t) + \beta_2 z_2 + f_1(x_1(t)) + f_2(x_2(t)) ~;~
- \eta_F(\tilde{{\bf v}}(t)) = \gamma_1 z_3(t) +  \gamma_2 z_4 +  \tilde{f}_1(x_3(t)) + \tilde{f}_2(x_4(t))}
+\deqn{\eta_\vartheta({\bf v}(t)) = \beta_0 + \beta_1 z_1(t) + \beta_2 z_2 + f_1(x_1(t)) + f_2(x_2(t))}
+\deqn{\eta_F(\tilde{{\bf v}}(t)) = \gamma_1 z_3(t) +  \gamma_2 z_4 +  \tilde{f}_1(x_3(t)) + \tilde{f}_2(x_4(t))}
 where \eqn{{\bf v}(t)=(z_1(t),z_2,x_1(t),x_2(t))}, \eqn{\tilde{\bf v}(t)=(z_3(t),z_4,x_3(t),x_4(t))},
-with \eqn{x_3(t)=x_1(t)} a time-varying covariate shared by the 2 submodels.
+with time-varying covariates \eqn{x_1(t)}, \eqn{x_3(t)} assumed identical and shared by the 2 submodels when
+\code{shared.cov} is TRUE.
 
 The density \eqn{f_0(t)} governing the reference cumulative hazard dynamic is,
 by default, a Weibull with shape parameter 2.65 and scale parameter 100,
@@ -91,7 +95,7 @@ Covariates are generated as follows:
 \itemize{
  \item{ } \eqn{z_1(t), z_3(t)} are recentered time-varying Bernoulli(0.5) on \eqn{(0,T_{max})} ;
  \item{ } \eqn{z_2, z_4 \sim N(0,1)} ;
- \item{ } \eqn{x_1(t), x_2(t), x_4(t)} follow random cubic polynomial trajectories on \eqn{(0,T_{max})}.
+ \item{ } \eqn{x_1(t), x_2(t), x_3(t), x_4(t)} follow random cubic polynomial trajectories on \eqn{(0,T_{max})}.
 }
 More details can be found in Lambert and Kreyenfeld (2024).
 }

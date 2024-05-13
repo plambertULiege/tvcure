@@ -16,7 +16,7 @@ importFrom("graphics", "abline", "curve", "grid", "lines", "matplot", "par", "po
 importFrom("stats", "dgamma", "na.omit", "nlm", "nlminb", "pchisq",
            "pf", "printCoefmat", "qchisq", "qnorm", "quantile", "sd",
            "splinefun", "model.matrix", "model.frame",
-           "dweibull", "pweibull", "rbinom", "rexp", "rnorm", "rpois", "runif",
+           "dweibull", "pweibull", "rbinom", "rexp", "rnorm", "rpois", "runif", "symnum",
            "AIC","BIC")
 importFrom("utils", "tail", "head")
 importFrom("cubicBsplines", "Bsplines", "D2Bsplines")

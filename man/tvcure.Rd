@@ -5,7 +5,7 @@
 \title{Fit of a tvcure model.}
 \usage{
 tvcure(formula1, formula2, data,
-       model0=NULL,
+       model0=NULL, noestimation=FALSE,
        baseline=c("S0","F0"), K0=20, pen.order0=2,
        K1=10, pen.order1=2, K2=10, pen.order2=2,
        phi.0=NULL, beta.0=NULL, gamma.0=NULL,
@@ -13,6 +13,7 @@ tvcure(formula1, formula2, data,
        tau.0=NULL, tau.min=1, tau.method = c("LPS","LPS2","Schall","grid","none"),
        lambda1.0=NULL, lambda1.min=1, lambda2.0=NULL, lambda2.min=1,
        lambda.method=c("LPS","LPS2","LPS3","Schall","nlminb","none"),
+       logscale=FALSE,
        observed.hessian=TRUE, use.Rfast=TRUE, Wood.test=FALSE,
        ci.level=.95,
        criterion=c("levidence","deviance","lpen","AIC","BIC","gradient"),
@@ -31,7 +32,9 @@ tvcure(formula1, formula2, data,
 \item{\code{event} : \verb{ }}{a sequence of 0-1 event indicators. For the lines corresponding to a given unit, it starts with 0 values concluded by a 0 in case of right-censoring or by a 1 if the event is observed at the end of the follow-up.}
 }}
 
-\item{model0}{(Optional) tvcure object from which starting values for the regression parameters, spline and penalty parameters are extracted. Make sure that it corresponds to the same model specification. That possibility can be found useful to accelerate the fit of the same model on other data or for fixed given penalty parameter values. (Default: NULL).}
+\item{model0}{(Optional) tvcure object from which starting values for the regression parameters, spline and penalty parameters are extracted. Make sure that it corresponds to the same model specification. The values of its components are overhidden by \code{phi.0}, \code{beta.0}, \code{gamma.0}, \code{tau.0}, \code{lambda1.0}, \code{lambda2.0} when they are not NULL. That possibility can be found useful to accelerate the fit of the same model on other data or for specific changes in model parameters (such as penalty parameters). (Default: NULL).}
+
+\item{noestimation}{Logical specifying that regression, spline and penalty parameters should not be estimated, but rather be fixed at their initial values (as for example provided by \code{model0} or other entries). (Default: FALSE).}
 
 \item{baseline}{Baseline ("S0" or "F0") used to specify the dependence of the cumulative hazard dynamics on covariates (Default: "S0"):
 Baseline S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Baseline F0: \eqn{F(t|x) = F_0(t)^{\exp{\gamma'x}}}}
@@ -83,6 +86,8 @@ Baseline S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Baseline F0: \eqn{F(t|x)
 \item{\code{nlminb} : \verb{ }}{nonlinear maximization of the marginal posterior of the penalty parameters using the R function <nlminb> ;}
 \item{\code{none} : \verb{ }}{penalty parameters are set at their initial values.}
 }}
+
+\item{logscale}{Logical: when TRUE, select \eqn{\lambda_1} or \eqn{\lambda_2} by maximizing \eqn{p(\log(\lambda_k)|D)},  maximize \eqn{p(\lambda_k|D)} otherwise. (Default= FALSE).}
 
 \item{observed.hessian}{Logical indicating if a fast approximation of the Hessian matrix based on cross-products is preferred over its expected value. (Default: TRUE).}
 
