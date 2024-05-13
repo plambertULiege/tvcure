@@ -4,7 +4,8 @@
 \alias{print.tvcure}
 \title{Print summary information on a \code{tvcure.object}.}
 \usage{
-\method{print}{tvcure}(x, ci.level=.95,expEst=TRUE,digits.est=3,digits.edf=2,digits.tst=2,digits.Pvalue=3,...)
+\method{print}{tvcure}(x, ci.level=.95,expEst=TRUE,
+             digits.est=3,digits.edf=2,digits.tst=2,digits.Pvalue=3,...)
 }
 \arguments{
 \item{x}{an object of class \code{\link{tvcure.object}}.}
