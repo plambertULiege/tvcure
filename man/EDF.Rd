@@ -4,12 +4,14 @@
 \alias{EDF}
 \title{Compute the effective degrees freedom in a tvcure model}
 \usage{
-EDF(model, Wood.test = FALSE)
+EDF(model, Wood.test = FALSE, joint.computation = TRUE)
 }
 \arguments{
 \item{model}{A tvcure object}
 
 \item{Wood.test}{Logical indicating if P-values based on Wood's test (Biometrika 2013) of the significance of additive terms should be preferred over basic Chi-square tests. (Default: FALSE).}
+
+\item{joint.computation}{Logical indicating if variance-covariance matrices for the regression and spline parameters in the long- and short-term survival submodels should be computed jointly (TRUE) or separately (FALSE). (Default: TRUE).}
 }
 \value{
 A list containing the effective degrees of freedom for the additive terms in the long-term (quantum) and short-term (timing) survival submodels, with the selected statistical test for significance and its P-value.

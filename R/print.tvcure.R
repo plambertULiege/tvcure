@@ -81,6 +81,9 @@ print.tvcure <- function(x,ci.level=.95,expEst=TRUE,
     print(x$call)
     cat("\n")
     ##
+    if (obj$regr1$J>0 || obj$regr2$J>0){
+        with(obj$fit, cat("Prior on penalty parameter(s): Gamma(",a,",",b,")\n\n",sep=""))
+    }
     cat(">> log(theta(x)) - Long-term survival (Quantum) <<\n")
     cat("Formula:",deparse(obj$formula1),"\n")
     nfixed1 = obj$regr1$nfixed
@@ -100,16 +103,17 @@ print.tvcure <- function(x,ci.level=.95,expEst=TRUE,
     ##
     if (obj$regr1$J > 0){
         if (obj$fit$marginalized){
-            cat("\nSmooth terms: P(EDF<1.5) & approximate significance using Wood's <Tr> or Chi2:\n")
-
+            cat("\nApproximate significance of smooth terms (Wood's <Tr> or Chi2):\n")
+            ## printMat(obj$fit$ED1,cs.edf=1:3,cs.tst=c(5,7),cs.Pval=c(4,6,8))
             printMat(obj$fit$ED1,cs.edf=1:3,cs.tst=c(5,7),cs.Pval=c(4,6,8))
         } else {
-            cat("\nApproximate significance of smooth terms (using Wood's <Tr> or Chi2):\n")
+            cat("\nApproximate significance of smooth terms (Wood's <Tr> or Chi2):\n")
+            ## printMat(obj$fit$ED1,cs.edf=1,cs.tst=c(2,4,6),cs.Pval=c(3,5,7))
             printMat(obj$fit$ED1,cs.edf=1,cs.tst=c(2,4),cs.Pval=c(3,5))
         }
     }
     ##
-    cat("\n\n>> eta(x) - Short-term survival (Timing) <<\n")
+    cat("\n>> eta(x) - Short-term survival (Timing) <<\n")
     ## switch(obj$baseline,
     ##        "S0" = {
     ##            cat("S.p(t|x) = exp{-theta(x) F(t|x)}  where  1-F(t|x) = S(t|x) = S.0(t)^exp(eta(x))\n")
@@ -142,15 +146,17 @@ print.tvcure <- function(x,ci.level=.95,expEst=TRUE,
     ##
     if (obj$regr2$J > 0){
         if (obj$fit$marginalized){
-            cat("\nSmooth terms: P(EDF<1.5) & approximate significance using Wood's <Tr> or Chi2:\n")
+            cat("\nApproximate significance of smooth terms (Wood's <Tr> or Chi2):\n")
+            ## printMat(obj$fit$ED2,cs.edf=1:3,cs.tst=c(5,7),cs.Pval=c(4,6,8))
             printMat(obj$fit$ED2,cs.edf=1:3,cs.tst=c(5,7),cs.Pval=c(4,6,8))
         } else {
-            cat("\nApproximate significance of smooth terms (using Wood's <Tr> or Chi2):\n")
+            cat("\nApproximate significance of smooth terms (Wood's <Tr> or Chi2):\n")
+            ## printMat(obj$fit$ED2,cs.edf=1,cs.tst=c(2,4,6),cs.Pval=c(3,5,7))
             printMat(obj$fit$ED2,cs.edf=1,cs.tst=c(2,4),cs.Pval=c(3,5))
         }
     }
-    ##
-    cat("\n------------------------------------------------------------------------\n")
+    ## cat("\n────────────────────────────────────────────────────────────────────\n")
+    cat("\n--------------------------------------------------------------------\n")
     if (!(obj$fit$marginalized)) cat(" logEvid: ",round(obj$fit$levidence,2)," ",sep="")
     cat(" Dev:",round(obj$fit$dev,2),
         "  AIC:",round(obj$fit$AIC,2),
@@ -162,5 +168,6 @@ print.tvcure <- function(x,ci.level=.95,expEst=TRUE,
         "  d: ",obj$fit$d," (events)",
         "\n",sep="")
     cat(" Elapsed time: ",round(obj$fit$elapsed.time,1)," seconds  (",obj$fit$iter," iterations)\n",sep="")
-    cat("------------------------------------------------------------------------\n")
+    ## cat("────────────────────────────────────────────────────────────────────\n")
+    cat("--------------------------------------------------------------------\n")
 }

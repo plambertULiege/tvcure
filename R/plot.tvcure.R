@@ -106,7 +106,7 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL,
               xlim=xlim0,ylim=ylim0,
               xlab="time",ylab=bquote(e^{beta[0]}*~f[0](t)), type="n",...)
         grid(lwd=.5,lty=1)
-        curve(exp(beta0)*fhat$f0(x),
+        curve(exp(beta0)*fhat$f0(x),lwd=1.5,
               xlim=attr(fhat$f0,"support"),ylim=ylim0, add=TRUE,
               xlab="time",ylab=bquote(e^{beta[0]}*~f[0](t)), ...)
     }
@@ -118,7 +118,7 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL,
               xlim=xlim0,ylim=ylim0,
               xlab="time",ylab=bquote(e^{beta[0]}*~f[0](t)), type="n",...)
         grid(lwd=.5,lty=1)
-        curve(exp(beta0)*fhat$f0(x),
+        curve(exp(beta0)*fhat$f0(x),lwd=1.5,
               xlim=attr(fhat$f0,"support"),ylim=ylim0, add=TRUE,
               xlab="time",ylab=bquote(e^{beta[0]}*~f[0](t)), ...)
         ## with(fhat, curve(f0,
@@ -127,7 +127,7 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL,
                          xlab="time",ylab=bquote(F[0](t))))
         grid(lwd=.5,lty=1,ny=0)
         abline(h=seq(0,1,by=.1),col="grey",lwd=.5)
-        with(fhat, curve(F0, xlim=attr(F0,"support"), add=TRUE,
+        with(fhat, curve(F0, xlim=attr(F0,"support"), add=TRUE,lwd=1.5,
                          xlab="time",ylab=bquote(F[0](t))))
     }
     ## Plot Additive terms
@@ -135,17 +135,17 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL,
     plotAdd = function(x,y,y2=NULL,col=1,colfill=c("#CCCCCC80","#E5E5E580"),las=1,...) {
         matplot(x, y,type="n",col=col,las=las,
                 xlim=xlims,ylim=ylims,xlab=xlab,ylab=ylab,
-                lwd=c(2,1,1),lty=c(1,2,2),...)
+                lwd=c(1.5,1,1),lty=c(1,2,2),...)
         grid(lwd=.5,lty=1)
         if (!fill){
             if (!is.null(y2)){
                 matplot(x,y2,type="l",add=TRUE,col="grey",las=las,
                         xlim=xlims,ylim=ylims,xlab=xlab,ylab=ylab,
-                        lwd=c(2,1,1),lty=c(1,3,3),...)
+                        lwd=c(1.5,1,1),lty=c(1,3,3),...)
             }
             matplot(x,y,type="l",add=TRUE,col=col,las=las,
                     xlim=xlims,ylim=ylims,xlab=xlab,ylab=ylab,
-                    lwd=c(2,1,1),lty=c(1,2,2),...)
+                    lwd=c(1.5,1,1),lty=c(1,2,2),...)
         } else {
             if (!is.null(y2)){
                 plotRegion(x,y2,add=TRUE,col=col,colfill=colfill[2],las=las,

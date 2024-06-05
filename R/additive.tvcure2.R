@@ -86,12 +86,13 @@ additive.tvcure <- function(obj.tvcure,ngrid=300, ci.level=.95){
     ## Additive part in long-term survival
     nbeta = obj$fit$nbeta
     ans$nfixed1=nfixed1 ; ans$J1 = J1
-    ## Sigma.regr = with(obj$fit, solve(-Hes.regr))
+    Sigma.regr = with(obj$fit, solve(-Hes.regr+1e-6*diag(ncol(Hes.regr))))
     if (J1 > 0){
         add.lab = obj$regr1$additive.lab
         ans$additive.lab1 = add.lab
         ans$K1=K1 ; ans$knots1 = obj$regr1$knots.x
-        Sigma = with(obj$fit, solve(-Hes.beta+1e-6*diag(ncol(Hes.beta)))) ## Added in 2023.10.11
+        Sigma = Sigma.regr[1:nbeta,1:nbeta] ## Added in 2024.05.13
+        ## Sigma = with(obj$fit, solve(-Hes.beta+1e-6*diag(ncol(Hes.beta)))) ## Added in 2023.10.11
         ## Sigma = Sigma.regr[1:nbeta,1:nbeta] ## Removed in 2023.10.11
         ED = obj$fit$ED1[,1]
         f.grid = f = f.se = list()
@@ -130,14 +131,16 @@ additive.tvcure <- function(obj.tvcure,ngrid=300, ci.level=.95){
     ## Additive part in short-term survival
     ngamma = obj$fit$ngamma
     ans$nfixed2=nfixed2 ; ans$J2 = J2
+    Sigma.regr = with(obj$fit, solve(-Hes.regr+1e-6*diag(ncol(Hes.regr))))
     if (J2 > 0){
         add.lab = obj$regr2$additive.lab
         ans$additive.lab2 = add.lab
         ans$K2=K2 ; ans$knots2 = obj$regr2$knots.x
-        Sigma = with(obj$fit, solve(-Hes.gamma+1e-6*diag(ncol(Hes.gamma)))) ## Added in 2023.10.11
+        Sigma = Sigma.regr[nbeta + (1:ngamma),nbeta + (1:ngamma)] ## Added in 2024.05.13
+        ## Sigma = with(obj$fit, solve(-Hes.gamma+1e-6*diag(ncol(Hes.gamma)))) ## Added in 2023.10.11
         ## Sigma = Sigma.regr[nbeta + (1:ngamma),nbeta + (1:ngamma)] ## Removed in 2023.10.11
         ED = obj$fit$ED2[,1]
-        f.grid = f.se = list()
+        f.grid = f = f.se = list()
         for (j in 1:J2){
             idx = nfixed2 + (j-1)*K2 + (1:K2)
             gamma.j = obj$fit$gamma[idx,"est"] ## Centered B-splines coefs for jth additive term

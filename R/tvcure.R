@@ -239,6 +239,7 @@ tvcure = function(formula1, formula2, data,
     K1 = regr1$K ; K2 = regr2$K ## Number of B-splines per additive term
     nfixed1 = regr1$nfixed ; nfixed2 = regr2$nfixed ## Number of 'non-spline' regression parameters
     lambda1.lab = regr1$lambda.lab ; lambda2.lab = regr2$lambda.lab ## Penalty labels
+    Dd1.x = regr1$Dd.x ; Dd2.x = regr2$Dd.x ## Basic penalty matrix for an additive term
     Pd1.x = regr1$Pd.x ; Pd2.x = regr2$Pd.x ## Basic penalty matrix for an additive term
     Z1 = regr1$Z ; Z2 = regr2$Z ## Design matrices associated to 'non-spline' regression parameters
     regr1.lab = colnames(regr1$Xcal) ; regr2.lab = colnames(regr2$Xcal) ## Labels of the regression parms
@@ -721,6 +722,7 @@ tvcure = function(formula1, formula2, data,
                    nfixed1=nfixed1, nfixed2=nfixed2, nogamma=nogamma, ## NEW
                    J1=J1, J2=J2, K1=K1, K2=K2, ## NEW
                    knots1.x=regr1$knots.x, knots2.x=regr2$knots.x, ## NEW
+                   Dd1.x=Dd1.x, Dd2.x=Dd2.x, Pd1.x=Pd1.x, Pd2.x=Pd2.x, ## NEW
                    pen.order1 = regr1$pen.order, pen.order2 = regr2$pen.order, ## NEW
                    additive.lab1 = regr1$additive.lab, additive.lab2 = regr2$additive.lab, ## NEW
                    knots=knots, T=T, t.grid=1:T, f0.grid=f0.grid, F0.grid=F0.grid, S0.grid=S0.grid,
