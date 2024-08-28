@@ -308,18 +308,6 @@ tvcure = function(formula1, formula2, data,
             ev1.lst[[j]] = ev.fun(BwB=Hes.betaj,Pd=regr1$Pd.x)$dj
         }
     }
-    ## ... in short-term survival submodel
-    ## (Exact) Non-penalized Hessian for <gamma>:
-    ## if (nogamma){ ## Absence of covariate (and no intercept for identification reasons)
-    ##     eta.2 = 0.0
-    ## } else {
-    ##     eta.2 = c(regr2$Xcal %*% gamma) ## Linear predictors in short-term survival
-    ## }
-    ## if (baseline == "F0") tempo = exp(eta.2)*log(F0.grid[time])
-    ## if (baseline == "S0") tempo = exp(eta.2)*log(S0.grid[time])
-    ## XcalTempo = (1+tempo) * regr2$Xcal
-    ## Hes.gamma0 = -Rfast::Crossprod(regr2$XcalTempo[id1,,drop=FALSE], regr2$XcalTemp[id1,,drop=FALSE])
-    ##
     ## (Approximate) Non-penalized Hessian for <gamma>:
     Hes.gamma0 = ev2.lst = NULL
     if (!nogamma){
@@ -333,11 +321,6 @@ tvcure = function(formula1, formula2, data,
             for (j in 1:J2){ ## Loop over additive terms in the long-term survival sub-model
                 idx = nfixed2 + (j-1)*K2 + (1:K2)
                 Hes.gamj = Hes.gamma0[idx,idx,drop=FALSE]
-                ## if (use.Rfast){
-                ##     Hes.gamj = -Rfast::Crossprod(regr2$Xcal[id1,idx,drop=FALSE], regr2$Xcal[id1,idx,drop=FALSE])
-                ## } else {
-                ##     Hes.gamj = -crossprod(regr2$Xcal[id1,idx,drop=FALSE], regr2$Xcal[id1,idx,drop=FALSE])
-                ## }
                 ev2.lst[[j]] = ev.fun(BwB=Hes.gamj,Pd=regr2$Pd.x)$dj
             }
         }
@@ -361,17 +344,12 @@ tvcure = function(formula1, formula2, data,
     ##
     ## Pre-evaluated IB-splines basis for F0(t)
     ## ----------------------------------------
-    ## t.grid = 1:T
-    ## obj.knots = qknots(t.grid, xmin=0, xmax=max(t.grid), equid.knots = TRUE, pen.order=pen.order0, K=K0)
     obj.knots = qknots(1:T, xmin=0, xmax=T+1, equid.knots = TRUE, pen.order=pen.order0, K=K0)
     knots = obj.knots$knots ## Knots
     Pd = obj.knots$Pd ## Penalty matrix
     ##
-    ## IB0.grid = IBsplines(t0=0,1:T,knots=knots) ## TxS matrix [Ib0_s(t)]
-    ## IB.T = c(IBsplines(t0=0,max(knots),knots=knots))
     B0.grid = Bsplines(1:T,knots=knots) ## TxS matrix [b0_s(t)]
     if (is.null(phi.0)) phi.0 = rep(0,ncol(B0.grid)) ## c(solve(t(B0.grid)%*%B0.grid + Pd)%*%t(B0.grid)%*%dnorm(1:T,.5*T,T/7))
-    ## if (is.null(phi.0)) phi.0 = c(solve(t(B0.grid)%*%B0.grid + Pd) %*% t(B0.grid) %*% log(h0.hat+1e-3))
     names(phi.0) = paste("phi",1:length(phi.0),sep="")
     k.ref = ceiling(K0/2)
     phi.0 = phi.0 - phi.0[k.ref]
@@ -479,23 +457,6 @@ tvcure = function(formula1, formula2, data,
                 ## Hes.beta0 = -t(regr1$Xcal) %*% (W1*regr1$Xcal)
                 }
             }
-            ## if (observed.hessian){
-            ##   if (use.Rfast){
-            ##     Hes.beta0 = -Rfast::Crossprod(regr1$Xcal[id1,,drop=FALSE], regr1$Xcal[id1,,drop=FALSE]) ## ICI ICI
-            ##   } else {
-            ##       Hes.beta0 = -crossprod(regr1$Xcal[id1,,drop=FALSE], regr1$Xcal[id1,,drop=FALSE]) ## ICI ICI
-            ##   }
-            ## } else {
-            ##     W1 = mu.ij
-            ##     if (use.Rfast){
-            ##         Hes.beta0 = -Rfast::Crossprod(regr1$Xcal, W1*regr1$Xcal)
-            ##     } else {
-            ##         Hes.beta0 = -crossprod(regr1$Xcal, W1*regr1$Xcal)
-            ##     ## Hes.beta0 = -t(regr1$Xcal) %*% (W1*regr1$Xcal)
-            ##     }
-            ## }
-            ## toc()
-            ##
             ## Additive terms
             Hes.beta = Hes.beta0 ## Non-penalized Hessian Hes.beta0 for <beta>
             if (J1 > 0){
@@ -636,10 +597,6 @@ tvcure = function(formula1, formula2, data,
                                cbind(t(Hes.betgam), Hes.gamma))
               Hes.regr0 = rbind(cbind(Hes.beta0, Hes.betgam),
                                 cbind(t(Hes.betgam), Hes.gamma0))
-              ## Hes.regr = rbind(cbind(Hes.beta, 0*Hes.betgam),
-              ##                  cbind(0*t(Hes.betgam), Hes.gamma))
-              ## Hes.regr0 = rbind(cbind(Hes.beta0, 0*Hes.betgam),
-              ##                  cbind(0*t(Hes.betgam), Hes.gamma0))
             }
         }
         ## Derivatives of lpen wrt <phi>
@@ -666,9 +623,6 @@ tvcure = function(formula1, formula2, data,
                        dlhp = (exp(eta.2)-1.0) * dlS0.grid[time,] + dlf0.grid[time,] ## (nobs x S) matrix
                    }
             )
-            ## grad.phi = apply((event-mu.ij) * dlhp, 2,sum)
-            ## grad.phi = colSums((event-mu.ij) * dlhp)
-            ## toc() ; tic("  Dphi - P2")
             if (use.Rfast){
                 grad.phi = Rfast::colsums(dlhp[id1,,drop=FALSE]) - Rfast::colsums(mu.ij * dlhp)
             } else {
@@ -719,12 +673,12 @@ tvcure = function(formula1, formula2, data,
                    Hes.betgam=Hes.betgam,
                    grad.regr=grad.regr, Hes.regr=Hes.regr, Hes.regr0=Hes.regr0,
                    grad.phi=grad.phi, Hes.phi=Hes.phi, Hes.phi0=Hes.phi0,
-                   nfixed1=nfixed1, nfixed2=nfixed2, nogamma=nogamma, ## NEW
-                   J1=J1, J2=J2, K1=K1, K2=K2, ## NEW
-                   knots1.x=regr1$knots.x, knots2.x=regr2$knots.x, ## NEW
-                   Dd1.x=Dd1.x, Dd2.x=Dd2.x, Pd1.x=Pd1.x, Pd2.x=Pd2.x, ## NEW
-                   pen.order1 = regr1$pen.order, pen.order2 = regr2$pen.order, ## NEW
-                   additive.lab1 = regr1$additive.lab, additive.lab2 = regr2$additive.lab, ## NEW
+                   nfixed1=nfixed1, nfixed2=nfixed2, nogamma=nogamma,
+                   J1=J1, J2=J2, K1=K1, K2=K2,
+                   knots1.x=regr1$knots.x, knots2.x=regr2$knots.x,
+                   Dd1.x=Dd1.x, Dd2.x=Dd2.x, Pd1.x=Pd1.x, Pd2.x=Pd2.x,
+                   pen.order1 = regr1$pen.order, pen.order2 = regr2$pen.order,
+                   additive.lab1 = regr1$additive.lab, additive.lab2 = regr2$additive.lab,
                    knots=knots, T=T, t.grid=1:T, f0.grid=f0.grid, F0.grid=F0.grid, S0.grid=S0.grid,
                    dlf0.grid=dlf0.grid, dlF0.grid=dlF0.grid, dlS0.grid=dlS0.grid, k.ref=k.ref,
                    a=aa, b=bb, a.tau=a.tau, b.tau=b.tau)
@@ -942,7 +896,7 @@ tvcure = function(formula1, formula2, data,
                     ok.xi=ok.xi1))
     } ## End select.lambda.LPS3
     ##
-    ## Function testStat implements Wood (2013) Biometrika 100(1), 221-228
+    ## Function Tr.test implements Wood (2013) Biometrika 100(1), 221-228
     ## Goal: evaluate H0: fj = Xt %*% beta = 0  when  (beta | D) ~ N(p,V)
     ## The type argument specifies the type of truncation to use.
     ## on entry `rank' should be an edf estimate
@@ -958,149 +912,6 @@ tvcure = function(formula1, formula2, data,
     }
     ## End Tr.test
     ##
-    ## Wood.test = function(p,Xt,V,edf){
-    ##     ans <- testStat(p, Xt, V, min(ncol(Xt), edf), type = 0, res.df = -1)
-    ##     return(ans)
-    ## }
-    ## End Wood.test
-    ##
-    ## ## Calculate EDF, Chi2 and Pval for additive terms
-    ## ED.fun = function(fit, Wood.test=FALSE){
-    ##     joint.ED.computation = FALSE
-    ##     ED1 = ED2 = ED1.Tr = ED2.Tr = ED1.Chi2 = ED2.Chi2 = NULL
-    ##     ##
-    ##     nbeta = fit$nbeta   ## Nbr of regression & spline parameters in long-term survival
-    ##     ngamma = fit$ngamma ## Nbr of regression & spline parameters in short-term survival
-    ##     nogamma = fit$nogamma ## Indicates when covariates are absent in <formula2>
-    ##     J1 = fit$J1 ; J2 = fit$J2 ; K1 = fit$K1 ; K2 = fit$K2
-    ##     nfixed1 = fit$nfixed1 ; nfixed2 = fit$nfixed2
-    ##     ##
-    ##     Sigma.beta = with(fit, solve(-Hes.beta+1e-6*diag(ncol(Hes.beta))))
-    ##     ED.beta = rowSums(t(Sigma.beta) * (-fit$Hes.beta0))
-    ##     ##
-    ##     if (!nogamma){
-    ##         Sigma.gamma = with(fit, solve(-Hes.gamma+1e-6*diag(ncol(Hes.gamma))))
-    ##         ED.gamma = rowSums(t(Sigma.gamma) * (-fit$Hes.gamma0))
-    ##     } else {
-    ##         Sigma.gamma = NULL
-    ##         ED.gamma = 0
-    ##     }
-    ##     ##
-    ##     ED.full = c(ED.beta,ED.gamma) ## Added on 2023.10.11
-    ##     ##
-    ##     ## Sigma.regr = with(fit, solve(-Hes.regr))
-    ##     ## ED.full = rowSums(t(Sigma.regr) * (-fit$Hes.regr0))
-    ##     ## Sigma.regr = with(fit, solve(-Hes.regr)) ## Removed on 2023.10.11
-    ##     ## ED.full = rowSums(t(Sigma.regr) * (-fit$Hes.regr0)) ## Removed on 2023.10.11
-    ##     ##
-    ##     if (J1 > 0){
-    ##         ## Sigma.beta = with(fit, solve(-Hes.beta))
-    ##         ## ED1.full = with(fit, rowSums(t(Sigma.beta) * (-Hes.beta0)))
-    ##         ## ED1.full = with(fit, diag(Sigma.beta %*% (-Hes.beta0)))
-    ##         ED1 = Chi2 = Tr = Pval.Tr = Pval.Chi2 = numeric(J1)
-    ##         for (j in 1:J1){
-    ##             idx = nfixed1 + (j-1)*K1 + (1:K1)
-    ##             beta.j = fit$beta[idx]
-    ##             if (joint.ED.computation){
-    ##                 ED1[j] = sum(ED.full[idx])
-    ##             } else {
-    ##                 Sigma.betaj = with(fit, solve(-Hes.beta[idx,idx]+1e-6*diag(length(idx))))
-    ##                 bele = t(Sigma.betaj) * (-fit$Hes.beta0[idx,idx])
-    ##                 ED1[j] = sum(bele)
-    ##             }
-    ##             ## Begin Wood
-    ##             ngrid = 200
-    ##             knots.x = fit$knots1.x[[j]] ## knots.x = regr1$knots.x[[j]]
-    ##             xL = min(knots.x) ; xU = max(knots.x)
-    ##             pen.order = fit$pen.order1 ## regr1$pen.order
-    ##             x1.grid = seq(min(knots.x),max(knots.x),length=ngrid) ## Grid of values
-    ##             ## Centered B-spline basis
-    ##             cB = centeredBasis.gen(x1.grid,knots=knots.x,cm=NULL,pen.order)$B
-    ##             ## f1.grid[,j] = c(cB %*% beta.j)
-    ##             bele = Tr.test(beta.j,Xt=cB,Sigma.beta[idx,idx],ED1[j]) ## Added on 2023.10.11
-    ##             ## bele = Tr.test(beta.j,Xt=cB,Sigma.regr[idx,idx],ED1[j]) ## Removed on 2023.10.11
-    ##             Tr[j] = bele$stat
-    ##             Pval.Tr[j] = bele$pval
-    ##             ## cat("Wood:",Tr[j],Pval.Tr[j],ED1[j],"\n")
-    ##             ## End Wood
-    ##             ##
-    ##             ## "Naive" method
-    ##             Chi2[j] = sum(beta.j * c(solve(Sigma.beta[idx,idx], beta.j))) ## Added on 2023.10.11
-    ##             ## Chi2[j] = sum(beta.j * c(solve(Sigma.regr[idx,idx]) %*% beta.j)) ## Removed on 2023.10.11
-    ##             Pval.Chi2[j] = 1 - pchisq(Chi2[j],ED1[j])
-    ##             ## cat("Naive:",Chi2[j],Pval.Chi2[j],ED1[j],"\n")
-    ##             ## End Naive
-    ##         }
-    ##         ED1.Tr = cbind(ED1,Tr,Pval.Tr)
-    ##         ED1.Chi2 = cbind(ED1,Chi2,Pval.Chi2)
-    ##         rownames(ED1.Tr) = rownames(ED1.Chi2) = paste("f1(",fit$additive.lab1,")",sep="")
-    ##         ## rownames(ED1.Tr) = rownames(ED1.Chi2) = paste("f1(",regr1$additive.lab,")",sep="")
-    ##         colnames(ED1.Tr) = c("edf","Tr","Pval")
-    ##         colnames(ED1.Chi2) = c("edf","Chi2","Pval")
-    ##     }
-    ##     ##
-    ##     if (J2 > 0){
-    ##         ## Sigma.gamma = with(fit, solve(-Hes.gamma))
-    ##         ## ED2.full = with(fit, rowSums(t(Sigma.gamma) * (-Hes.gamma0)))
-    ##         ## ED2.full = with(fit, diag(Sigma.gamma %*% (-Hes.gamma0)))
-    ##         ED2 = Chi2 = Tr = Pval.Tr = Pval.Chi2 = numeric(J2)
-    ##         for (j in 1:J2){
-    ##             idx = nfixed2 + (j-1)*K2 + (1:K2)
-    ##             gamma.j = fit$gamma[idx]
-    ##             if (joint.ED.computation){
-    ##                 ED2[j] = sum(ED.full[nbeta + idx])
-    ##             } else {
-    ##                 Sigma.gammaj = with(fit, solve(-Hes.gamma[idx,idx]+1e-6*diag(length(idx))))
-    ##                 bele = t(Sigma.gammaj) * (-fit$Hes.gamma0[idx,idx])
-    ##                 ED2[j] = sum(bele)
-    ##             }
-    ##             ## Begin Wood
-    ##             ngrid = 200
-    ##             knots.x = fit$knots2.x[[j]] ## regr2$knots.x[[j]]
-    ##             xL = min(knots.x) ; xU = max(knots.x)
-    ##             pen.order = fit$pen.order2 ## regr2$pen.order
-    ##             x2.grid = seq(min(knots.x),max(knots.x),length=ngrid) ## Grid of values
-    ##             ## Centered B-spline basis
-    ##             cB = centeredBasis.gen(x2.grid,knots=knots.x,cm=NULL,pen.order)$B
-    ##             ## f2.grid[,j] = c(cB %*% gamma.j)
-    ##             bele = Tr.test(gamma.j,Xt=cB,Sigma.gamma[idx,idx],ED2[j]) ## Added on 2023.10.11
-    ##             ## bele = Tr.test(gamma.j,Xt=cB,Sigma.regr[nbeta+idx, nbeta+idx],ED2[j]) ## Removed on 2023.10.11
-    ##             Tr[j] = bele$stat
-    ##             Pval.Tr[j] = bele$pval
-    ##             ## cat("Wood:",Tr[j],Pval.Tr[j],ED2[j],"\n")
-    ##             ## End Wood
-    ##             ##
-    ##             ## "Naive" method
-    ##             Chi2[j] = sum(gamma.j * c(solve(Sigma.gamma[idx, idx], gamma.j))) ## Added on 2023.10.11
-    ##             ## Chi2[j] = sum(gamma.j * c(solve(Sigma.regr[nbeta+idx, nbeta+idx]) %*% gamma.j)) ## Removed on 2023.10.11
-    ##             Pval.Chi2[j] = 1 - pchisq(Chi2[j],ED2[j])
-    ##             ## cat("Naive:",Chi2[j],Pval[j],ED2[j],"\n")
-    ##             ## End Naive
-    ##         }
-    ##         ED2.Tr = cbind(ED2,Tr,Pval.Tr)
-    ##         ED2.Chi2 = cbind(ED2,Chi2,Pval.Chi2)
-    ##         rownames(ED2.Tr) = rownames(ED2.Chi2) = paste("f2(",fit$additive.lab2,")",sep="")
-    ##         ## rownames(ED2.Tr) = rownames(ED2.Chi2) = paste("f2(",regr2$additive.lab,")",sep="")
-    ##         colnames(ED2.Tr) = c("edf","Tr","Pval")
-    ##         colnames(ED2.Chi2) = c("edf","Chi2","Pval")
-    ##     }
-    ##     if (Wood.test){
-    ##         ED1=ED1.Tr ; ED2=ED2.Tr
-    ##     } else {
-    ##         ED1=ED1.Chi2 ; ED2=ED2.Chi2
-    ##     }
-    ##     ##
-    ##     ED1.tot = ED2.tot = 0
-    ##     ED1.tot = nfixed1 + ifelse(J1==0, 0, sum(ED1[,1]))
-    ##     ED2.tot = ifelse(nogamma, 0, nfixed2) + ifelse(J2==0, 0, sum(ED2[,1]))
-    ##     ED.tot = ED1.tot + ED2.tot
-    ##     ##
-    ##     return(list(ED1=ED1, ED2=ED2,
-    ##                 ED1.tot=ED1.tot, ED2.tot=ED2.tot, ED.tot=ED.tot,
-    ##                 ED1.Tr=ED1.Tr, ED2.Tr=ED2.Tr,
-    ##                 ED1.Chi2=ED1.Chi2, ED2.Chi2=ED2.Chi2))
-    ## } ## End ED.fun
-    ##
     ## #############
     ## ESTIMATION ##
     ## #############
@@ -1115,7 +926,7 @@ tvcure = function(formula1, formula2, data,
         ok = FALSE
         ## Convergence criterion using RDM (see e.g. Prague et al, 2013)
         RDM = with(obj.cur, sum(grad * dtheta)) / ntheta
-        ok =  (RDM < tol^2) ## grad' (-H)^-1 grad / ntheta < tol^2 ?
+        ok =  (abs(RDM) < tol^2) ## grad' (-H)^-1 grad / ntheta < tol^2 ?
         ## ok = (L2norm(obj.cur$grad) < tol) ## Stopping rule
         ## ok = all(abs(obj.cur$grad) < tol) ## Stopping rule
         iter = 0
@@ -1153,27 +964,9 @@ tvcure = function(formula1, formula2, data,
     ##
     ## Starting values
     ## ---------------
-    ## if (!is.null(model0)){
-    ##     phi.cur = c(model0$fit$phi[,1])
-    ##     beta.cur = c(model0$fit$beta[,1])
-    ##     gamma.cur = c(model0$fit$gamma[,1])
-    ##     tau.cur = c(model0$fit$tau)
-    ##     lambda1.cur = model0$fit$lambda1
-    ##     lambda2.cur = model0$fit$lambda2
-    ##     se.lambda1 = model0$fit$se.lambda1
-    ##     se.loglambda1 = model0$fit$se.loglambda1
-    ##     se.lambda2 = model0$fit$se.lambda2
-    ##     se.loglambda2 = model0$fit$se.loglambda2
-    ##     Hes.xi1 = model0$fit$Hes.xi1
-    ##     Hes.xi2 = model0$fit$Hes.xi2
-    ##     Hes.lam1 = model0$fit$Hes.lam1
-    ##     Hes.lam2 = model0$fit$Hes.lam2
-    ## } else {
     phi.cur = phi.0 ; beta.cur = beta.0 ; gamma.cur = gamma.0
     tau.cur = tau.0 ; lambda1.cur = lambda1.0 ; lambda2.cur = lambda2.0
-    ## se.lambda1 = se.loglambda1  = NA*lambda1.cur ; se.lambda2 = se.loglambda2 = NA*lambda2.cur
-    ## Hes.xi1 = Hes.xi2 = Hes.lam1 = Hes.lam2 = NULL
-    ## }
+    ##
     tau.iter = c()
     ## Functions to handle identification issue in polytomial logistic estimation of <f0>
     ## ----------------------------------------------------------------------------------
@@ -1183,9 +976,6 @@ tvcure = function(formula1, formula2, data,
         return(ans)
     }
     phi2psi = function(phi) return((phi-phi[k.ref])[-k.ref])
-    ## ## Check whether there is no covariate in the short-term survival part
-    ## ##  in which case  <gamma> should be a scalar fixed to 0
-    ## nogamma = (regr2$nfixed==1) & (colnames(regr2$Xcal)[1]=="(Intercept)") & (regr2$J == 0)
     ##
     converged = FALSE ; iter = 0
     final.iteration = FALSE ## Idea: when the EDs of the additive terms stabilize,
@@ -1209,8 +999,6 @@ tvcure = function(formula1, formula2, data,
         ## =====================
         ## -1- Estimation of F0  (through <phi> and <psi>)
         ## =====================
-        ## cat("phi\n")
-        ## tic("1: phi:")
         if (!noestimation){
             nlm.version = FALSE
             ##
@@ -1353,26 +1141,7 @@ tvcure = function(formula1, formula2, data,
         ## =======================================
         ## -2- Newton-Raphson for <beta> & <gamma>
         ## =======================================
-        ## cat("beta - gamma\n")
-        ## toc() ; tic("2: regr")
         idx1 = 1:length(beta.0)
-        ##
-        ## ## Select <beta,gamma> using nlminb and (gradient + Hessian) (function ff)
-        ## ## -----------------------------------------------------------------------
-        ## gg = function(theta){
-        ##     beta = theta[idx1] ; gamma = theta[-idx1]
-        ##     -ff(phi=phi.cur, beta=beta, gamma=gamma,tau=tau.cur, lambda1=lambda1.cur, lambda2=lambda2.cur,Dbeta=FALSE,Dgamma=FALSE)$lpen
-        ## }
-        ## gr = function(theta){
-        ##     beta = theta[idx1] ; gamma = theta[-idx1]
-        ##     -ff(phi=phi.cur, beta=beta, gamma=gamma,tau=tau.cur, lambda1=lambda1.cur, lambda2=lambda2.cur,Dbeta=TRUE,Dgamma=TRUE)$grad.regr
-        ## }
-        ## gh = function(theta){
-        ##     beta = theta[idx1] ; gamma = theta[-idx1]
-        ##     -ff(phi=phi.cur, beta=beta, gamma=gamma,tau=tau.cur, lambda1=lambda1.cur, lambda2=lambda2.cur,Dbeta=TRUE,Dgamma=TRUE)$Hes.regr
-        ## }
-        ## bele = nlminb(start=c(beta.cur,gamma.cur), objective=gg, gradient=gr, hessian=gh, control=list(eval.max=500,iter.max=500))
-        ## beta.cur = bele$par[idx1] ; gamma.cur = bele$par[-idx1]
         ##
         ## Select <beta,gamma> using homemade Newton-Raphson
         ## --------------------------------------------------
@@ -1401,9 +1170,6 @@ tvcure = function(formula1, formula2, data,
         ## ================================
         ## -3- Update <lambda1> & <lambda2> (i.e. penalty vectors for additive terms in long- and short-term survival)
         ## ================================
-        ##
-        ## cat("lambda\n")
-        ## toc() ; tic("3: lambda")
         itermin = 1 ## Only start updating after <itermin> iterations
         update.lambda = ifelse(iter <= itermin, FALSE, (J1 > 0)|(J2 > 0))
         ##
@@ -1486,10 +1252,6 @@ tvcure = function(formula1, formula2, data,
         if (lambda.method == "Schall"){ ## Schall's method
             ##
             ED.cur = EDF(list(fit=obj.cur),Wood.test=Wood.test) ## Evaluate current ED for additive terms
-            ## ED1.tot = regr1$nfixed + ifelse(J1==0, 0, sum(ED.cur$ED1[,1]))
-            ## ED2.tot = ifelse(nogamma, 0, regr2$nfixed) + ifelse(J2==0, 0, sum(ED.cur$ED2[,1]))
-            ## ED.tot = ED1.tot + ED2.tot
-            ##
             if (update.lambda & !final.iteration){
                 ## -3a- lambda1 (long-term survival)
                 ## ------------
@@ -1533,18 +1295,10 @@ tvcure = function(formula1, formula2, data,
                 obj.cur = ff(phi.cur, beta.cur, gamma.cur,
                              tau=tau.cur, lambda1=lambda1, lambda2=lambda2,
                              Dphi=FALSE, Dbeta=TRUE, Dgamma=TRUE, Dlambda=FALSE)
-                ## ev.phi = svd(-obj.cur$Hes.phi)$d
-                ## ev.beta = svd(-obj.cur$Hes.beta)$d
-                ## levidence = obj.cur$lpen -.5*sum(log(ev.beta[ev.beta>1e-6]))
                 levidence = obj.cur$lpen -.5*ldet.fun(-obj.cur$Hes.beta)
                 if (!nogamma){
-                    ## ev.gamma = svd(-obj.cur$Hes.gamma)$d
-                    ## levidence = levidence -.5*sum(log(ev.gamma[ev.gamma>1e-6]))
                     levidence = levidence -.5*ldet.fun(-obj.cur$Hes.gamma)
                 }
-                ## levidence = obj.cur$lpen -.5*sum(log(ev.phi[ev.phi>1e-6])) -.5*sum(log(ev.beta[ev.beta>1e-6])) -.5*sum(log(ev.gamma[ev.gamma>1e-6]))
-                ## ev.regr = svd(-obj.cur$Hes.regr)$d
-                ## levidence = obj.cur$lpen -.5*sum(log(ev.phi[ev.phi>1e-6])) -.5*sum(log(ev.regr[ev.regr>1e-6]))
                 ans = -levidence
                 return(ans)
             } ## End loglambda.loss
@@ -1581,26 +1335,9 @@ tvcure = function(formula1, formula2, data,
         ## Effective dims & Information criteria
         ## -------------------------------------
         ED.cur = EDF(list(fit=obj.cur),Wood.test=Wood.test)
-        ## ED1.tot = regr1$nfixed + ifelse(J1==0, 0, sum(ED.cur$ED1[,1]))
-        ## ED2.tot = ifelse(nogamma, 0, regr2$nfixed) + ifelse(J2==0, 0, sum(ED.cur$ED2[,1]))
-        ## ED.tot = ED1.tot + ED2.tot
         AIC = obj.cur$dev + 2*ED.cur$ED.tot
         BIC = obj.cur$dev + log(sum(n.event))*ED.cur$ED.tot
         levidence = obj.cur$levidence
-        ##
-        ## ## log(evidence)
-        ## ## -------------
-        ## ev.psi = svd(-obj.cur$Hes.phi[-k.ref,-k.ref])$d
-        ## ev.beta = svd(-obj.cur$Hes.beta)$d
-        ## ev.gamma = 0
-        ## if (!nogamma) ev.gamma = svd(-obj.cur$Hes.gamma)$d
-        ## levidence = obj.cur$lpen -.5*sum(log(ev.beta[ev.beta>1e-6]))
-        ## if (!nogamma) levidence = levidence -.5*sum(log(ev.gamma[ev.gamma>1e-6]))
-        ## levidence = levidence -.5*sum(log(ev.psi[ev.psi>1e-6])) ## NEW NEW NEW <-----
-        ## cat("levidence:",levidence,obj.cur$levidence,"\n")
-        ##
-        ## ev.regr = svd(-obj.cur$Hes.regr)$d
-        ## levidence = obj.cur$lpen -.5*sum(log(ev.phi[ev.phi>1e-6])) -.5*sum(log(ev.regr[ev.regr>1e-6]))
         ##
         ## Some output at the end of an iteration
         ## --------------------------------------
@@ -1667,9 +1404,6 @@ tvcure = function(formula1, formula2, data,
     } else {
         se.gamma = with(fit, sqrt(diag(solve(-Hes.gamma+1e-6*diag(ncol(Hes.gamma))))))
     }
-    ## The following line of code was there before, yielding misleading results !!
-    ## se.gamma = ifelse(nogamma, 0, sqrt(diag(solve(-fit$Hes.gamma))))
-    ##
     ## Regression parameter estimates with their se's, z-score, Pval
     ## -------------------------------------------------------------
     fit$marginalized = FALSE ## Marginalization indicator (over penaly parameters) for regression and spline coefs
@@ -1716,17 +1450,6 @@ tvcure = function(formula1, formula2, data,
     ## -----------------------------------------------------------------
     temp = EDF(list(fit=fit),Wood.test=Wood.test)
     fit = c(fit,temp)
-    ## fit$ED1 = temp$ED1 ; fit$ED2 = temp$ED2
-    ## fit$ED1.Tr = temp$ED1.Tr ; fit$ED2.Tr = temp$ED2.Tr
-    ## fit$ED1.Chi2 = temp$ED1.Chi2 ; fit$ED2.Chi2 = temp$ED2.Chi2
-    ##
-    ## Effective total number of parameters in regression submodels
-    ## ------------------------------------------------------------
-    ## ED1.tot = ED2.tot = 0
-    ## ED1.tot = regr1$nfixed + ifelse(J1==0, 0, sum(fit$ED1[,1]))
-    ## ED2.tot = ifelse(nogamma, 0, regr2$nfixed) + ifelse(J2==0, 0, sum(fit$ED2[,1]))
-    ## ED.tot = ED1.tot + ED2.tot
-    ## fit$ED1.tot = ED1.tot ; fit$ED2.tot = ED2.tot ; fit$ED.tot = ED.tot
     ##
     ## AIC and BIC
     ## -----------
@@ -1736,17 +1459,6 @@ tvcure = function(formula1, formula2, data,
     ##
     fit$AIC = AIC ## fit$dev + 2*ED.tot
     fit$BIC = BIC ## fit$dev + log(fit$d)*ED.tot
-    ##
-    ## ## log(evidence)
-    ## ## -------------
-    ## ev.psi = svd(-obj.cur$Hes.phi[-k.ref,-k.ref])$d
-    ## ev.beta = svd(-obj.cur$Hes.beta)$d
-    ## ev.gamma = 0
-    ## if (!nogamma) ev.gamma = svd(-obj.cur$Hes.gamma)$d
-    ## levidence = obj.cur$lpen -.5*sum(log(ev.beta[ev.beta>1e-6]))
-    ## if (!nogamma) levidence = levidence -.5*sum(log(ev.gamma[ev.gamma>1e-6]))
-    ## levidence = levidence -.5*sum(log(ev.psi[ev.psi>1e-6]))
-    ## fit$levidence = levidence
     ##
     ## Iterations and Computation time
     ## -------------------------------
