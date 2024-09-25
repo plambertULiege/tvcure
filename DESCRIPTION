@@ -18,4 +18,4 @@ Imports:
     MASS,
     Matrix,
     mgcv
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
