@@ -148,6 +148,9 @@ tvcure = function(formula1, formula2, data,
     fun0 = function(x) x[length(x)] %in% c(0,1) && sum(x[-length(x)])==0
     check0 = all(unlist(by(data$event, data$id, fun0)))
     if (!check0) stop("<event> can only contain 0's (with 0 or 1 at the end) for a given <id> !!")
+    ## tapply2: same as <tapply>, but keep original order of appearance of 'group' values
+    tapply2 = function(x,group,FUN) tapply(x, factor(group,unique(group)), FUN)
+    ##
     ## Check 1: <time> starts at 1 for a given <id>
     fun1 = function(x) x[1]==1
     check1 = all(as.vector(by(data$time, data$id, fun1))) ## Should be true
@@ -160,7 +163,8 @@ tvcure = function(formula1, formula2, data,
     T = max(data$time) ## Maximum follow-up time (that should be RC)
     ## Check 3: <time> should be a sequence of consecutive integers for a given <id>
     fun3 = function(x) all(diff(x)==1)
-    check3 = c(by(data$time, data$id, fun3)) ## Should be true for a given <id>
+    check3 = tapply2(data$time, data$id, fun3) ## Should be true for a given <id>
+    ## check3 = c(by(data$time, data$id, fun3)) ## Should be true for a given <id>
     id.discarded = names(check3)[!check3]
     n.id = length(check3)
     if (sum(check3) < .1*n.id) stop("<time> should be a sequence of consecutive integers for a given <id> !!")
@@ -168,9 +172,13 @@ tvcure = function(formula1, formula2, data,
         word = ifelse(sum(!check3)>1, " units", " unit")
         cat(sum(!check3),word," (out of ",length(unique(data$id)),") with non-consecutive integer values for <time> detected\n",sep="")
         fun4 = function(x) as.logical(cumprod(c(TRUE,diff(x)==1)))
-        rows.ok =  unlist(by(data$time, data$id, fun4)) ## Rows with consecutive <time> values within a given <id>
+        ## Rows with consecutive <time> values within a given <id>
+        rows.ok =  as.vector(unlist(tapply2(data$time, data$id, fun4)))
+        ## NOTE: the 'by' function does not keep the original order of appearance of data$id values !! --> correction using 'tapply2' on 2024.11.30
+        ## rows.ok =  as.vector(unlist(by(data$time, data$id, fun4))) ## Rows with consecutive <time> values within a given <id>
         ##
-        temp = c(by(data$id[!rows.ok],data$id[!rows.ok],function(x) length(x)))
+        temp = tapply2(data$id[!rows.ok],data$id[!rows.ok],function(x) length(x))
+##        temp = c(by(data$id[!rows.ok],data$id[!rows.ok],function(x) length(x)))
         temp = c(temp,sum(temp)) ; names(temp)[length(temp)] = "Total"
         cat("Number of discarded time entries (out of ",nrow(data),") per problematic unit <id>:\n",sep="")
         print(temp)
