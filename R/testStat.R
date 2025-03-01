@@ -10,9 +10,9 @@
 #' @param res.df -1 indicates that the scale is fixed (cf. ordinal response)
 #' @return Returns a list with following elements:
 #' \itemize{
-#' \item{stat : \verb{ }}{Value of the test statistics}
-#' \item{pval : \verb{ }}{P-value of the test for the null hypothesis Ho: p=0}
-#' \item{rank : \verb{ }}{Effective dimension of <p>}
+#' \item stat : Value of the test statistics
+#' \item pval : P-value of the test for the null hypothesis Ho: p=0
+#' \item rank : Effective dimension of <p>
 #' }
 #' @keywords internal
 #' @export

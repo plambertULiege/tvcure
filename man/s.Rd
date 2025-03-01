@@ -9,7 +9,7 @@ s(x, ref = NULL)
 \arguments{
 \item{x}{Name of the variable for which an additive term is requested.}
 
-\item{(Optional)}{reference value for \code{x} where the additive term is zero.}
+\item{ref}{(Optional) reference value for \code{x} where the additive term is zero.}
 }
 \value{
 The submitted variable for which an additive term is required.

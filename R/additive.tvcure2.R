@@ -6,21 +6,24 @@
 #'
 #' @return A list with following elements:
 #' \itemize{
-#' \item{\code{f0} : \verb{ }}{a function estimate of \eqn{f_0}.}
-#' \item{\code{F0} : \verb{ }}{a function estimate of \eqn{F_0}.}
-#' \item{\code{T} : \verb{ }}{the follow-up time after which a unit is considered `cured'.}
-#' \item{\code{nfixed1} : \verb{ }}{the number of non-penalized regression parameter in the long-term term (or quantum) submodel.}
-#' \item{\code{J1} : \verb{ }}{number of additive terms in the long-term term (or quantum) submodel.}
-#' \item{\code{additive.lab1} : \verb{ }}{labels of the additive terms in the long-term term (or quantum) submodel.}
-#' \item{\code{K1} : \verb{ }}{number of P-spline parameters per additive term in the long-term term (or quantum) submodel.}
-#' \item{\code{knots1} : \verb{ }}{list of length J1 containing the knots of the additive term in the long-term term (or quantum) submodel.}
-#' \item{\code{f1.grid} : \verb{ }}{list of length J1 containing for each additive term in the long-term term (or quantum) submodel, a list of length 3 with elements <x>, <y.mat> and <y.mat2>.
-#' Element <x> is a vector of \code{ngrid} equidistant values covering the range of values for the covariate ;
-#' <y.mat> is (ngrid x 3) matrix containing in column 1 the estimated values of the additive term at <x> and the bounds of the pointwise credible interval for it in the other 2 columns.
-#' <y.mat2> is (ngrid x 3) matrix containing in column 1 the estimated values of the additive term at <x> and the bounds of the simultaneous credible region for it in the other 2 columns.}
-#' \item{\code{f1} : \verb{ }}{list of length J1 containing the estimated function of the corresponding additive term in the long-term term (or quantum) submodel.}
-#' \item{\code{f1.se} : \verb{ }}{list of length J1 containing the estimated standard error function of the corresponding additive term in the long-term term (or quantum) submodel.}
+#' \item \code{f0} : a function estimate of \eqn{f_0}.
+#' \item \code{F0} : a function estimate of \eqn{F_0}.
+#' \item \code{T} : the follow-up time after which a unit is considered `cured'.
+#' \item \code{nfixed1} : the number of non-penalized regression parameter in the long-term term (or quantum) submodel.
+#' \item \code{J1} : number of additive terms in the long-term term (or quantum) submodel.
+#' \item \code{additive.lab1} : labels of the additive terms in the long-term term (or quantum) submodel.
+#' \item \code{K1} : number of P-spline parameters per additive term in the long-term term (or quantum) submodel.
+#' \item \code{knots1} : list of length J1 containing the knots of the additive term in the long-term term (or quantum) submodel.
+#' \item \code{f1.grid} : list of length J1 containing for each additive term in the long-term term (or quantum) submodel, a list of length 3 with elements <x>, <y.mat> and <y.mat2>
+#' \itemize{
+#' \item Element <x> is a vector of \code{ngrid} equidistant values covering the range of values for the covariate ;
+#' \item <y.mat> is (ngrid x 3) matrix containing in column 1 the estimated values of the additive term at <x> and the bounds of the pointwise credible interval for it in the other 2 columns.
+#' \item <y.mat2> is (ngrid x 3) matrix containing in column 1 the estimated values of the additive term at <x> and the bounds of the simultaneous credible region for it in the other 2 columns.
 #' }
+#' \item \code{f1} : list of length J1 containing the estimated function of the corresponding additive term in the long-term term (or quantum) submodel.
+#' \item \code{f1.se} : list of length J1 containing the estimated standard error function of the corresponding additive term in the long-term term (or quantum) submodel.
+#' }
+#'
 #' The same definitions applies for \code{nfixed2}, \code{J2}, \code{additive.lab2}, \code{K2}, \code{knots2},
 #' \code{f2.grid}, \code{f2}, \code{f2.se} with the additive terms in the short-term (or timing) submodel.
 #'

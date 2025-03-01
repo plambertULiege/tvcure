@@ -11,6 +11,7 @@ tvcure(formula1, formula2, data,
        phi.0=NULL, beta.0=NULL, gamma.0=NULL,
        a.tau=1, b.tau=1e-6, a=1, b=1e-2,
        tau.0=NULL, tau.min=1, tau.method = c("LPS","LPS2","Schall","grid","none"),
+       psi.method = c("LM","NR","none"),
        lambda1.0=NULL, lambda1.min=1, lambda2.0=NULL, lambda2.min=1,
        lambda.method=c("LPS","LPS2","LPS3","Schall","nlminb","none"),
        logscale=FALSE,
@@ -18,6 +19,7 @@ tvcure(formula1, formula2, data,
        ci.level=.95,
        criterion=c("levidence","deviance","lpen","AIC","BIC","gradient"),
        criterion.tol=1e-2, grad.tol=1e-2,
+       RDM.tol=1e-4, fun.tol=1e-3,
        iterlim=50, iter.verbose=FALSE, verbose=FALSE)
 }
 \arguments{
@@ -27,9 +29,9 @@ tvcure(formula1, formula2, data,
 
 \item{data}{A data frame with survival data in a counting process format. It should always contain at least the following entries:
 \itemize{
-\item{\code{id} : \verb{ }}{the <id> of the unit associated to the data in a given line in the data frame.}
-\item{\code{time} : \verb{ }}{the integer time at which the observations are reported. For a given unit, it should be a sequence of CONSECUTIVE integers starting at 1 for the first observation.}
-\item{\code{event} : \verb{ }}{a sequence of 0-1 event indicators. For the lines corresponding to a given unit, it starts with 0 values concluded by a 0 in case of right-censoring or by a 1 if the event is observed at the end of the follow-up.}
+\item \code{id} : the <id> of the unit associated to the data in a given line in the data frame.
+\item \code{time} : the integer time at which the observations are reported. For a given unit, it should be a sequence of CONSECUTIVE integers starting at 1 for the first observation.
+\item \code{event} : a sequence of 0-1 event indicators. For the lines corresponding to a given unit, it starts with 0 values concluded by a 0 in case of right-censoring or by a 1 if the event is observed at the end of the follow-up.
 }}
 
 \item{model0}{(Optional) tvcure object from which starting values for the regression parameters, spline and penalty parameters are extracted. Make sure that it corresponds to the same model specification. The values of its components are overhidden by \code{phi.0}, \code{beta.0}, \code{gamma.0}, \code{tau.0}, \code{lambda1.0}, \code{lambda2.0} when they are not NULL. That possibility can be found useful to accelerate the fit of the same model on other data or for specific changes in model parameters (such as penalty parameters). (Default: NULL).}
@@ -71,6 +73,8 @@ Baseline S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Baseline F0: \eqn{F(t|x)
 
 \item{tau.method}{Method used to calculate the posterior mode of \eqn{p(\tau|data)}: "LPS", "LPS2", "Schall" (Fellner-Schall algorithm), "grid" (best choice in a regular grid on the log-scale) or "none" (stick to the initial value tau.0). LPS and LPS2, based on Laplace P-splines, both maximize the marginal posterior of the penalty parameter \eqn{\tau} using a fixed-point method, with LPS relying on the prior calculation of eigenvalues. (Default: "LPS").}
 
+\item{psi.method}{Algorithm used for the computation of the conditional posterior mode of the regression and splines parameters. Possible choices are Levenberg-Marquardt ("LM"), Newton-Raphson ("NR") or "none" (when the coefficients remain fixed at their initial values).}
+
 \item{lambda1.0}{(Optional) J1-vector with starting values for the penalty parameters of the additive terms in the long-term survival (or quantum) submodel.}
 
 \item{lambda1.min}{Minimal value for the J1 penalty parameters \eqn{\lambda_1} of the additive terms in the long-term survival (or quantum) submodel. (Default: 1.0).}
@@ -81,11 +85,10 @@ Baseline S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Baseline F0: \eqn{F(t|x)
 
 \item{lambda.method}{Method used ("LPS", "LPS2", "LPS3", "Schall", "nlminb" or "none") to select the penalty parameters of the additive terms in the long-term survival (or quantum) submodel:
 \itemize{
-\item{\code{LPS}, \code{LPS2}, or \code{LPS3} : \verb{ }}{based on Laplace P-splines where the marginal posterior of the penalty parameters is maximized using a fixed-point method. LPS is based on the prior calculation of eigenvalues (unlike LPS2) and delivers results of comparable quality to those of nlminb, but much more quickly. LPS3 work sequentially and separately on long- and short-term parameters with potentially convergence issues ;}
-\item{\code{Schall} : \verb{ }}{Fellner-Schall method ;}
-\item{\code{nlminb} : \verb{ }}{nonlinear maximization of the marginal posterior of the penalty parameters using the R function <nlminb> ;}
-\item{\code{none} : \verb{ }}{penalty parameters are set at their initial values.}
-}}
+\item \code{LPS}, \code{LPS2}, or \code{LPS3} : based on Laplace P-splines where the marginal posterior of the penalty parameters is maximized using a fixed-point method. LPS is based on the prior calculation of eigenvalues (unlike LPS2) and delivers results of comparable quality to those of nlminb, but much more quickly. LPS3 work sequentially and separately on long- and short-term parameters with potentially convergence issues ;
+\item \code{Schall} : Fellner-Schall method ;
+\item \code{nlminb} : nonlinear maximization of the marginal posterior of the penalty parameters using the R function <nlminb> ;
+\item \code{none} : penalty parameters are set at their initial values. }}
 
 \item{logscale}{Logical: when TRUE, select \eqn{\lambda_1} or \eqn{\lambda_2} by maximizing \eqn{p(\log(\lambda_k)|D)},  maximize \eqn{p(\lambda_k|D)} otherwise. (Default= FALSE).}
 
@@ -99,16 +102,19 @@ Baseline S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Baseline F0: \eqn{F(t|x)
 
 \item{criterion}{Criterion used to assess convergence of the estimation procedure (Default: "levidence"):
 \itemize{
-\item{\code{levidence} : \verb{ }}{log of the evidence, i.e. of the marginal posterior of the penalty parameters at their selected values ;}
-\item{\code{deviance} : \verb{ }}{deviance or -2 log(Likelihood) ;}
-\item{\code{AIC} : \verb{ }}{Akaike information criterion ;}
-\item{\code{BIC} : \verb{ }}{Bayesian (or Schwarz) information criterion ;}
-\item{\code{gradient} : \verb{ }}{L2 norm of the gradient of the log of the joint posterior w.r.t. the regression and spline parameters.}
-}}
+\item \code{levidence} : log of the evidence, i.e. of the marginal posterior of the penalty parameters at their selected values ;
+\item \code{deviance} : deviance or -2 log(Likelihood) ;
+\item \code{AIC} : Akaike information criterion ;
+\item \code{BIC} : Bayesian (or Schwarz) information criterion ;
+\item \code{gradient} : L2 norm of the gradient of the log of the joint posterior w.r.t. the regression and spline parameters.}}
 
 \item{criterion.tol}{Maximum absolute difference between the successive values of the \code{criterion} values (when different from "gradient") to declare convergence. (Default: 1e-2).}
 
-\item{grad.tol}{Tolerance value to declare convergence based on gradient values in an optimization procedure (such as Newton-Raphson). (Default: 1e-2).}
+\item{grad.tol}{Tolerance threshold for the absolute value of each gradient component when monitoring convergence. (default: 1e-2).}
+
+\item{RDM.tol}{Tolerance thershold for the Relative Damping Measure (= RDM) when monitoring convergence (default: 1e-4).}
+
+\item{fun.tol}{Tolerance threshold for variations in the maximized function during the final iterations of posterior mode computation and convergence monitoring (default: 1e-3).}
 
 \item{iterlim}{Maximum number of iterations. (Default: 50).}
 

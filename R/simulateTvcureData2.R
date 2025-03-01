@@ -51,39 +51,39 @@
 #'
 #' @return A list with following elements:
 #' \itemize{
-#' \item{\code{seeds} : \verb{ }}{Seeds used to generate the data for each of the n units.}
-#' \item{\code{tRC.min} : \verb{ }}{Minimum right-censoring time value if the right-censoring time distribution is Uniform.}
-#' \item{\code{RC.dist} : \verb{ }}{Right-censoring distribution ("Uniform", "Exponential" or "Tmax").}
-#' \item{\code{cure.rate} : \verb{ }}{Underlying proportion of cured units (i.e. without an observed event by \code{Tmax} if the follow-up is not interrupted by that time due to right-censoring).}
-#' \item{\code{RC.rate} : \verb{ }}{Observed right-censoring rate.}
-#' \item{\code{rawdata} : \verb{ }}{Data frame containing the generated data in a counting process format with the detailed follow-up for each unit until the event or right-censoring occurs:}
+#' \item \code{seeds} : Seeds used to generate the data for each of the n units.
+#' \item \code{tRC.min} : Minimum right-censoring time value if the right-censoring time distribution is Uniform.
+#' \item \code{RC.dist} : Right-censoring distribution ("Uniform", "Exponential" or "Tmax").
+#' \item \code{cure.rate} : Underlying proportion of cured units (i.e. without an observed event by \code{Tmax} if the follow-up is not interrupted by that time due to right-censoring).
+#' \item \code{RC.rate} : Observed right-censoring rate.
+#' \item \code{rawdata} : Data frame containing the generated data in a counting process format with the detailed follow-up for each unit until the event or right-censoring occurs:
 #'   \itemize{
-#'   \item{\code{id} : \verb{ }}{Unit identificator for each row.}
-#'   \item{\code{time} : \verb{ }}{Discrete observation times, starting at 1 for a given unit, until the end of its follow-up. The number of rows associated to a given unit corresponds to the follow-up duration.}
-#'   \item{\code{event} : \verb{ }}{Event indicator (1 if it occured, 0 otherwise) for given unit at a given time.}
-#'   \item{\code{z1, z2, z3, z4, x1, x2, x3, x4} : \verb{ }}{Covariate values for a given unit at a given time.}
+#'   \item \code{id} : Unit identificator for each row.
+#'   \item \code{time} : Discrete observation times, starting at 1 for a given unit, until the end of its follow-up. The number of rows associated to a given unit corresponds to the follow-up duration.
+#'   \item \code{event} : Event indicator (1 if it occured, 0 otherwise) for given unit at a given time.
+#'   \item \code{z1, z2, z3, z4, x1, x2, x3, x4} : Covariate values for a given unit at a given time.
 #'   }
-#' \item{\code{data.summary} : \verb{ }}{Data frame with n rows containing summarized information on the generated data for each unit:}
+#' \item \code{data.summary} : Data frame with n rows containing summarized information on the generated data for each unit:
 #'   \itemize{
-#'   \item{\code{id} : \verb{ }}{Unit identificator (the ith row corresponding to the ith unit).}
-#'   \item{\code{t.obs} : \verb{ }}{Observed event or right-censoring time.}
-#'   \item{\code{delta} : \verb{ }}{Event indicator (1 if it occured, 0 otherwise).}
-#'   \item{\code{t.true} : \verb{ }}{True (possibly unobserved) event time (Inf for a cured unit).}
-#'   \item{\code{t.cens} : \verb{ }}{True (possibly unobserved) right-censoring time.}
-#'   \item{\code{cured} : \verb{ }}{True (possibly unobserved) cure status.}
+#'   \item \code{id} : Unit identificator (the ith row corresponding to the ith unit).
+#'   \item \code{t.obs} : Observed event or right-censoring time.
+#'   \item \code{delta} : Event indicator (1 if it occured, 0 otherwise).
+#'   \item \code{t.true} : True (possibly unobserved) event time (Inf for a cured unit).
+#'   \item \code{t.cens} : True (possibly unobserved) right-censoring time.
+#'   \item \code{cured} : True (possibly unobserved) cure status.
 #'   }
-#' \item{\code{parameters} : \verb{ }}{List containing the defining elements of the tvcure model:}
+#' \item \code{parameters} : List containing the defining elements of the tvcure model:
 #'   \itemize{
-#'   \item{\code{beta} : \verb{ }}{The regression parameters in the long-term survival (or quantum) submodel.}
-#'   \item{\code{gam} : \verb{ }}{The regression parameters in the short-term survival (or timing) submodel.}
-#'   \item{\code{beta.f} : \verb{ }}{The multiplying coefficients of the additive terms in the long-term survival (or quantum) submodel.}
-#'   \item{\code{gam.f} : \verb{ }}{The multiplying coefficients of the additive terms in the short-term survival (or timing) submodel.}
-#'   \item{\code{f.theta} : \verb{ }}{A list of length 2 containing the functions defining the additive terms in the long-term survival (or quantum) submodel.}
-#'   \item{\code{f.gam} : \verb{ }}{A list of length 2 containing the functions defining the additive terms in the short-term survival (or timing) submodel.}
-#'   \item{\code{f0} : \verb{ }}{Density function governing the dynamic of the reference cumulative hazard on (0,Tmax).}
-#'   \item{\code{F0} : \verb{ }}{CDF governing the dynamic of the reference cumulative hazard on (0,Tmax).}
+#'   \item \code{beta} : The regression parameters in the long-term survival (or quantum) submodel.
+#'   \item \code{gam} : The regression parameters in the short-term survival (or timing) submodel.
+#'   \item \code{beta.f} : The multiplying coefficients of the additive terms in the long-term survival (or quantum) submodel.
+#'   \item \code{gam.f} : The multiplying coefficients of the additive terms in the short-term survival (or timing) submodel.
+#'   \item \code{f.theta} : A list of length 2 containing the functions defining the additive terms in the long-term survival (or quantum) submodel.
+#'   \item \code{f.gam} : A list of length 2 containing the functions defining the additive terms in the short-term survival (or timing) submodel.
+#'   \item \code{f0} : Density function governing the dynamic of the reference cumulative hazard on (0,Tmax).
+#'   \item \code{F0} : CDF governing the dynamic of the reference cumulative hazard on (0,Tmax).
 #'   }
-#' \item{\code{call} : \verb{ }}{Function call.}
+#' \item \code{call} : Function call.
 #' }
 #'
 #' @author Philippe Lambert \email{p.lambert@uliege.be}

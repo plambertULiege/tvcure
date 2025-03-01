@@ -8,25 +8,25 @@
 #'
 #' @return List containing
 #' \itemize{
-#' \item{\code{B} : \verb{ }}{centered cubic B-spline matrix obtained by subtracting \code{cm[j]} from the jth B-spline in column j of the original B-spline matrix evaluated at \code{x}.}
-#' \item{\code{Dd} : \verb{ }}{difference matrix (of order \code{pen.order}) for the associated centered B-spline matrix.}
-#' \item{\code{Pd} : \verb{ }}{penalty matrix (of order \code{pen.order}) for the associated centered B-spline matrix.}
-#' \item{\code{K} : \verb{ }}{number of centered B-splines in the basis.}
-#' \item{\code{cm} : \verb{ }}{values subtracted from each column of the original B-spline matrix. By default, this is a vector containing the mean of each column in the original B-spline matrix.}
+#' \item \code{B} : centered cubic B-spline matrix obtained by subtracting \code{cm[j]} from the jth B-spline in column j of the original B-spline matrix evaluated at \code{x}.
+#' \item \code{Dd} : difference matrix (of order \code{pen.order}) for the associated centered B-spline matrix.
+#' \item \code{Pd} : penalty matrix (of order \code{pen.order}) for the associated centered B-spline matrix.
+#' \item \code{K} : number of centered B-splines in the basis.
+#' \item \code{cm} : values subtracted from each column of the original B-spline matrix. By default, this is a vector containing the mean of each column in the original B-spline matrix.
 #'}
 #' @author Philippe Lambert \email{p.lambert@uliege.be}
 #' @references Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
 #' with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, under review.
-#' 
+#'
 #' @examples
 #' x = seq(0,1,by=.01)
 #' knots = seq(0,1,length=5)
 #' obj = centeredBasis.gen(x,knots)
 #' matplot(x,obj$B,type="l",ylab="Centered B-splines")
 #' colMeans(obj$B)
-#' 
+#'
 #' @export
-#' 
+#'
 centeredBasis.gen = function(x,knots,cm=NULL,pen.order=2){
   if ((max(x)>max(knots))|(min(x)<min(knots))){
     cat("The knots do no cover the values of x !!\n")

@@ -22,9 +22,9 @@ testStat(p, X, V, rank = NULL, type = 0, res.df = -1)
 \value{
 Returns a list with following elements:
 \itemize{
-\item{stat : \verb{ }}{Value of the test statistics}
-\item{pval : \verb{ }}{P-value of the test for the null hypothesis Ho: p=0}
-\item{rank : \verb{ }}{Effective dimension of <p>}
+\item stat : Value of the test statistics
+\item pval : P-value of the test for the null hypothesis Ho: p=0
+\item rank : Effective dimension of <p>
 }
 }
 \description{

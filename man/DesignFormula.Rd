@@ -32,26 +32,25 @@ DesignFormula(
 \value{
 A list with
 \itemize{
-\item{\code{J} : \verb{ }}{number of additive terms.}
-\item{\code{K} : \verb{ }}{number of B-splines in a basis used to estimate an additive term.}
-\item{\code{Z} : \verb{ }}{(n x nfixed) design matrix with fixed effects (including a first column of 1 if nointercept is FALSE).}
-\item{\code{X} : \verb{ }}{(n x J) design matrix with the covariates involved in the additive terms.}
-\item{\code{Xcal} : \verb{ }}{Z column-stacked with the J centered B-spline bases to yield the full design matrix (with column labels).}
-\item{\code{nfixed} : \verb{ }}{number of fixed effect regression parameters.}
-}
+\item \code{J} : number of additive terms.
+\item \code{K} : number of B-splines in a basis used to estimate an additive term.
+\item \code{Z} : (n x nfixed) design matrix with fixed effects (including a first column of 1 if nointercept is FALSE).
+\item \code{X} : (n x J) design matrix with the covariates involved in the additive terms.
+\item \code{Xcal} : Z column-stacked with the J centered B-spline bases to yield the full design matrix (with column labels).
+\item \code{nfixed} : number of fixed effect regression parameters.}
+
 If additive terms are specified in the formula, the following elements also appear:
 \itemize{
-\item{\code{Bcal} : \verb{ }}{column-stacked matrix with the J centered B-spline bases.}
-\item{\code{Bx} : \verb{ }}{list with J objects (one per additive term) including (B,Dd,Pd,K,cm).}
-\item{\code{Pd.x, Dd.x} : \verb{ }}{penalty and difference penalty matrices applied on the spline parameters of an additive term.}
-\item{\code{knots.x} : \verb{ }}{list of length J with the knots associated to each of the J additive terms.}
-\item{\code{pen.order} : \verb{ }}{penalty order for the spline parameters in the additive terms.}
-\item{\code{additive.lab} : \verb{ }}{labels for the columns in <Bcal> associated to the additive terms.}
-\item{\code{lambda.lab} : \verb{ }}{labels for the penalty parameters.}
-\item{\code{has.ref} : \verb{ }}{vector of J logicals indicating whether reference values were specified for a given additive term.}
-\item{\code{ref.values} : \verb{ }}{specified reference values for the the J additive terms.}
-\item{\code{cm.values} : \verb{ }}{list of length J with the values of the B-spline basis at the reference values specified (if any) for each of the additive terms.}
-}
+\item \code{Bcal} : column-stacked matrix with the J centered B-spline bases.
+\item \code{Bx} : list with J objects (one per additive term) including (B,Dd,Pd,K,cm).
+\item \code{Pd.x, Dd.x} : penalty and difference penalty matrices applied on the spline parameters of an additive term.
+\item \code{knots.x} : list of length J with the knots associated to each of the J additive terms.
+\item \code{pen.order} : penalty order for the spline parameters in the additive terms.
+\item \code{additive.lab} : labels for the columns in <Bcal> associated to the additive terms.
+\item \code{lambda.lab} : labels for the penalty parameters.
+\item \code{has.ref} : vector of J logicals indicating whether reference values were specified for a given additive term.
+\item \code{ref.values} : specified reference values for the the J additive terms.
+\item \code{cm.values} : list of length J with the values of the B-spline basis at the reference values specified (if any) for each of the additive terms.}
 }
 \description{
 Internal function extracting design matrices from formulas in the tvcure function and computing penalty related matrices.

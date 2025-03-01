@@ -4,7 +4,8 @@
 \alias{qknots}
 \title{Specification of the knots of a cubic B-spline basis for given data.}
 \usage{
-qknots(x, xmin = NULL, xmax = NULL, equid.knots = TRUE, pen.order = 2, K = 25)
+qknots(x, xmin=NULL, xmax=NULL,
+       equid.knots = TRUE, pen.order=2, K=25)
 }
 \arguments{
 \item{x}{data that should be supported by the knots of the B-spline basis.}
@@ -22,11 +23,11 @@ qknots(x, xmin = NULL, xmax = NULL, equid.knots = TRUE, pen.order = 2, K = 25)
 \value{
 a list containing the following elements:
 \itemize{
-\item{\code{xmin} : \verb{ }}{minimum value of the knots.}
-\item{\code{xmax} : \verb{ }}{maximum value of the knots.}
-\item{\code{knots} : \verb{ }}{vector containing the knots: equidistant if \code{equid.knots} is TRUE, based on quantiles of \code{x} otherwise.}
-\item{\code{Pd} : \verb{ }}{penalty matrix for the B-spline coefficients.}
-\item{\code{pen.order} : \verb{ }}{penalty order for the P-spline model.}
+\item \code{xmin} : minimum value of the knots.
+\item \code{xmax} : maximum value of the knots.
+\item \code{knots} : vector containing the knots: equidistant if \code{equid.knots} is TRUE, based on quantiles of \code{x} otherwise.
+\item \code{Pd} : penalty matrix for the B-spline coefficients.
+\item \code{pen.order} : penalty order for the P-spline model.
 }
 }
 \description{

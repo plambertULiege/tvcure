@@ -18,17 +18,16 @@
 \value{
 A list containing, in addition to the optional \code{newdata} entries, the following elements:
 \itemize{
-\item{\code{Hp} : \verb{ }}{Matrix containing estimates of the cumulative population hazard \eqn{H_p(t|x_{1:t})} with its credible interval bounds at time \eqn{t} given the history of covariates.}
-\item{\code{lHp} : \verb{ }}{Matrix containing estimates of the log cumulative population hazard \eqn{\log H_p(t|x_{1:t})} with its standard error and credible interval bounds at time \eqn{t} given the history of covariates.}
-\item{\code{se.lHp} : \verb{ }}{Vector containing the standard errors of the estimated log cumulative population hazard at time \eqn{t} given the history of covariates.}
-\item{\code{hp} : \verb{ }}{Matrix containing estimates of the population hazard \eqn{h_p(t|x_{1:t})} with its credible interval bounds at time \eqn{t} given the history of covariates.}
-\item{\code{lhp} : \verb{ }}{Matrix containing estimates of the log population hazard \eqn{\log h_p(t|x_{1:t})} with its standard error and credible interval bounds at time \eqn{t} given the history of covariates.}
-\item{\code{se.lhp} : \verb{ }}{Vector containing the standard errors of the estimated log population hazard at time \eqn{t} given the history of covariates.}
-\item{\code{Sp} : \verb{ }}{Matrix containing estimates of the population survival fuction \eqn{S_p(t|x_{1:t})=\exp(-H_p(t|x_{1:t}))} with its credible interval bounds at time \eqn{t} given the history of covariates.}
-\item{\code{pcure} : \verb{ }}{Matrix containing estimates of the conditional cure probability of a unit still at tisk at time \eqn{t}, \eqn{P(T=+\infty|T>t,x=x_t)}, with its credible interval bounds at time \eqn{t} if covariates remain constant from time \eqn{t}.}
-\item{\code{llpcure} : \verb{ }}{Matrix containing estimates of the conditional log-log cure probability of a unit still at tisk at time \eqn{t}, \eqn{\log(-\log P(T=+\infty|T>t,x=x_t))}, with its standard error and credible interval bounds at time \eqn{t} if covariates remain constant from time \eqn{t}.}
-\item{\code{se.llpcure} : \verb{ }}{Vector containing the standard errors of the estimated conditional log-log cure probability of a unit still at tisk at time \eqn{t}, \eqn{\log(-\log P(T=+\infty|T>t,x=x_t))}, if covariates remain constant from time \eqn{t}.}
-}
+\item \code{Hp} : Matrix containing estimates of the cumulative population hazard \eqn{H_p(t|x_{1:t})} with its credible interval bounds at time \eqn{t} given the history of covariates.
+\item \code{lHp} : Matrix containing estimates of the log cumulative population hazard \eqn{\log H_p(t|x_{1:t})} with its standard error and credible interval bounds at time \eqn{t} given the history of covariates.
+\item \code{se.lHp} : Vector containing the standard errors of the estimated log cumulative population hazard at time \eqn{t} given the history of covariates.
+\item \code{hp} : Matrix containing estimates of the population hazard \eqn{h_p(t|x_{1:t})} with its credible interval bounds at time \eqn{t} given the history of covariates.
+\item \code{lhp} : Matrix containing estimates of the log population hazard \eqn{\log h_p(t|x_{1:t})} with its standard error and credible interval bounds at time \eqn{t} given the history of covariates.
+\item \code{se.lhp} : Vector containing the standard errors of the estimated log population hazard at time \eqn{t} given the history of covariates.
+\item \code{Sp} : Matrix containing estimates of the population survival fuction \eqn{S_p(t|x_{1:t})=\exp(-H_p(t|x_{1:t}))} with its credible interval bounds at time \eqn{t} given the history of covariates.
+\item \code{pcure} : Matrix containing estimates of the conditional cure probability of a unit still at tisk at time \eqn{t}, \eqn{P(T=+\infty|T>t,x=x_t)}, with its credible interval bounds at time \eqn{t} if covariates remain constant from time \eqn{t}.
+\item \code{llpcure} : Matrix containing estimates of the conditional log-log cure probability of a unit still at tisk at time \eqn{t}, \eqn{\log(-\log P(T=+\infty|T>t,x=x_t))}, with its standard error and credible interval bounds at time \eqn{t} if covariates remain constant from time \eqn{t}.
+\item \code{se.llpcure} : Vector containing the standard errors of the estimated conditional log-log cure probability of a unit still at tisk at time \eqn{t}, \eqn{\log(-\log P(T=+\infty|T>t,x=x_t))}, if covariates remain constant from time \eqn{t}.}
 }
 \description{
 Predicted values based on a tvcure object.
