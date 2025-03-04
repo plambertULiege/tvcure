@@ -132,40 +132,41 @@ print(model)
     ## Parametric coefficients:
     ##                est    se    low    up     Z   Pval    
     ## (Intercept)  0.508 0.068  0.375 0.641  7.47 <0.001 ***
-    ## z1          -0.108 0.107 -0.319 0.102 -1.01  0.312    
+    ## z1          -0.108 0.107 -0.319 0.102 -1.01  0.313    
     ## z2           0.211 0.055  0.104 0.319  3.85 <0.001 ***
     ## 
     ##    exp(est) exp(-est)   low    up   Pval    
-    ## z1    0.897     1.114 0.727 1.107  0.312    
+    ## z1    0.897     1.114 0.727 1.107  0.313    
     ## z2    1.235     0.810 1.109 1.375 <0.001 ***
     ## 
     ## Approximate significance of smooth terms (Wood's <Tr> or Chi2):
     ##         edf    Tr   Pval  Chi2   Pval    
     ## f1(x1) 2.69  9.75  0.017  9.95  0.014 *  
-    ## f1(x2) 3.26 23.80 <0.001 28.37 <0.001 ***
+    ## f1(x2) 3.26 23.79 <0.001 28.36 <0.001 ***
     ## 
     ## >> eta(x) - Short-term survival (Timing) <<
     ## Formula: ~z3 + z4 + s(x3) + s(x4) 
     ## 
     ## Parametric coefficients:
     ##      est    se    low    up    Z  Pval   
-    ## z3 0.216 0.138 -0.054 0.485 1.57 0.116   
+    ## z3 0.215 0.138 -0.054 0.485 1.57 0.118   
     ## z4 0.182 0.070  0.045 0.319 2.60 0.009 **
     ## 
     ##    exp(est) exp(-est)   low    up  Pval   
-    ## z3    1.241     0.806 0.948 1.625 0.116   
-    ## z4    1.200     0.834 1.046 1.376 0.009 **
+    ## z3    1.240     0.806 0.947 1.624 0.118   
+    ## z4    1.199     0.834 1.046 1.376 0.009 **
     ## 
     ## Approximate significance of smooth terms (Wood's <Tr> or Chi2):
     ##         edf   Tr  Pval Chi2  Pval  
-    ## f2(x3) 2.54 6.81 0.077 6.90 0.052 .
+    ## f2(x3) 2.54 6.79 0.078 6.88 0.053 .
     ## f2(x4) 2.16 2.63 0.273 2.99 0.251  
     ## 
-    ## --------------------------------------------------------------------
-    ##  logEvid: -2002.42  Dev: 3161.26   AIC: 3192.59   BIC: 3253.15 
-    ##  edf: 15.66  nobs: 50672  n: 500 (units)  d: 353 (events)
-    ##  Elapsed time: 4.4 seconds  (12 iterations)
-    ## --------------------------------------------------------------------
+    ## ---------------------------------------------------------------
+    ##  logEvid: -2002.41  Dev: 3161.21   AIC: 3192.53   BIC: 3253.09 
+    ##  edf: 15.66   nobs: 50672   n: 500 (units)   d: 353 (events)
+    ##  Convergence: TRUE  --  Algorithms: NR-LPS / LM-LPS
+    ##  Elapsed time: 6.9 seconds  (13 iterations)
+    ## ---------------------------------------------------------------
 
 The estimated reference hazard $\mathrm{e}^{\beta_0}f_0(t)$ and the
 associated c.d.f. function $F_0(t)$ governing the baseline dynamics of
@@ -239,7 +240,7 @@ print(tail(obj$Sp,n=1)) ## Cure probability
 ```
 
     ##              est       low        up
-    ## [275,] 0.3208051 0.2188028 0.4271495
+    ## [275,] 0.3210159 0.2189705 0.4273863
 
 More details can be found in Lambert & Kreyenfeld (2023) and in the
 documentation of the *tvcure* package.
@@ -269,7 +270,7 @@ covariates in double additive cure survival model with application to
 fertility. Journal of the Royal Statistical Society, Series A, under
 review. Preprint: [*arXiv:2302.00331*](https://arxiv.org/abs/2302.00331)
 
-\[2\] Lambert, P. (2024). R-package *tvcure* - Version 0.6.5. GitHub:
+\[2\] Lambert, P. (2024). R-package *tvcure* - Version 0.6.6. GitHub:
 [plambertULiege/tvcure](https://github.com/plambertULiege/tvcure)
 
 ### Complementary references

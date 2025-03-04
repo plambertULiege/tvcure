@@ -11,9 +11,9 @@ tvcure(formula1, formula2, data,
        phi.0=NULL, beta.0=NULL, gamma.0=NULL,
        a.tau=1, b.tau=1e-6, a=1, b=1e-2,
        tau.0=NULL, tau.min=1, tau.method = c("LPS","LPS2","Schall","grid","none"),
-       psi.method = c("LM","NR","none"),
+       psi.method = c("NR","LM","none"),
        lambda1.0=NULL, lambda1.min=1, lambda2.0=NULL, lambda2.min=1,
-       lambda.method=c("LPS","LPS2","LPS3","Schall","nlminb","none"),
+       lambda.method=c("LPS","LPS2","LPS3","nlminb","none"),
        logscale=FALSE,
        observed.hessian=TRUE, use.Rfast=TRUE, Wood.test=FALSE,
        ci.level=.95,
@@ -73,7 +73,7 @@ Baseline S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Baseline F0: \eqn{F(t|x)
 
 \item{tau.method}{Method used to calculate the posterior mode of \eqn{p(\tau|data)}: "LPS", "LPS2", "Schall" (Fellner-Schall algorithm), "grid" (best choice in a regular grid on the log-scale) or "none" (stick to the initial value tau.0). LPS and LPS2, based on Laplace P-splines, both maximize the marginal posterior of the penalty parameter \eqn{\tau} using a fixed-point method, with LPS relying on the prior calculation of eigenvalues. (Default: "LPS").}
 
-\item{psi.method}{Algorithm used for the computation of the conditional posterior mode of the regression and splines parameters. Possible choices are Levenberg-Marquardt ("LM"), Newton-Raphson ("NR") or "none" (when the coefficients remain fixed at their initial values).}
+\item{psi.method}{Algorithm used for the computation of the conditional posterior mode of the regression and splines parameters. Possible choices are Newton-Raphson ("NR"), Levenberg-Marquardt ("LM") or "none" (when the coefficients remain fixed at their initial values).}
 
 \item{lambda1.0}{(Optional) J1-vector with starting values for the penalty parameters of the additive terms in the long-term survival (or quantum) submodel.}
 
@@ -83,7 +83,7 @@ Baseline S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Baseline F0: \eqn{F(t|x)
 
 \item{lambda2.min}{Minimal value for the J2 penalty parameters \eqn{\lambda_2} of the additive terms in the short-term survival (or timing) submodel. (Default: 1.0).}
 
-\item{lambda.method}{Method used ("LPS", "LPS2", "LPS3", "Schall", "nlminb" or "none") to select the penalty parameters of the additive terms in the long-term survival (or quantum) submodel:
+\item{lambda.method}{Method used ("LPS", "LPS2", "LPS3", "nlminb" or "none") to select the penalty parameters of the additive terms in the long-term survival (or quantum) submodel:
 \itemize{
 \item \code{LPS}, \code{LPS2}, or \code{LPS3} : based on Laplace P-splines where the marginal posterior of the penalty parameters is maximized using a fixed-point method. LPS is based on the prior calculation of eigenvalues (unlike LPS2) and delivers results of comparable quality to those of nlminb, but much more quickly. LPS3 work sequentially and separately on long- and short-term parameters with potentially convergence issues ;
 \item \code{Schall} : Fellner-Schall method ;

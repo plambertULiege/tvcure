@@ -155,19 +155,18 @@ print.tvcure <- function(x,ci.level=.95,expEst=TRUE,
             printMat(obj$fit$ED2,cs.edf=1,cs.tst=c(2,4),cs.Pval=c(3,5))
         }
     }
-    ## cat("\n────────────────────────────────────────────────────────────────────\n")
-    cat("\n--------------------------------------------------------------------\n")
+    cat("\n---------------------------------------------------------------\n")
     if (!(obj$fit$marginalized)) cat(" logEvid: ",round(obj$fit$levidence,2)," ",sep="")
     cat(" Dev:",round(obj$fit$dev,2),
         "  AIC:",round(obj$fit$AIC,2),
         "  BIC:",round(obj$fit$BIC,2),
         "\n")
     cat(" edf: ",round(obj$fit$ED.tot,2),
-        "  nobs: ",obj$fit$nobs,
-        "  n: ",obj$fit$n," (units)",
-        "  d: ",obj$fit$d," (events)",
+        "   nobs: ",obj$fit$nobs,
+        "   n: ",obj$fit$n," (units)",
+        "   d: ",obj$fit$d," (events)",
         "\n",sep="")
+    cat(" Convergence: ",obj$fit$converged,"  --  Algorithms: NR-",obj$fit$tau.method," / ",obj$fit$psi.method,"-",obj$fit$lambda.method,"\n",sep="")
     cat(" Elapsed time: ",round(obj$fit$elapsed.time,1)," seconds  (",obj$fit$iter," iterations)\n",sep="")
-    ## cat("────────────────────────────────────────────────────────────────────\n")
-    cat("--------------------------------------------------------------------\n")
+    cat("---------------------------------------------------------------\n")
 }

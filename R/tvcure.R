@@ -11,9 +11,9 @@
 #'        phi.0=NULL, beta.0=NULL, gamma.0=NULL,
 #'        a.tau=1, b.tau=1e-6, a=1, b=1e-2,
 #'        tau.0=NULL, tau.min=1, tau.method = c("LPS","LPS2","Schall","grid","none"),
-#'        psi.method = c("LM","NR","none"),
+#'        psi.method = c("NR","LM","none"),
 #'        lambda1.0=NULL, lambda1.min=1, lambda2.0=NULL, lambda2.min=1,
-#'        lambda.method=c("LPS","LPS2","LPS3","Schall","nlminb","none"),
+#'        lambda.method=c("LPS","LPS2","LPS3","nlminb","none"),
 #'        logscale=FALSE,
 #'        observed.hessian=TRUE, use.Rfast=TRUE, Wood.test=FALSE,
 #'        ci.level=.95,
@@ -49,12 +49,12 @@
 #' @param tau.0 Starting value for \eqn{\tau}.
 #' @param tau.min Minimal value for the penalty parameter \eqn{\tau}. (Default: 1.0).
 #' @param tau.method Method used to calculate the posterior mode of \eqn{p(\tau|data)}: "LPS", "LPS2", "Schall" (Fellner-Schall algorithm), "grid" (best choice in a regular grid on the log-scale) or "none" (stick to the initial value tau.0). LPS and LPS2, based on Laplace P-splines, both maximize the marginal posterior of the penalty parameter \eqn{\tau} using a fixed-point method, with LPS relying on the prior calculation of eigenvalues. (Default: "LPS").
-#' @param psi.method Algorithm used for the computation of the conditional posterior mode of the regression and splines parameters. Possible choices are Levenberg-Marquardt ("LM"), Newton-Raphson ("NR") or "none" (when the coefficients remain fixed at their initial values).
+#' @param psi.method Algorithm used for the computation of the conditional posterior mode of the regression and splines parameters. Possible choices are Newton-Raphson ("NR"), Levenberg-Marquardt ("LM") or "none" (when the coefficients remain fixed at their initial values).
 #' @param lambda1.0 (Optional) J1-vector with starting values for the penalty parameters of the additive terms in the long-term survival (or quantum) submodel.
 #' @param lambda1.min Minimal value for the J1 penalty parameters \eqn{\lambda_1} of the additive terms in the long-term survival (or quantum) submodel. (Default: 1.0).
 #' @param lambda2.0 (Optional) J2-vector with starting values for the penalty parameters of the additive terms in the short-term survival (or timing) submodel.
 #' @param lambda2.min Minimal value for the J2 penalty parameters \eqn{\lambda_2} of the additive terms in the short-term survival (or timing) submodel. (Default: 1.0).
-#' @param lambda.method Method used ("LPS", "LPS2", "LPS3", "Schall", "nlminb" or "none") to select the penalty parameters of the additive terms in the long-term survival (or quantum) submodel:
+#' @param lambda.method Method used ("LPS", "LPS2", "LPS3", "nlminb" or "none") to select the penalty parameters of the additive terms in the long-term survival (or quantum) submodel:
 #' \itemize{
 #' \item \code{LPS}, \code{LPS2}, or \code{LPS3} : based on Laplace P-splines where the marginal posterior of the penalty parameters is maximized using a fixed-point method. LPS is based on the prior calculation of eigenvalues (unlike LPS2) and delivers results of comparable quality to those of nlminb, but much more quickly. LPS3 work sequentially and separately on long- and short-term parameters with potentially convergence issues ;
 #' \item \code{Schall} : Fellner-Schall method ;
@@ -114,9 +114,9 @@ tvcure = function(formula1, formula2, data,
                   a=1, b=1e-2, ## Prior on penalty parameters for the additive terms: Gamma(a,b)
                   tau.0=NULL, tau.min=1,
                   tau.method = c("LPS","LPS2","Schall","grid","none"),
-                  psi.method = c("LM","NR","none"), ## Estimation method for the regression and spline parameters
+                  psi.method = c("NR","LM","none"), ## Estimation method for the regression and spline parameters
                   lambda1.0=NULL, lambda1.min=1, lambda2.0=NULL, lambda2.min=1,
-                  lambda.method=c("LPS","LPS2","LPS3","Schall","nlminb","none"), ## Penalty selection method for additive terms
+                  lambda.method=c("LPS","LPS2","LPS3","nlminb","none"), ## Penalty selection method for additive terms
                   logscale=FALSE, ## Maximize p(log(lambda)|D) when TRUE,  p(lambda|D) otherwise
                   observed.hessian=TRUE,  ## TRUE: X[event==1,]'X[event==1,] ; FALSE: X'diag(mu.ij)X
                   use.Rfast=TRUE,
@@ -137,6 +137,7 @@ tvcure = function(formula1, formula2, data,
     psi.method = match.arg(psi.method)
     if (missing(formula1)) {message("Missing model formula <formula1> for long-term survival !") ; return(NULL)}
     if (missing(formula2)) {message("Missing model formula <formula2> for short-term survival !") ; return(NULL)}
+    if (verbose) iter.verbose = verbose
     ## Make sure that the 's' function for additive terms in formulas is tvcure::s
     ## ---------------------------------------------------------------------------
     s <- tvcure::s
@@ -957,7 +958,7 @@ tvcure = function(formula1, formula2, data,
     ##       * RDM: Relative Damping Measure at <theta>
     ##       * iter: number of iterations
     ##       * convergence: logical indicating if convergence occured: L2(grad) < grad.tol
-    myLevMarq <- function(g, theta0, grad.tol=1e-2, RDM.tol=1e-4, fun.tol=1e-2,
+    myLevMarq <- function(g, theta0, grad.tol=1e-2, RDM.tol=1e-4, fun.tol=1e-3,
                           max_iter=25, lambda_init=1e-3, lambda_factor=10,
                           verbose=FALSE){
         theta <- theta0
@@ -994,11 +995,10 @@ tvcure = function(formula1, formula2, data,
             ##
             ## Accept update ?
             obj.prop <- g(theta.prop, Dtheta=TRUE)
-            if (verbose) cat(i,"> ",lambda,obj.cur$g,obj.prop$g,"\n")
-            gdif = 1e12
-            if (!is.na(obj.prop$g) && (obj.prop$g > obj.cur$g)) {
-                gdif = obj.prop$g - obj.cur$g
-                if (verbose) cat("gdif:",gdif,"\n")
+            g.cur = obj.cur$g ; g.prop = obj.prop$g
+            g.dif = g.prop - g.cur
+            if (verbose) cat(i,"> ",lambda, g.cur, g.prop, "--> g.dif =",g.dif,"\n")
+            if (!is.na(g.dif) && (g.dif > 0)) {
                 nreject = 0
                 theta <- theta.prop
                 lambda <- lambda / lambda_factor
@@ -1013,7 +1013,7 @@ tvcure = function(formula1, formula2, data,
             grad = obj.cur$grad
             RDM = sum(grad * dtheta) / ntheta
             ## Check convergence
-            converged = (L2norm(obj.cur$grad) < grad.tol) | (gdif < fun.tol)
+            converged = (L2norm(obj.cur$grad) < grad.tol) && (g.dif >= 0) && (g.dif < fun.tol)
             if (converged) break
         }
         ans = list(val=obj.cur$g, val.start=g.start,
@@ -1026,47 +1026,53 @@ tvcure = function(formula1, formula2, data,
     ## --------------------------------
     ## Generic Newton-Raphson algorithm
     ## --------------------------------
-    NewtonRaphson = function(g, theta, tol=1e-2, itermax=15, verbose=FALSE){
+    NewtonRaphson = function(g, theta, grad.tol=1e-2, RDM.tol=1e-4, fun.tol=1e-3,
+                             step_factor=2, itermax=25, verbose=FALSE){
         ntheta = length(theta)
         theta.cur = theta
         obj.cur = g(theta.cur,Dtheta=TRUE)
         g.start = obj.cur$g ## Function at the iteration start
-        ok = FALSE
-        ## Convergence criterion using RDM (see e.g. Prague et al, 2013)
+        L2grad = L2norm(obj.cur$grad)
+        ## Convergence criterion using L2(grad) and RDM (see e.g. Prague et al, 2013)
         RDM = with(obj.cur, sum(grad * dtheta)) / ntheta
-        ok =  (abs(RDM) < tol^2) ## grad' (-H)^-1 grad / ntheta < tol^2 ?
-        ## ok = (L2norm(obj.cur$grad) < tol) ## Stopping rule
-        ## ok = all(abs(obj.cur$grad) < tol) ## Stopping rule
+        ok =  (L2grad < grad.tol) && (abs(RDM) < RDM.tol) ## grad' (-H)^-1 grad / ntheta < tol^2 ?
         iter = 0
+        step = 1
         while(!ok){
             iter = iter + 1
+            ## step = 1
             theta.cur = obj.cur$theta
             dtheta = c(obj.cur$dtheta)
-            step = 1 ; nrep = 0
+            nrep = 0
             repeat { ## Repeat step-halving directly till improve target function
                 nrep = nrep + 1
                 if (nrep > itermax) break ## if (nrep > 20) break
                 theta.prop = theta.cur + step*dtheta ## Update.theta
                 obj.prop = tryCatch(expr=g(theta.prop,Dtheta=TRUE), error=function(e) e)
                 if (inherits(obj.prop, "error")){
-                    step = .5*step
+                    step = step / step_factor
                 } else {
-                    if (obj.prop$g >= obj.cur$g) break
-                    step = .5*step
+                    if (obj.prop$g >= obj.cur$g){
+                        break
+                    }
+                    step = step / step_factor
                 }
             }
+            g.cur = obj.cur$g ; g.prop = obj.prop$g
+            g.dif = g.prop - g.cur
+            ##
             obj.cur = obj.prop
-            ## Convergence criterion using RDM (see e.g. Prague et al, 2013)
-            RDM = with(obj.cur, sum(grad * dtheta)) / ntheta
-            ok =  (RDM < tol^2) ## grad' (-H)^-1 grad / ntheta < tol^2 ?
-            ## Alternative stopping rules:
-            ## ok = (L2norm(obj.cur$grad) < tol) ## Stopping rule
-            ## ok = all(abs(obj.cur$grad) < tol) ## Stopping rule
+            L2grad = L2norm(obj.cur$grad)
+            if (verbose) cat(iter,"> ",step, g.cur, g.prop, "--> g.dif =",g.dif,"  --  L2(grad) = ",L2grad,"\n")
+            ## Computre RDM (see e.g. Prague et al, 2013):
+            RDM = with(obj.cur, sum(grad * dtheta)) / ntheta ## grad' (-H)^-1 grad / ntheta < tol^2 ?
+            ok = (abs(RDM) < RDM.tol) && (L2grad < grad.tol) && (g.dif >= 0) && (g.dif < fun.tol)
             if (iter > itermax) break
         }
-        if (verbose) cat(obj.cur$g," (niter = ",iter,") - RDM = ",RDM,"\n",sep="")
+        if (verbose) cat(obj.cur$g," (niter = ",iter,")  -  L2(grad) = ",L2grad,"  -  RDM = ",RDM,"\n",sep="")
         ## if (verbose) cat(obj.cur$g," (niter = ",iter,") - grad = ",L2norm(obj.cur$grad),"\n",sep="")
-        ans = list(val=obj.cur$g, val.start=g.start, theta=obj.cur$theta, grad=obj.cur$grad, RDM=RDM, iter=iter)
+        ans = list(val=obj.cur$g, val.start=g.start, theta=obj.cur$theta, grad=obj.cur$grad,
+                   RDM=RDM, iter=iter, converged=ok)
         return(ans)
     } ## End NewtonRaphson
     ##
@@ -1104,6 +1110,11 @@ tvcure = function(formula1, formula2, data,
     }
     while(!converged){ ## Global estimation loop
         iter = iter + 1
+        if (verbose){
+            cat("\n--------------\n")
+            cat("Iteration ",iter,"\n")
+            cat("--------------\n")
+        }
         ## =====================
         ## -1- Estimation of F0  (through <phi> and <psi>)
         ## =====================
@@ -1150,7 +1161,9 @@ tvcure = function(formula1, formula2, data,
                 } ## End g.psi
                 ##
                 psi.cur = phi2psi(phi.cur)
-                psi.NR = NewtonRaphson(g=g.psi,theta=psi.cur,tol=grad.tol)
+                psi.NR = NewtonRaphson(g=g.psi,theta=psi.cur,
+                                       grad.tol=grad.tol, RDM.tol=RDM.tol, fun.tol=fun.tol,
+                                       verbose=FALSE)
                 psi.cur = psi.NR$theta ; phi.cur = psi2phi(psi.cur)
                 ## ed.phi = attr(psi.cur,"ed.phi") ## Effective dim of <phi> in the estimation of F0(t)
             }
@@ -1222,7 +1235,10 @@ tvcure = function(formula1, formula2, data,
                            if (tau.cur == tau.ref){
                                psi.NR2 = psi.NR
                            } else {
-                               psi.NR2 = NewtonRaphson(g=g.psi,theta=psi.cur,tol=grad.tol)
+                               psi.NR2 = NewtonRaphson(g=g.psi,theta=psi.cur,
+                                                       grad.tol=grad.tol, RDM.tol=RDM.tol, fun.tol=fun.tol,
+                                                       verbose=FALSE)
+
                            }
                            psi.prop = psi.NR2$theta ; phi.prop = psi2phi(psi.prop)
                            psi.grid[[j]] = psi.prop
@@ -1249,6 +1265,8 @@ tvcure = function(formula1, formula2, data,
         ## =======================================
         ## -2- Newton-Raphson for <beta> & <gamma>
         ## =======================================
+        ## (i.e. regression and spline parameters in long- and short-term survival submodels
+        ##)
         idx1 = 1:length(beta.0)
         ##
         ## Select <beta,gamma> using homemade Newton-Raphson
@@ -1278,13 +1296,17 @@ tvcure = function(formula1, formula2, data,
                                 verbose=verbose)
             beta.cur = regr.LM$theta[idx1] ; gamma.cur = regr.LM$theta[-idx1]
         } else if (psi.method == "NR"){
-            regr.NR = NewtonRaphson(g=g.regr,theta=c(beta.cur,gamma.cur),tol=grad.tol)
+            regr.NR = NewtonRaphson(g=g.regr,theta=c(beta.cur,gamma.cur),
+                                    grad.tol=grad.tol, RDM.tol=RDM.tol, fun.tol=fun.tol,
+                                    verbose=verbose)
             beta.cur = regr.NR$theta[idx1] ; gamma.cur = regr.NR$theta[-idx1]
         }
         ##
         ## ================================
-        ## -3- Update <lambda1> & <lambda2> (i.e. penalty vectors for additive terms in long- and short-term survival)
+        ## -3- Update <lambda1> & <lambda2>
         ## ================================
+        ## (i.e. penalty vectors for additive terms in long- and short-term survival)
+        ##
         itermin = 1 ## Only start updating after <itermin> iterations
         update.lambda = ifelse(iter <= itermin, FALSE, (J1 > 0)|(J2 > 0))
         ##
@@ -1295,10 +1317,11 @@ tvcure = function(formula1, formula2, data,
                          Dphi=FALSE, Dbeta=TRUE, Dgamma=!nogamma,
                          Dlambda=update.lambda & ((lambda.method == "LPS3")))
         }
-        ##
-        ## -- Method 1: LPS --
-        if (lambda.method == "LPS"){ ## Laplace's method with fast determinant computation
-            if (update.lambda & !final.iteration){
+        ## Update <lambda1> & <lambda2>
+        ## ----------------------------
+        if (update.lambda & !final.iteration){
+            ## -- Method 1: LPS --
+            if (lambda.method == "LPS"){ ## Laplace's method with fast determinant computation
                 ## -3- lambda1 & lambda2
                 if (J2 >0){
                     Hes.gamma0 = obj.cur$Hes.gamma0 ## Update Hes.gamma0 value
@@ -1314,107 +1337,100 @@ tvcure = function(formula1, formula2, data,
                     lambda1.cur = temp$lambda1 ; se.lambda1 = temp$se.lambda1 ; se.loglambda1 = temp$se.loglambda1
                     lambda2.cur = temp$lambda2 ; se.lambda2 = temp$se.lambda2 ; se.loglambda2 = temp$se.loglambda2
                 }
-            }
-        } ## Endif lambda.method == "LPS"
-        ##
-        ## -- Method 2: LPS2 --
-        if (lambda.method == "LPS2"){ ## Laplace's method (jointly for (lambd1,lambda2))
-            if (update.lambda & !final.iteration){
+            } ## Endif lambda.method == "LPS"
+            ##
+            ## -- Method 2: LPS2 --
+            if (lambda.method == "LPS2"){ ## Laplace's method (jointly for (lambd1,lambda2))
                 ## -3- lambda1 & lambda2
                 if (J1 > 0 | J2 > 0){
                     temp = select.lambda.LPS2(Hes.regr0=obj.cur$Hes.regr0)
                     lambda1.cur = temp$lambda1
                     lambda2.cur = temp$lambda2
                 }
-            }
-        } ## Endif lambda.method == "LPS2"
-        ##
-        ## -- Method 3: LPS3 --
-        if (lambda.method == "LPS3"){ ## Laplace's method (separately for <lambda1> & <lambda2>
-            if (update.lambda & !final.iteration){
+            } ## Endif lambda.method == "LPS2"
+            ##
+            ## -- Method 3: LPS3 --
+            if (lambda.method == "LPS3"){ ## Laplace's method (separately for <lambda1> & <lambda2>
                 ## -3a- lambda1 (long-term survival)
                 if (J1 > 0){
                     temp = select.lambda.LPS3(coef=beta.cur, nfixed=nfixed1,
-                                             lambda=lambda1.cur, Pd=Pd1.x, Mcal=obj.cur$Mcal.1,
-                                             pen.order=pen.order1, lambda.min=lambda1.min, bb=bb)
+                                              lambda=lambda1.cur, Pd=Pd1.x, Mcal=obj.cur$Mcal.1,
+                                              pen.order=pen.order1, lambda.min=lambda1.min, bb=bb)
                     lambda1.cur = temp$lambda ## Vector of penalty parameters for the additive terms
                     Hes.xi1 = temp$Hes.xi
                     Hes.lam1 = temp$Hes.lam
                 }
                 ## -3b- lambda2 (short-term survival)
                 if (J2 > 0){
-                   temp = select.lambda.LPS3(coef=gamma.cur, nfixed=nfixed2,
-                                             lambda=lambda2.cur, Pd=Pd2.x, Mcal=obj.cur$Mcal.2,
-                                             pen.order=pen.order2, lambda.min=lambda2.min, bb=bb)
-                   lambda2.cur = temp$lambda ## Vector of penalty parameters for the additive terms
-                   Hes.xi2 = temp$Hes.xi
-                   Hes.lam2 = temp$Hes.lam
+                    temp = select.lambda.LPS3(coef=gamma.cur, nfixed=nfixed2,
+                                              lambda=lambda2.cur, Pd=Pd2.x, Mcal=obj.cur$Mcal.2,
+                                              pen.order=pen.order2, lambda.min=lambda2.min, bb=bb)
+                    lambda2.cur = temp$lambda ## Vector of penalty parameters for the additive terms
+                    Hes.xi2 = temp$Hes.xi
+                    Hes.lam2 = temp$Hes.lam
                 }
-
-            }
-        } ## Endif lambda.method == "LPS3"
-        ##
-        ##
-        ## -- Method 4: Schall --
-        if (lambda.method == "Schall"){ ## Schall's method
+            } ## Endif lambda.method == "LPS3"
             ##
-            ED.cur = EDF(list(fit=obj.cur),Wood.test=Wood.test) ## Evaluate current ED for additive terms
-            if (update.lambda & !final.iteration){
-                ## -3a- lambda1 (long-term survival)
-                if (J1 > 0){
-                    for (j in 1:J1){
-                        idx = nfixed1 + (j-1)*K1 + (1:K1)
-                        beta.j = beta.cur[idx] ## Centered B-splines coefs for jth additive term
-                        quad = sum(beta.j * c(Pd1.x %*% beta.j))
-                        ed = ED.cur$ED1[j,1]
-                        tau2 = quad / (ed-pen.order1)
-                        sigma2 = sum(obj.cur$res^2) / (length(obj.cur$res)-ED.cur$ED.tot)
-                        ## sigma2 = obj.cur$dev / (length(obj.cur$mu.ij)-ED.tot)
-                        lambda1.cur[j] = max(lambda1.min, sigma2/tau2)
-                    }
-                }
-                ## -3b- lambda2 (short-term survival)
-                if (J2 > 0){
-                    for (j in 1:J2){
-                        idx = nfixed2 + (j-1)*K2 + (1:K2)
-                        gamma.j = gamma.cur[idx] ## Centered B-splines coefs for jth additive term
-                        quad = sum(gamma.j* c(Pd2.x %*% gamma.j))
-                        ed = ED.cur$ED2[j,1]
-                        tau2 = quad / (ed-pen.order2)
-                        sigma2 = sum(obj.cur$res^2) / (length(obj.cur$res)-ED.cur$ED.tot)
-                        ## sigma2 = obj.cur$dev / (length(obj.cur$mu.ij)-ED.tot)
-                        lambda2.cur[j] = max(lambda2.min, sigma2/tau2)
-                    }
-                }
-            } ## Endif update.lambda
-        } ## Endif lambda.method == "Schall"
-        ##
-        ## -- Method 5: nlminb --
-        if (lambda.method == "nlminb"){ ## Direct optimization of log-evidence
-            ## Loss function to select <lambda>:
-            ##     loss.fn(nu) = -log p(lambda=exp(nu) | data)
-            loglambda.loss = function(loglambda,data){
-                if (J1 > 0) lambda1 = exp(loglambda[1:J1])
-                if (J2 > 0) lambda2 = exp(loglambda[(J1+1):(J1+J2)])
-                obj.cur = ff(phi.cur, beta.cur, gamma.cur,
-                             tau=tau.cur, lambda1=lambda1, lambda2=lambda2,
-                             Dphi=FALSE, Dbeta=TRUE, Dgamma=TRUE, Dlambda=FALSE)
-                levidence = obj.cur$lpen -.5*ldet.fun(-obj.cur$Hes.beta)
-                if (!nogamma){
-                    levidence = levidence -.5*ldet.fun(-obj.cur$Hes.gamma)
-                }
-                ans = -levidence
-                return(ans)
-            } ## End loglambda.loss
             ##
-            ## Minimize the loss function to select <log(lambda)>
-            obj.ml = nlminb(start=log(c(lambda1.cur,lambda2.cur)),
-                            objective=loglambda.loss,
-                            lower=rep(0,J1+J2),upper=(rep(10,J1+J2)))
-            lambda.cur = exp(obj.ml$par) ## Selected <lambda> --> lambda.hat
-            if (J1 > 0) lambda1.cur = lambda.cur[1:J1]
-            if (J2 > 0) lambda2.cur = lambda.cur[(J1+1):(J1+J2)]
-        } ## Endif lambda.method == "nlminb"
+            ## ## -- Method 4: Schall --
+            ## if (lambda.method == "Schall"){ ## Schall's method
+            ##     ##
+            ##     ED.cur = EDF(list(fit=obj.cur),Wood.test=Wood.test) ## Evaluate current ED for additive terms
+            ##     ## -3a- lambda1 (long-term survival)
+            ##     if (J1 > 0){
+            ##         for (j in 1:J1){
+            ##             idx = nfixed1 + (j-1)*K1 + (1:K1)
+            ##             beta.j = beta.cur[idx] ## Centered B-splines coefs for jth additive term
+            ##             quad = sum(beta.j * c(Pd1.x %*% beta.j))
+            ##             ed = ED.cur$ED1[j,1]
+            ##             tau2 = quad / (ed-pen.order1)
+            ##             sigma2 = sum(obj.cur$res^2) / (length(obj.cur$res)-ED.cur$ED.tot)
+            ##             ## sigma2 = obj.cur$dev / (length(obj.cur$mu.ij)-ED.tot)
+            ##             lambda1.cur[j] = max(lambda1.min, sigma2/tau2)
+            ##         }
+            ##     }
+            ##     ## -3b- lambda2 (short-term survival)
+            ##     if (J2 > 0){
+            ##         for (j in 1:J2){
+            ##             idx = nfixed2 + (j-1)*K2 + (1:K2)
+            ##             gamma.j = gamma.cur[idx] ## Centered B-splines coefs for jth additive term
+            ##             quad = sum(gamma.j* c(Pd2.x %*% gamma.j))
+            ##             ed = ED.cur$ED2[j,1]
+            ##             tau2 = quad / (ed-pen.order2)
+            ##             sigma2 = sum(obj.cur$res^2) / (length(obj.cur$res)-ED.cur$ED.tot)
+            ##             ## sigma2 = obj.cur$dev / (length(obj.cur$mu.ij)-ED.tot)
+            ##             lambda2.cur[j] = max(lambda2.min, sigma2/tau2)
+            ##         }
+            ##     }
+            ## } ## Endif lambda.method == "Schall"
+            ##
+            ## -- Method 5: nlminb --
+            if (lambda.method == "nlminb"){ ## Direct optimization of log-evidence
+                ## Loss function to select <lambda>:
+                ##     loss.fn(nu) = -log p(lambda=exp(nu) | data)
+                loglambda.loss = function(loglambda,data){
+                    if (J1 > 0) lambda1 = exp(loglambda[1:J1])
+                    if (J2 > 0) lambda2 = exp(loglambda[(J1+1):(J1+J2)])
+                    obj.cur = ff(phi.cur, beta.cur, gamma.cur,
+                                 tau=tau.cur, lambda1=lambda1, lambda2=lambda2,
+                                 Dphi=FALSE, Dbeta=TRUE, Dgamma=TRUE, Dlambda=FALSE)
+                    levidence = obj.cur$lpen -.5*ldet.fun(-obj.cur$Hes.beta)
+                    if (!nogamma){
+                        levidence = levidence -.5*ldet.fun(-obj.cur$Hes.gamma)
+                    }
+                    ans = -levidence
+                    return(ans)
+                } ## End loglambda.loss
+                ##
+                ## Minimize the loss function to select <log(lambda)>
+                obj.ml = nlminb(start=log(c(lambda1.cur,lambda2.cur)),
+                                objective=loglambda.loss,
+                                lower=rep(0,J1+J2),upper=(rep(10,J1+J2)))
+                lambda.cur = exp(obj.ml$par) ## Selected <lambda> --> lambda.hat
+                if (J1 > 0) lambda1.cur = lambda.cur[1:J1]
+                if (J2 > 0) lambda2.cur = lambda.cur[(J1+1):(J1+J2)]
+            } ## Endif lambda.method == "nlminb"
+        } ## End Update <lambda1> & <lambda2>
         ##
         ## toc() ; cat("\n")
         ##
@@ -1430,7 +1446,7 @@ tvcure = function(formula1, formula2, data,
         ## -------------------------
         if (nogamma) obj.cur$grad.gamma = 0
         grad.cur = with(obj.cur, grad.regr) ##c(grad.beta,grad.gamma))
-        grad.L2 = with(obj.cur, c(beta=L2norm(abs(grad.beta)),gamma=L2norm(abs(grad.gamma))))
+        ## grad.L2 = with(obj.cur, c(beta=L2norm(abs(grad.beta)),gamma=L2norm(abs(grad.gamma))))
         ##
         ## Penalized logLik
         ## ----------------
@@ -1454,33 +1470,39 @@ tvcure = function(formula1, formula2, data,
                 "; lpen:",round(obj.cur$lpen,2),
                 "\n")
         }
-        ##
+        ## green == TRUE:  necessary condition to complete the estimation process
         switch(criterion, ## CONVERGENCE criterion
                "levidence" = {
-                   converged = (abs(levidence-levidence.old) < criterion.tol)
+                   green = (abs(levidence-levidence.old) < criterion.tol)
                    levidence.old = levidence
                },
                "deviance" = {
                    dev.cur = obj.cur$dev
-                   converged = (abs(dev.old-dev.cur) < criterion.tol)
+                   green = (abs(dev.old-dev.cur) < criterion.tol)
                    dev.old = dev.cur
                },
                "lpen" = {
-                   converged = (abs(lpen.old-obj.cur$lpen) < criterion.tol)
+                   green = (abs(lpen.old-obj.cur$lpen) < criterion.tol)
                    lpen.old = obj.cur$lpen
                },
                "AIC" = {
-                   converged = (abs(AIC.old-AIC) < criterion.tol)
+                   green = (abs(AIC.old-AIC) < criterion.tol)
                    AIC.old = AIC
                },
                "BIC" = {
-                   converged = (abs(BIC.old-BIC) < criterion.tol)
+                   green = (abs(BIC.old-BIC) < criterion.tol)
                    BIC.old = BIC
                },
                "gradient" = {
-                   converged = all(grad.L2 < 10*grad.tol) & (iter > 5)
+                   green = (L2norm(grad.cur) < grad.tol) & (iter > 5)
+                   ## green = all(grad.L2 < 10*grad.tol) & (iter > 5)
                }
                )
+        ## Necessary & sufficient condition to complete the estimation process:
+        ##     green light followed by one last iteration
+        if (final.iteration & green) converged = TRUE
+        final.iteration = green ## One final iteration required after the 1st green light to completeestimation
+        ##
         if (iter >= iterlim) break
         if (noestimation) break
     } ## End While (global estimation loop)
@@ -1567,6 +1589,7 @@ tvcure = function(formula1, formula2, data,
     ##
     ## Iterations and Computation time
     ## -------------------------------
+    fit$converged = converged ## Also save <converged> in fit
     fit$iter = iter
     fit$elapsed.time <- (proc.time()-ptm)[1] ## Elapsed time
     ##
@@ -1577,7 +1600,7 @@ tvcure = function(formula1, formula2, data,
                regr1=regr1,regr2=regr2, K0=K0,
                fit=fit,
                call=cl,
-               converged=converged
+               converged=converged ## Also save <converged> in root
                )
     ##
     ans$logLik = ans$fit$llik
