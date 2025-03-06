@@ -17,7 +17,7 @@ tvcure(formula1, formula2, data,
        logscale=FALSE,
        observed.hessian=TRUE, use.Rfast=TRUE, Wood.test=FALSE,
        ci.level=.95,
-       criterion=c("levidence","deviance","lpen","AIC","BIC","gradient"),
+       criterion=c("logEvid","deviance","lpen","AIC","BIC","gradient"),
        criterion.tol=1e-2, grad.tol=1e-2,
        RDM.tol=1e-4, fun.tol=1e-3,
        iterlim=50, iter.verbose=FALSE, verbose=FALSE)
@@ -100,9 +100,9 @@ Baseline S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Baseline F0: \eqn{F(t|x)
 
 \item{ci.level}{Default value for the levels of the credible intervals. (Default: 0.95).}
 
-\item{criterion}{Criterion used to assess convergence of the estimation procedure (Default: "levidence"):
+\item{criterion}{Criterion used to assess convergence of the estimation procedure (Default: "logEvid"):
 \itemize{
-\item \code{levidence} : log of the evidence, i.e. of the marginal posterior of the penalty parameters at their selected values ;
+\item \code{logEvid} : log of the evidence, i.e. of the marginal posterior of the penalty parameters at their selected values ;
 \item \code{deviance} : deviance or -2 log(Likelihood) ;
 \item \code{AIC} : Akaike information criterion ;
 \item \code{BIC} : Bayesian (or Schwarz) information criterion ;

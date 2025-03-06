@@ -17,7 +17,7 @@
 #'        logscale=FALSE,
 #'        observed.hessian=TRUE, use.Rfast=TRUE, Wood.test=FALSE,
 #'        ci.level=.95,
-#'        criterion=c("levidence","deviance","lpen","AIC","BIC","gradient"),
+#'        criterion=c("logEvid","deviance","lpen","AIC","BIC","gradient"),
 #'        criterion.tol=1e-2, grad.tol=1e-2,
 #'        RDM.tol=1e-4, fun.tol=1e-3,
 #'        iterlim=50, iter.verbose=FALSE, verbose=FALSE)
@@ -65,9 +65,9 @@
 #' @param use.Rfast Logical indicating if matrix functions from the Rfast package should be used to fasten computation. (Default: TRUE).
 #' @param Wood.test Logical indicating if P-values based on Wood's test (Biometrika 2013) of the significance of additive terms should be preferred over basic Chi-square tests. (Default: FALSE).
 #' @param ci.level Default value for the levels of the credible intervals. (Default: 0.95).
-#' @param criterion Criterion used to assess convergence of the estimation procedure (Default: "levidence"):
+#' @param criterion Criterion used to assess convergence of the estimation procedure (Default: "logEvid"):
 #' \itemize{
-#' \item \code{levidence} : log of the evidence, i.e. of the marginal posterior of the penalty parameters at their selected values ;
+#' \item \code{logEvid} : log of the evidence, i.e. of the marginal posterior of the penalty parameters at their selected values ;
 #' \item \code{deviance} : deviance or -2 log(Likelihood) ;
 #' \item \code{AIC} : Akaike information criterion ;
 #' \item \code{BIC} : Bayesian (or Schwarz) information criterion ;
@@ -122,7 +122,7 @@ tvcure = function(formula1, formula2, data,
                   use.Rfast=TRUE,
                   Wood.test=FALSE,
                   ci.level=.95,
-                  criterion=c("levidence","deviance","lpen","AIC","BIC","gradient"),
+                  criterion=c("logEvid","deviance","lpen","AIC","BIC","gradient"),
                   criterion.tol=1e-2,
                   grad.tol=1e-2, RDM.tol=1e-4, fun.tol=1e-3,
                   iterlim=50,iter.verbose=FALSE,verbose=FALSE){
@@ -260,13 +260,13 @@ tvcure = function(formula1, formula2, data,
     regr1.lab = colnames(regr1$Xcal) ; regr2.lab = colnames(regr2$Xcal) ## Labels of the regression parms
     addregr1.lab = regr1$additive.lab ; addregr2.lab = regr2$additive.lab ## Labels of the additive terms
     ##
-    ## Log-determinant of a positive definite matrix based on Choleski
-    ##  Note: faster than methods based on functions svd, qr or determinant
+    ## Log-determinant of a positive definite matrix based on determinant(.)
+    ##  Note: faster than methods based on functions cholevski, svd or qr
     ## ---------------------------------------------------------------------
-    ldet.fun  = function(x) sum(log(abs(diag(qr(x)$qr))))
-    ## ldet.fun = function(x) c(determinant(x,logarithm=TRUE)$mod)
+    ldet.fun = function(x) c(determinant(x,logarithm=TRUE)$mod)
     ## ldet.fun = function(x) 2*sum(log(diag(chol(x))))
-    ## End ldet.fun
+    ## ldet.fun = function(x) sum(log(svd(A,nu=0,nv=0)$d))
+    ## ldet.fun  = function(x) sum(log(abs(diag(qr(x)$qr))))
     ##
     ## Fast calculation of log |B'WB + lambda*Pd| using pre-computed eigenvalues:
     ##  log |B'WB + lambda*Pd| = ldet0 + sum(log(lambda1)) + sum_j(log(tau+dj))
@@ -279,7 +279,7 @@ tvcure = function(formula1, formula2, data,
         M = BwB[id1,id1] - BwB[id1,id2,drop=FALSE]%*%solve(BwB[id2,id2,drop=FALSE])%*%BwB[id2,id1,drop=FALSE]
         MM = sqrt(1/lambda1) * t(sqrt(1/lambda1)*t(M))
         ## MM2 = diag(1/sqrt(lambda1))%*%M%*%diag(1/sqrt(lambda1))
-        dj = svd(MM)$d
+        dj = svd(MM,nu=0,nv=0)$d
         ldet0 = ldet.fun(BwB[id2,id2,drop=FALSE])
         ## log |B'WB + lambda*Pd| = ldet0 + sum(log(lambda1)) + sum_j(log(tau+dj))
         return(list(ldet0=ldet0,lambda1=lambda1,dj=dj))
@@ -295,7 +295,7 @@ tvcure = function(formula1, formula2, data,
         M = t(Bt1)%*%Bt1 - t(B01)%*%solve(t(Bt0)%*%Bt0)%*%B01
         MM = sqrt(1/lambda1) * t(sqrt(1/lambda1)*t(M))
         ## MM2 = diag(1/sqrt(lambda1))%*%M%*%diag(1/sqrt(lambda1))
-        dj = svd(MM)$d
+        dj = svd(MM,nu=0,nv=0)$d
         ldet0 = ldet.fun(t(Bt0)%*%Bt0)
         return(list(ldet0=ldet0,lambda1=lambda1,dj=dj))
     }
@@ -377,9 +377,9 @@ tvcure = function(formula1, formula2, data,
     ff = function(phi, beta, gamma,
                   tau, lambda1, lambda2,
                   Dbeta=FALSE, Dgamma=FALSE, Dphi=FALSE, D2phi=FALSE,
-                  Dlambda=FALSE, hessian=TRUE, get.levidence=FALSE){
+                  Dlambda=FALSE, hessian=TRUE, get.logEvid=FALSE){
         ## -----------------------------------------------------------------------------------------
-        if (get.levidence){
+        if (get.logEvid){
             hessian = Dphi = D2phi = Dbeta = TRUE
             Dgamma = !nogamma
         }
@@ -435,14 +435,14 @@ tvcure = function(formula1, formula2, data,
             ## Prior on <lambda1>
             lpen = lpen + sum(dgamma(lambda1.cur,aa,bb,log=TRUE)) ## Prior on <lambda1>
             ## Prior on (beta|lambda1)
-            ev.beta = svd(P1.cur)$d
+            ev.beta = svd(P1.cur,nu=0,nv=0)$d
             lpen = lpen + .5*sum(log(ev.beta[ev.beta>eps.ev])) - .5*sum(beta*c(P1.cur%*%beta))
         }
         if (J2 > 0){
             ## Prior on <lambda2>
             lpen = lpen + sum(dgamma(lambda2.cur,aa,bb,log=TRUE))
             ## Prior on (gamma|lambda2)
-            ev.gam = svd(P2.cur)$d
+            ev.gam = svd(P2.cur,nu=0,nv=0)$d
             lpen = lpen + .5*sum(log(ev.gam[ev.gam>eps.ev])) - .5*sum(gamma*c(P2.cur%*%gamma))
         }
         ##
@@ -668,17 +668,17 @@ tvcure = function(formula1, formula2, data,
         }
         attr(phi,"ed.phi") = ed.phi ## Effective dimension for <phi> in F0(t) estimation
         ## Log-evidence
-        levidence = NA
-        if (get.levidence){
-            ev.psi = svd(-Hes.phi[-k.ref,-k.ref])$d
-            ev.beta = svd(-Hes.beta)$d
+        logEvid = NA
+        if (get.logEvid){
+            ev.psi = svd(-Hes.phi[-k.ref,-k.ref],nu=0,nv=0)$d
+            ev.beta = svd(-Hes.beta,nu=0,nv=0)$d
             ev.gamma = 0
-            if (!nogamma) ev.gamma = svd(-Hes.gamma)$d
-            levidence = lpen -.5*sum(log(ev.beta[ev.beta>eps.ev]))
-            if (!nogamma) levidence = levidence -.5*sum(log(ev.gamma[ev.gamma>eps.ev]))
-            levidence = levidence -.5*sum(log(ev.psi[ev.psi>eps.ev]))
+            if (!nogamma) ev.gamma = svd(-Hes.gamma,nu=0,nv=0)$d
+            logEvid = lpen -.5*sum(log(ev.beta[ev.beta>eps.ev]))
+            if (!nogamma) logEvid = logEvid -.5*sum(log(ev.gamma[ev.gamma>eps.ev]))
+            logEvid = logEvid -.5*sum(log(ev.psi[ev.psi>eps.ev]))
         }
-        ans = list(llik=llik, lpen=lpen, dev=dev, levidence=levidence,
+        ans = list(llik=llik, lpen=lpen, dev=dev, logEvid=logEvid,
                    mu.ij=mu.ij,res=(event-mu.ij)/sqrt(mu.ij),
                    phi=phi, beta=beta, gamma=gamma,
                    nbeta=length(beta), ngamma=length(gamma),
@@ -1014,7 +1014,7 @@ tvcure = function(formula1, formula2, data,
             RDM = sum(grad * dtheta) / ntheta
             ## Check convergence
             converged = (L2norm(obj.cur$grad) < grad.tol) && (g.dif >= 0) && (g.dif < fun.tol)
-            if (converged) break
+            if ((converged) || (abs(g.dif) < fun.tol)) break
         }
         ans = list(val=obj.cur$g, val.start=g.start,
                    theta=obj.cur$theta,
@@ -1099,7 +1099,7 @@ tvcure = function(formula1, formula2, data,
     if (tau.method == "grid") tau.stable = FALSE ## Initiate the algorithm with the selection of <tau> for F0(t)
     tau.iter = tau.cur ## Necessary when <tau.method> == "grid"
     dev.old = AIC.old = BIC.old = 1e12 ## Necessary for convergence criterion based on <deviance>
-    lpen.old = levidence.old = -1e12   ##  ... or <AIC> or <BIC> or <lpen> or <log(evidence)>
+    lpen.old = logEvid.old = -1e12   ##  ... or <AIC> or <BIC> or <lpen> or <log(evidence)>
     ##
     ## ------------------------------------------------------------------------------------
     ##                           START of the estimation process
@@ -1414,11 +1414,11 @@ tvcure = function(formula1, formula2, data,
                     obj.cur = ff(phi.cur, beta.cur, gamma.cur,
                                  tau=tau.cur, lambda1=lambda1, lambda2=lambda2,
                                  Dphi=FALSE, Dbeta=TRUE, Dgamma=TRUE, Dlambda=FALSE)
-                    levidence = obj.cur$lpen -.5*ldet.fun(-obj.cur$Hes.beta)
+                    logEvid = obj.cur$lpen -.5*ldet.fun(-obj.cur$Hes.beta)
                     if (!nogamma){
-                        levidence = levidence -.5*ldet.fun(-obj.cur$Hes.gamma)
+                        logEvid = logEvid -.5*ldet.fun(-obj.cur$Hes.gamma)
                     }
-                    ans = -levidence
+                    ans = -logEvid
                     return(ans)
                 } ## End loglambda.loss
                 ##
@@ -1441,7 +1441,7 @@ tvcure = function(formula1, formula2, data,
         obj.cur = ff(phi.cur, beta.cur, gamma.cur,
                   tau=tau.cur, lambda1=lambda1.cur, lambda2=lambda2.cur,
                   Dphi=TRUE, D2phi=TRUE, Dbeta=TRUE, Dgamma=!nogamma,
-                  get.levidence=TRUE)
+                  get.logEvid=TRUE)
         ## Gradient for <beta,gamma>
         ## -------------------------
         if (nogamma) obj.cur$grad.gamma = 0
@@ -1457,13 +1457,13 @@ tvcure = function(formula1, formula2, data,
         ED.cur = EDF(list(fit=obj.cur),Wood.test=Wood.test)
         AIC = obj.cur$dev + 2*ED.cur$ED.tot
         BIC = obj.cur$dev + log(sum(n.event))*ED.cur$ED.tot
-        levidence = obj.cur$levidence
+        logEvid = obj.cur$logEvid
         ##
         ## Some output at the end of an iteration
         ## --------------------------------------
         if (iter.verbose){
             cat(iter,
-                ": levidence:",round(levidence,2),
+                ": logEvid:",round(logEvid,2),
                 "; BIC:",round(BIC,2),
                 "; AIC:",round(AIC,2),
                 "; Dev:",round(obj.cur$dev,2),
@@ -1472,9 +1472,9 @@ tvcure = function(formula1, formula2, data,
         }
         ## green == TRUE:  necessary condition to complete the estimation process
         switch(criterion, ## CONVERGENCE criterion
-               "levidence" = {
-                   green = (abs(levidence-levidence.old) < criterion.tol)
-                   levidence.old = levidence
+               "logEvid" = {
+                   green = (abs(logEvid-logEvid.old) < criterion.tol)
+                   logEvid.old = logEvid
                },
                "deviance" = {
                    dev.cur = obj.cur$dev

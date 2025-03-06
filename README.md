@@ -149,12 +149,12 @@ print(model)
     ## 
     ## Parametric coefficients:
     ##      est    se    low    up    Z  Pval   
-    ## z3 0.215 0.138 -0.054 0.485 1.57 0.118   
+    ## z3 0.215 0.138 -0.054 0.485 1.57 0.117   
     ## z4 0.182 0.070  0.045 0.319 2.60 0.009 **
     ## 
     ##    exp(est) exp(-est)   low    up  Pval   
-    ## z3    1.240     0.806 0.947 1.624 0.118   
-    ## z4    1.199     0.834 1.046 1.376 0.009 **
+    ## z3     1.24     0.806 0.947 1.624 0.117   
+    ## z4     1.20     0.834 1.046 1.376 0.009 **
     ## 
     ## Approximate significance of smooth terms (Wood's <Tr> or Chi2):
     ##         edf   Tr  Pval Chi2  Pval  
@@ -164,7 +164,7 @@ print(model)
     ## ---------------------------------------------------------------
     ##  logEvid: -2002.41  Dev: 3161.21   AIC: 3192.53   BIC: 3253.09 
     ##  edf: 15.66   nobs: 50672   n: 500 (units)   d: 353 (events)
-    ##  Convergence: TRUE  --  Algorithms: NR-LPS / LM-LPS
+    ##  Convergence: TRUE  --  Algorithms: NR-LPS / NR-LPS
     ##  Elapsed time: 6.9 seconds  (13 iterations)
     ## ---------------------------------------------------------------
 
@@ -240,7 +240,7 @@ print(tail(obj$Sp,n=1)) ## Cure probability
 ```
 
     ##              est       low        up
-    ## [275,] 0.3210159 0.2189705 0.4273863
+    ## [275,] 0.3210158 0.2189705 0.4273861
 
 More details can be found in Lambert & Kreyenfeld (2023) and in the
 documentation of the *tvcure* package.

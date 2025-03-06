@@ -156,7 +156,7 @@ print.tvcure <- function(x,ci.level=.95,expEst=TRUE,
         }
     }
     cat("\n---------------------------------------------------------------\n")
-    if (!(obj$fit$marginalized)) cat(" logEvid: ",round(obj$fit$levidence,2)," ",sep="")
+    if (!(obj$fit$marginalized)) cat(" logEvid: ",round(obj$fit$logEvid,2)," ",sep="")
     cat(" Dev:",round(obj$fit$dev,2),
         "  AIC:",round(obj$fit$AIC,2),
         "  BIC:",round(obj$fit$BIC,2),
