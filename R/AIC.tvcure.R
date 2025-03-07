@@ -9,7 +9,7 @@
 #' @param k The penalty per parameter to be used. (Default: k=2 for the classical AIC).
 #' @param ... Other optional tvcure objects.
 #'
-#' @details Akaike information criterion for the fitted model in a tvcure object, with a penalty calculated using the total effective degrees of freedom, -2log(L) + 2*ED.tot, larger values being preferred during model selection.
+#' @details Akaike information criterion for the fitted model in a tvcure object, with a penalty calculated using the total effective degrees of freedom, -2log(L) + 2*ED.tot, smaller values being preferred during model selection.
 #'
 #' @return The AIC of the fitted tvcure model in \code{x}.
 #'

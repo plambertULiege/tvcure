@@ -2,49 +2,15 @@
 % Please edit documentation in R/logEvid.R
 \name{logEvid}
 \alias{logEvid}
-\title{Log-evidence of a tvcure object.}
+\title{Generic function for computing log-evidence}
 \usage{
-logEvid(x, ...)
+logEvid(object, ...)
 }
 \arguments{
-\item{x}{A \code{\link{tvcure.object}}.}
+\item{object}{An object for which log-evidence is to be computed.}
 
-\item{...}{Optionally more tvcure objects.}
-}
-\value{
-The log-evidence of the tvcure model in \code{x}.
+\item{...}{Additional arguments (not used for now).}
 }
 \description{
-The log-evidence of the fitted tvcure model in a \code{tvcure.object}.
-}
-\details{
-Provides the log-evidence (or log-marginal likelihood) of the fitted tvcure model in a given \code{\link{tvcure.object}}, where the evidence is the marginal posterior of the penalty parameters at their selected values.
-}
-\examples{
-require(tvcure)
-## data(tvcure_Data)
-## fit = tvcure(...)
-## logEvid(fit)
-
-require(tvcure)
-## Simulated data generation
-beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2)
-data = simulateTVcureData(n=500, seed=123, beta=beta, gam=gam,
-                          RC.dist="exponential",mu.cens=550)$rawdata
-## TVcure model fitting
-tau.0 = 2.7 ; lambda1.0 = c(40,15) ; lambda2.0 = c(25,70) ## Optional
-model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), data=data,
-               tau.0=tau.0, lambda1.0=lambda1.0, lambda2.0=lambda2.0)
-logEvid(model)
-}
-\references{
-Lambert, P. and Kreyenfeld, M. (2025).
-Time-varying exogenous covariates with frequently changing values in double additive cure survival model: an application to fertility.
-\emph{Journal of the Royal Statistical Society, Series A}. <doi:10.1093/jrsssa/qnaf035>
-}
-\seealso{
-\code{\link{tvcure}}, \code{\link{tvcure.object}}, \code{\link{AIC.tvcure}}, \code{\link{BIC.tvcure}}
-}
-\author{
-Philippe Lambert \email{p.lambert@uliege.be}
+This is a generic function returning the log-evidence for the class of the input object.
 }

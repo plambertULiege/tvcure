@@ -1,15 +1,24 @@
+#' Generic function for computing log-evidence
+#'
+#' This is a generic function returning the log-evidence for the class of the input object.
+#'
+#' @param object An object for which log-evidence is to be computed.
+#' @param ... Additional arguments (not used for now).
+#' @export
+logEvid <- function(object, ...) {
+  UseMethod("logEvid")
+}
+
 #' Log-evidence of a tvcure object.
 #'
 #' @description
 #' The log-evidence of the fitted tvcure model in a \code{tvcure.object}.
 #'
-#' @usage logEvid(x, ...)
-#'
-#' @param x A \code{\link{tvcure.object}}.
+#' @param object A \code{\link{tvcure.object}}.
 #' @param ... Optionally more tvcure objects.
 #'
 #' @details Provides the log-evidence (or log-marginal likelihood) of the fitted tvcure model in a given \code{\link{tvcure.object}}, where the evidence is the marginal posterior of the penalty parameters at their selected values.
-#' @return The log-evidence of the tvcure model in \code{x}.
+#' @return The log-evidence of the tvcure model in \code{object}.
 #'
 #' @author Philippe Lambert \email{p.lambert@uliege.be}
 #' @references Lambert, P. and Kreyenfeld, M. (2025).
@@ -40,8 +49,8 @@
 
 ##logEvid <- function(x, ...) UseMethod("logEvid")
 ## logEvid.tvcure <- function(x, ...){
-logEvid <- function(x, ...){
-    obj = x
+logEvid.tvcure <- function(object, ...){
+    obj = object
   lls = function(obj) return(ans = c(logEvid=obj$fit$logEvid, edf=obj$fit$ED.tot, nobs=obj$fit$nobs))
   if (!missing(...)) {
     vals = sapply(list(obj,...), lls)
