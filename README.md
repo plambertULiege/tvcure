@@ -165,7 +165,7 @@ print(model)
     ##  logEvid: -2002.41  Dev: 3161.21   AIC: 3192.53   BIC: 3253.09 
     ##  edf: 15.66   nobs: 50672   n: 500 (units)   d: 353 (events)
     ##  Convergence: TRUE  --  Algorithms: NR-LPS / NR-LPS
-    ##  Elapsed time: 6.9 seconds  (13 iterations)
+    ##  Elapsed time: 7.1 seconds  (13 iterations)
     ## ---------------------------------------------------------------
 
 The estimated reference hazard $\mathrm{e}^{\beta_0}f_0(t)$ and the
