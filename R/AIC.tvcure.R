@@ -14,8 +14,8 @@
 #' @return The AIC of the fitted tvcure model in \code{x}.
 #'
 #' @author Philippe Lambert \email{p.lambert@uliege.be}
-#' @references Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
-#' with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, under review.
+#' @references Time-varying exogenous covariates with frequently changing values in double additive cure survival model: an application to fertility.
+#' \emph{Journal of the Royal Statistical Society, Series A}. <doi:10.1093/jrsssa/qnaf035>
 #'
 #' @examples
 #' require(tvcure)
@@ -29,7 +29,7 @@
 #'                tau.0=tau.0, lambda1.0=lambda1.0, lambda2.0=lambda2.0)
 #' AIC(model)
 #'
-#' @seealso \code{\link{tvcure}}, \code{\link{tvcure.object}}, \code{\link{BIC.tvcure}}, \code{\link{levidence}}
+#' @seealso \code{\link{tvcure}}, \code{\link{tvcure.object}}, \code{\link{BIC.tvcure}}, \code{\link{logEvid}}
 #'
 #' @export
 #'

@@ -55,8 +55,9 @@ with(obj$f1.grid$x1, plotRegion(x=x,mat=y.mat,xlab="x1",ylab="f(x1)"))
 with(obj$f1.grid$x2, plotRegion(x=x,mat=y.mat,xlab="x2",ylab="f(x2)"))
 }
 \references{
-Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
-with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, under review.
+Lambert, P. and Kreyenfeld, M. (2025).
+Time-varying exogenous covariates with frequently changing values in double additive cure survival model: an application to fertility.
+\emph{Journal of the Royal Statistical Society, Series A}. <doi:10.1093/jrsssa/qnaf035>
 }
 \author{
 Philippe Lambert \email{p.lambert@uliege.be}

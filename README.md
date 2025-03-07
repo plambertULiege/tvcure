@@ -265,12 +265,13 @@ with this program. If not, see <https://www.gnu.org/licenses/>.
 
 ## References
 
-\[1\] Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying
-covariates in double additive cure survival model with application to
-fertility. Journal of the Royal Statistical Society, Series A, under
-review. Preprint: [*arXiv:2302.00331*](https://arxiv.org/abs/2302.00331)
+\[1\] Lambert, P. and Kreyenfeld, M. (2025). Time-varying exogenous
+covariates with frequently changing values in double additive cure
+survival model: an application to fertility. Journal of the Royal
+Statistical Society, Series A.
+[*doi:10.1093/jrsssa/qnaf035*](https://doi.org/10.1093/jrsssa/qnaf035)
 
-\[2\] Lambert, P. (2024). R-package *tvcure* - Version 0.6.6. GitHub:
+\[2\] Lambert, P. (2025). R-package *tvcure* - Version 0.6.6. GitHub:
 [plambertULiege/tvcure](https://github.com/plambertULiege/tvcure)
 
 ### Complementary references
@@ -282,7 +283,7 @@ P-splines models. Statistical Modelling, 23(5-6): 409–423.
 
 \[4\] Lambert, P. and Bremhorst, V. (2020). Inclusion of time-varying
 covariates in cure survival models with an application in fertility
-studies. Journal of the Royal Statistical Society: Series A, 183(1):
+studies. Journal of the Royal Statistical Society, Series A, 183(1):
 333-354. [*doi:10.1111/rssa.12501*](https://doi.org/10.1111/rssa.12501)
 
 \[5\] Lambert, P. and Bremhorst, V. (2019). Estimation and

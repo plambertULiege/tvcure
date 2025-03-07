@@ -3,7 +3,7 @@
 #' @description
 #' The log-evidence of the fitted tvcure model in a \code{tvcure.object}.
 #'
-#' @usage levidence(x, ...)
+#' @usage logEvid(x, ...)
 #'
 #' @param x A \code{\link{tvcure.object}}.
 #' @param ... Optionally more tvcure objects.
@@ -12,14 +12,15 @@
 #' @return The log-evidence of the tvcure model in \code{x}.
 #'
 #' @author Philippe Lambert \email{p.lambert@uliege.be}
-#' @references Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
-#' with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, under review.
+#' @references Lambert, P. and Kreyenfeld, M. (2025).
+#' Time-varying exogenous covariates with frequently changing values in double additive cure survival model: an application to fertility.
+#' \emph{Journal of the Royal Statistical Society, Series A}. <doi:10.1093/jrsssa/qnaf035>
 #'
 #' @examples
 #' require(tvcure)
 #' ## data(tvcure_Data)
 #' ## fit = tvcure(...)
-#' ## levidence(fit)
+#' ## logEvid(fit)
 #'
 #' @seealso \code{\link{tvcure}}, \code{\link{tvcure.object}}, \code{\link{AIC.tvcure}}, \code{\link{BIC.tvcure}}
 #'
@@ -35,16 +36,16 @@
 #' tau.0 = 2.7 ; lambda1.0 = c(40,15) ; lambda2.0 = c(25,70) ## Optional
 #' model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), data=data,
 #'                tau.0=tau.0, lambda1.0=lambda1.0, lambda2.0=lambda2.0)
-#' levidence(model)
+#' logEvid(model)
 
-##levidence <- function(x, ...) UseMethod("levidence")
-## levidence.tvcure <- function(x, ...){
-levidence <- function(x, ...){
+##logEvid <- function(x, ...) UseMethod("logEvid")
+## logEvid.tvcure <- function(x, ...){
+logEvid <- function(x, ...){
     obj = x
-  lls = function(obj) return(ans = c(levidence=obj$fit$levidence, edf=obj$fit$ED.tot, nobs=obj$fit$nobs))
+  lls = function(obj) return(ans = c(logEvid=obj$fit$logEvid, edf=obj$fit$ED.tot, nobs=obj$fit$nobs))
   if (!missing(...)) {
     vals = sapply(list(obj,...), lls)
-    val <- data.frame(edf = round(vals[2L, ],2), levidence = vals[1L, ])
+    val <- data.frame(edf = round(vals[2L, ],2), logEvid = vals[1L, ])
     nos <- na.omit(vals[3L, ])
     if (length(nos) && any(nos != nos[1L])) warning("models are not all fitted to the same number of observations")
     Call <- match.call()

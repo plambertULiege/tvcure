@@ -29,8 +29,9 @@ nfixed = 2 ## 2 unpenalized parameters
 Pcal.fun(nfixed=2,lambda=c(10,100),Pd)
 }
 \references{
-Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
-with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, under review.
+Lambert, P. and Kreyenfeld, M. (2025).
+Time-varying exogenous covariates with frequently changing values in double additive cure survival model: an application to fertility.
+\emph{Journal of the Royal Statistical Society, Series A}. <doi:10.1093/jrsssa/qnaf035>
 }
 \author{
 Philippe Lambert \email{p.lambert@uliege.be}

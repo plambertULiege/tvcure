@@ -9,7 +9,7 @@
 #'        baseline=c("S0","F0"), K0=20, pen.order0=2,
 #'        K1=10, pen.order1=2, K2=10, pen.order2=2,
 #'        phi.0=NULL, beta.0=NULL, gamma.0=NULL,
-#'        a.tau=1, b.tau=1e-6, a=1, b=1e-2,
+#'        a.tau=1, b.tau=1e-6, a.pen=1, b.pen=1e-2,
 #'        tau.0=NULL, tau.min=1, tau.method = c("LPS","LPS2","Schall","grid","none"),
 #'        psi.method = c("NR","LM","none"),
 #'        lambda1.0=NULL, lambda1.min=1, lambda2.0=NULL, lambda2.min=1,
@@ -42,13 +42,13 @@
 #' @param phi.0 (Optional) vector of length \code{K0} with starting values for the P-spline parameters in \eqn{\log f_0(t)}.
 #' @param beta.0 (Optional) starting value for the regression and spline parameters in the long-term survival (or quantum) submodel.
 #' @param gamma.0 (Optional) starting value for the regression and spline parameters in the short-term survival (or timing) submodel.
-#' @param a.tau Hyperprior parameter in the \eqn{Gamma(a.tau,b.tau)} prior for the penalty parameter \eqn{\tau} tuning the smoothness of \eqn{\log f_0(t)} (Default: 1.0).
-#' @param b.tau Hyperprior parameter in the \eqn{Gamma(a.tau,b.tau)} prior for the penalty parameter \eqn{\tau} tuning the smoothness of \eqn{\log f_0(t)} (Default: 1e-6).
-#' @param a Hyperprior parameter in the \eqn{Gamma(a,b)} priors for the penalty parameters \eqn{\lambda_1} and \eqn{\lambda_2} tuning the smoothness of the additive terms in the long-term (quantum) and short-term (timing) survival submodels. (Default: 1.0).
-#' @param b Hyperprior parameter in the \eqn{Gamma(a,b)} priors for the penalty parameters \eqn{\lambda_1} and \eqn{\lambda_2} tuning the smoothness of the additive terms in the long-term (quantum) and short-term (timing) survival submodels. (Default: 1e-2).
+#' @param a.tau Hyperprior parameter in the Gamma(a.tau,b.tau) prior for the penalty parameter \eqn{\tau} tuning the smoothness of \eqn{\log f_0(t)} (Default: 1.0).
+#' @param b.tau Hyperprior parameter in the Gamma(a.tau,b.tau) prior for the penalty parameter \eqn{\tau} tuning the smoothness of \eqn{\log f_0(t)} (Default: 1e-6).
+#' @param a.pen Hyperprior parameter in the Gamma(a.pen,b.pen) priors for the penalty parameters \eqn{\lambda_1} and \eqn{\lambda_2} tuning the smoothness of the additive terms in the long-term (quantum) and short-term (timing) survival submodels. (Default: 1.0).
+#' @param b.pen Hyperprior parameter in the Gamma(a.pen,b.pen) priors for the penalty parameters \eqn{\lambda_1} and \eqn{\lambda_2} tuning the smoothness of the additive terms in the long-term (quantum) and short-term (timing) survival submodels. (Default: 1e-2).
 #' @param tau.0 Starting value for \eqn{\tau}.
 #' @param tau.min Minimal value for the penalty parameter \eqn{\tau}. (Default: 1.0).
-#' @param tau.method Method used to calculate the posterior mode of \eqn{p(\tau|data)}: "LPS", "LPS2", "Schall" (Fellner-Schall algorithm), "grid" (best choice in a regular grid on the log-scale) or "none" (stick to the initial value tau.0). LPS and LPS2, based on Laplace P-splines, both maximize the marginal posterior of the penalty parameter \eqn{\tau} using a fixed-point method, with LPS relying on the prior calculation of eigenvalues. (Default: "LPS").
+#' @param tau.method Method used to calculate the posterior mode of \eqn{p(\tau|{\cal D})}: "LPS", "LPS2", "Schall" (Fellner-Schall algorithm), "grid" (best choice in a regular grid on the log-scale) or "none" (stick to the initial value tau.0). LPS and LPS2, based on Laplace P-splines, both maximize the marginal posterior of the penalty parameter \eqn{\tau} using a fixed-point method, with LPS relying on the prior calculation of eigenvalues. (Default: "LPS").
 #' @param psi.method Algorithm used for the computation of the conditional posterior mode of the regression and splines parameters. Possible choices are Newton-Raphson ("NR"), Levenberg-Marquardt ("LM") or "none" (when the coefficients remain fixed at their initial values).
 #' @param lambda1.0 (Optional) J1-vector with starting values for the penalty parameters of the additive terms in the long-term survival (or quantum) submodel.
 #' @param lambda1.min Minimal value for the J1 penalty parameters \eqn{\lambda_1} of the additive terms in the long-term survival (or quantum) submodel. (Default: 1.0).
@@ -67,7 +67,7 @@
 #' @param ci.level Default value for the levels of the credible intervals. (Default: 0.95).
 #' @param criterion Criterion used to assess convergence of the estimation procedure (Default: "logEvid"):
 #' \itemize{
-#' \item \code{logEvid} : log of the evidence, i.e. of the marginal posterior of the penalty parameters at their selected values ;
+#' \item \code{logEvid} : log of the evidence (also named \emph{marginal likelihood} or \emph{model likelihood}), i.e. the log of the marginal posterior of the penalty parameters at their selected values ;
 #' \item \code{deviance} : deviance or -2 log(Likelihood) ;
 #' \item \code{AIC} : Akaike information criterion ;
 #' \item \code{BIC} : Bayesian (or Schwarz) information criterion ;
@@ -84,9 +84,9 @@
 #' @return An object of type \code{\link{tvcure.object}}.
 #'
 #' @author Philippe Lambert \email{p.lambert@uliege.be}
-#' @references Lambert, P. and Kreyenfeld, M. (2023). Exogenous time-varying covariates in double additive cure survival model
-#' with application to fertility.
-#' \emph{Journal of the Royal Statistical Society, Series A}, under review.
+#' @references Lambert, P. and Kreyenfeld, M. (2025).
+#' Time-varying exogenous covariates with frequently changing values in double additive cure survival model: an application to fertility.
+#' \emph{Journal of the Royal Statistical Society, Series A}. <doi:10.1093/jrsssa/qnaf035>
 #'
 #' @examples
 #' require(tvcure)
@@ -111,7 +111,7 @@ tvcure = function(formula1, formula2, data,
                   K2=10, pen.order2=2,
                   phi.0=NULL, beta.0=NULL, gamma.0=NULL,
                   a.tau=1, b.tau=1e-6,  ## Prior on penalty parameter <tau> for log f0(t): Gamma(a.tau,b.tau)
-                  a=1, b=1e-2, ## Prior on penalty parameters for the additive terms: Gamma(a,b)
+                  a.pen=1, b.pen=1e-2, ## Prior on penalty parameters for the additive terms: Gamma(a.pen,b.pen)
                   tau.0=NULL, tau.min=1,
                   tau.method = c("LPS","LPS2","Schall","grid","none"),
                   psi.method = c("NR","LM","none"), ## Estimation method for the regression and spline parameters
@@ -128,7 +128,7 @@ tvcure = function(formula1, formula2, data,
                   iterlim=50,iter.verbose=FALSE,verbose=FALSE){
     ##
     cl <- match.call()
-    aa = a ; bb = b
+    aa = a.pen ; bb = b.pen
     baseline = match.arg(baseline) ## "S0": S(t|x) = S0(t)^exp(gamma'x) ;  "F0": F(t|x) = F0(t)^exp(gamma'x)
     if (!is.null(model0)) baseline = model0$baseline
     criterion = match.arg(criterion) ## Criterion to assess convergence of the global algorithm

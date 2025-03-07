@@ -28,9 +28,9 @@
 #' \code{f2.grid}, \code{f2}, \code{f2.se} with the additive terms in the short-term (or timing) submodel.
 #'
 #' @author Philippe Lambert \email{p.lambert@uliege.be}
-#' @references Lambert, P. and Kreyenfeld, M. (2023). Exogenous time-varying covariates in double additive cure survival model
-#' with application to fertility.
-#' \emph{Journal of the Royal Statistical Society, Series A}, under review.
+#' @references Lambert, P. and Kreyenfeld, M. (2025).
+#' Time-varying exogenous covariates with frequently changing values in double additive cure survival model: an application to fertility.
+#' \emph{Journal of the Royal Statistical Society, Series A}. <doi:10.1093/jrsssa/qnaf035>
 #'
 #' @examples
 #' require(tvcure)

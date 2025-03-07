@@ -55,8 +55,9 @@ with(subset(pred,id==4), plotRegion(time,Sp,main="Id=4",
                               ylim=c(0,1),xlab="t",ylab="Sp(t)"))
 }
 \references{
-Lambert, P. and Kreyenfeld, M. (2024). Exogenous time-varying covariates in double additive cure survival model
-with application to fertility. \emph{Journal of the Royal Statistical Society, Series A}, under review.
+Lambert, P. and Kreyenfeld, M. (2025).
+Time-varying exogenous covariates with frequently changing values in double additive cure survival model: an application to fertility.
+\emph{Journal of the Royal Statistical Society, Series A}. <doi:10.1093/jrsssa/qnaf035>
 }
 \author{
 Philippe Lambert \email{p.lambert@uliege.be}
