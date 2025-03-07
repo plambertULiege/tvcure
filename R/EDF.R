@@ -147,7 +147,7 @@ EDF = function(model, Wood.test=FALSE, joint.computation=TRUE){
         ## ED2.full = with(fit, rowSums(t(Sigma.gamma) * (-Hes.gamma0)))
         ## ED2.full = with(fit, diag(Sigma.gamma %*% (-Hes.gamma0)))
         ED2 = Chi2 = Tr = Pval.Tr = Pval.Chi2 = Chi2.lin = Pval.lin = numeric(J2)
-        ED2.CI = matrix(nrow=J2,ncol=4) ; rownames(ED2.CI) = paste("f1(",fit$additive.lab1,")",sep="")
+        ED2.CI = matrix(nrow=J2,ncol=4) ; rownames(ED2.CI) = paste("f2(",fit$additive.lab2,")",sep="")
         ## colnames(ED2.CI) = c("edf","low","up","Plin")
         colnames(ED2.CI) = c("edf","low","up","P(<1.5)")
         for (j in 1:J2){
