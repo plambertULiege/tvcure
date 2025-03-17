@@ -124,7 +124,7 @@ print(tail(obj$Sp,n=1)) ## Cure probability
 More details can be found in Lambert \& Kreyenfeld (2025) and in the documentation of the *tvcure* package.
 
 ## License
-**tvcure**: Additive cure survival model with exogenous time-varying covariates. Copyright (C) 2023-2024 Philippe Lambert
+**tvcure**: Additive cure survival model with exogenous time-varying covariates. Copyright (C) 2023-2025 Philippe Lambert
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
 

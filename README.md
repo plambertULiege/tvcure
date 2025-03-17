@@ -165,7 +165,7 @@ print(model)
     ##  logEvid: -2002.41  Dev: 3161.21   AIC: 3192.53   BIC: 3253.09 
     ##  edf: 15.66   nobs: 50672   n: 500 (units)   d: 353 (events)
     ##  Convergence: TRUE  --  Algorithms: NR-LPS / NR-LPS
-    ##  Elapsed time: 6.7 seconds  (13 iterations)
+    ##  Elapsed time: 6.6 seconds  (13 iterations)
     ## ---------------------------------------------------------------
 
 The estimated reference hazard $\mathrm{e}^{\beta_0}f_0(t)$ and the
@@ -248,7 +248,7 @@ documentation of the *tvcure* package.
 ## License
 
 **tvcure**: Additive cure survival model with exogenous time-varying
-covariates. Copyright (C) 2023-2024 Philippe Lambert
+covariates. Copyright (C) 2023-2025 Philippe Lambert
 
 This program is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
