@@ -9,7 +9,7 @@ knitr::opts_chunk$set(fig.path="man/figures/")
 ```
 
 ## Introduction
-The _*tvcure*_ package enables to fit additive cure survival model with exogenous time-varying covariates (Lambert \& Kreyenfeld, 2023) [1,2].
+The _*tvcure*_ package enables to fit additive cure survival model with exogenous time-varying covariates (Lambert \& Kreyenfeld, 2025) [1,2].
 
 The starting point is the bounded cumulative hazard model (also name the *promotion time* model) (Tsodikov 1998) with population survival function
 $$S_p(t|\mathbf{v}) = \exp\{-H_p(t|\mathbf{v})\} =\exp\{-{\vartheta(\mathbf{v})} F(t)\},$$ 
@@ -35,7 +35,7 @@ $F(t|\tilde{\mathbf{v}}) = 1-S_0(t)^{\exp(\eta_F(\tilde{\mathbf{v}}))}$,
 where $\eta_F(\tilde{\mathbf{v}})= {\pmb{\gamma}}^\top\tilde{\mathbf{z}} + \sum_j \tilde{f}_j(\tilde{x}_j)$,
 a positive value for $\gamma_k$ suggesting an acceleration of event timing with $z_k$,  see Bremhorst, Kreyenfeld \& Lambert (2019). The baseline density function $f_0(t)=-{d\over dt}S_0(t)$ and the additive terms are specified using Bayesian P-splines. The model is identifiable provided that the follow-up is sufficiently long to display the plateau in the population survival function (Lambert \& Bremhorst, 2019).
 
-The core contribution in Lambert and Kreyenfeld (2023) is an extension of that model to include exogenous time-varying covariates.
+The core contribution in Lambert and Kreyenfeld (2025) is an extension of that model to include exogenous time-varying covariates.
 The model specification starts with the population hazard function from which other quantities can be obtained:
  $$h_p(t|\mathbf{v}(t),\tilde{\mathbf{v}}(t)) = \vartheta(\mathbf{v}(t)) f(t|\tilde{\mathbf{v}}(t)) = \mathrm{e}^{\eta_\vartheta(\mathbf{v}(t))+\eta_F(\tilde{\mathbf{v}}(t))} f_0(t)S_0(t)^{\exp(\eta_F(\tilde{\mathbf{v}}(t))-1}$$ 
 In the special case where covariates are constant, we return to the preceding extended promotion time model with static covariates.
@@ -121,7 +121,7 @@ with the last value providing the estimated cure probability (with credible boun
 print(tail(obj$Sp,n=1)) ## Cure probability
 ```
 
-More details can be found in Lambert \& Kreyenfeld (2023) and in the documentation of the *tvcure* package.
+More details can be found in Lambert \& Kreyenfeld (2025) and in the documentation of the *tvcure* package.
 
 ## License
 **tvcure**: Additive cure survival model with exogenous time-varying covariates. Copyright (C) 2023-2024 Philippe Lambert

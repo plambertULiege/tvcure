@@ -4,7 +4,7 @@ The *tvcure* R-package
 ## Introduction
 
 The **tvcure** package enables to fit additive cure survival model with
-exogenous time-varying covariates (Lambert & Kreyenfeld, 2023) \[1,2\].
+exogenous time-varying covariates (Lambert & Kreyenfeld, 2025) \[1,2\].
 
 The starting point is the bounded cumulative hazard model (also name the
 *promotion time* model) (Tsodikov 1998) with population survival
@@ -47,7 +47,7 @@ terms are specified using Bayesian P-splines. The model is identifiable
 provided that the follow-up is sufficiently long to display the plateau
 in the population survival function (Lambert & Bremhorst, 2019).
 
-The core contribution in Lambert and Kreyenfeld (2023) is an extension
+The core contribution in Lambert and Kreyenfeld (2025) is an extension
 of that model to include exogenous time-varying covariates. The model
 specification starts with the population hazard function from which
 other quantities can be obtained:
@@ -242,7 +242,7 @@ print(tail(obj$Sp,n=1)) ## Cure probability
     ##              est       low        up
     ## [275,] 0.3209875 0.2189295 0.4273745
 
-More details can be found in Lambert & Kreyenfeld (2023) and in the
+More details can be found in Lambert & Kreyenfeld (2025) and in the
 documentation of the *tvcure* package.
 
 ## License
