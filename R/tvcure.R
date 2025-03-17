@@ -19,7 +19,7 @@
 #'        ci.level=.95,
 #'        criterion=c("logEvid","deviance","lpen","AIC","BIC","gradient"),
 #'        criterion.tol=1e-2, grad.tol=1e-2,
-#'        RDM.tol=1e-4, fun.tol=1e-3,
+#'        RDM.tol=1e-4, fun.tol=1e-3, Lnorm=c("Linf","L2"),
 #'        iterlim=50, iter.verbose=FALSE, verbose=FALSE)
 #' @param formula1 A formula describing the linear predictor in the long-term (cure) survival (or quantum) submodel.
 #' @param formula2 A formula describing the linear predictor in the short-term (cure) survival (or timing) submodel.
@@ -71,12 +71,13 @@
 #' \item \code{deviance} : deviance or -2 log(Likelihood) ;
 #' \item \code{AIC} : Akaike information criterion ;
 #' \item \code{BIC} : Bayesian (or Schwarz) information criterion ;
-#' \item \code{gradient} : L2 norm of the gradient of the log of the joint posterior w.r.t. the regression and spline parameters.}
+#' \item \code{gradient} : Lp-norm of the gradient of the log of the joint posterior w.r.t. the regression and spline parameters.}
 #'
 #' @param criterion.tol Maximum absolute difference between the successive values of the \code{criterion} values (when different from "gradient") to declare convergence. (Default: 1e-2).
 #' @param grad.tol Tolerance threshold for the absolute value of each gradient component when monitoring convergence. (default: 1e-2).
 #' @param RDM.tol Tolerance thershold for the Relative Damping Measure (= RDM) when monitoring convergence (default: 1e-4).
 #' @param fun.tol Tolerance threshold for variations in the maximized function during the final iterations of posterior mode computation and convergence monitoring (default: 1e-3).
+#' @param Lnorm Lp norm used to evaluate the gradient for convergence assessment. Options are "Linf" (default) or "L2".
 #' @param iterlim Maximum number of iterations. (Default: 50).
 #' @param iter.verbose Logical indicating if the values of the convergence criterions should be printed after each iteration. (Default: FALSE).
 #' @param verbose Logical indicating if additional output based on gradients should be printed at the end of each iteration. (Default: FALSE).
@@ -124,7 +125,7 @@ tvcure = function(formula1, formula2, data,
                   ci.level=.95,
                   criterion=c("logEvid","deviance","lpen","AIC","BIC","gradient"),
                   criterion.tol=1e-2,
-                  grad.tol=1e-2, RDM.tol=1e-4, fun.tol=1e-3,
+                  grad.tol=1e-2, RDM.tol=1e-4, fun.tol=1e-3, Lnorm=c("Linf","L2"),
                   iterlim=50,iter.verbose=FALSE,verbose=FALSE){
     ##
     cl <- match.call()
@@ -138,6 +139,14 @@ tvcure = function(formula1, formula2, data,
     if (missing(formula1)) {message("Missing model formula <formula1> for long-term survival !") ; return(NULL)}
     if (missing(formula2)) {message("Missing model formula <formula2> for short-term survival !") ; return(NULL)}
     if (verbose) iter.verbose = verbose
+    ## Lp-norm function
+    ## ----------------
+    Lnorm = match.arg(Lnorm)
+    if (Lnorm == "Linf"){
+        Lp <- function(x) max(abs(x))
+    } else if (Lnorm == "L2"){
+        Lp <- function(x) sqrt(sum(x^2))
+    }
     ## Make sure that the 's' function for additive terms in formulas is tvcure::s
     ## ---------------------------------------------------------------------------
     s <- tvcure::s
@@ -930,7 +939,6 @@ tvcure = function(formula1, formula2, data,
     ## #############
     ## ESTIMATION ##
     ## #############
-    L2norm = function(x) sqrt(sum(x^2))
     ##
     ## ---------------------------------------
     ##  Generic Levenberg-Marquardt algorithm
@@ -943,7 +951,7 @@ tvcure = function(formula1, formula2, data,
     ##       - Hes: Hessian matrix of the function
     ##       - RDM: grad' (-H)^-1 grad / ntheta
     ##    * theta0: starting value
-    ##    * grad.tol: tolerance value for the L2-norm of the gradient
+    ##    * grad.tol: tolerance value for the Lp-norm of the gradient
     ##    * RDM.tol: tolerance value for the RDM (= Relative Damping Measure)
     ##    * max_iter: maximum number of iterations
     ##    * lambda_init: initial value of the damping parameter in Levenberg-Marquardt
@@ -957,14 +965,13 @@ tvcure = function(formula1, formula2, data,
     ##       * grad: gradient at <theta>
     ##       * RDM: Relative Damping Measure at <theta>
     ##       * iter: number of iterations
-    ##       * convergence: logical indicating if convergence occured: L2(grad) < grad.tol
+    ##       * convergence: logical indicating if convergence occured: Lp(grad) < grad.tol
     myLevMarq <- function(g, theta0, grad.tol=1e-2, RDM.tol=1e-4, fun.tol=1e-3,
                           max_iter=25, lambda_init=1e-3, lambda_factor=10,
                           verbose=FALSE){
         theta <- theta0
         ntheta <- length(theta)
         lambda <- lambda_init
-        L2norm <- function(x) sqrt(sum(x^2)) ## Euclidean norm function
         obj.cur <- g(theta0, Dtheta=TRUE)
         g.start = obj.cur$g
         ##
@@ -1008,12 +1015,12 @@ tvcure = function(formula1, formula2, data,
                 if (nreject > 5) break
                 lambda <- lambda * lambda_factor
             }
-            if (verbose) cat("L2(grad):",L2norm(obj.cur$grad),"\n")
+            if (verbose) cat("Lp(grad):",Lp(obj.cur$grad),"\n")
             ## Compute RDM
             grad = obj.cur$grad
             RDM = sum(grad * dtheta) / ntheta
             ## Check convergence
-            converged = (L2norm(obj.cur$grad) < grad.tol) && (g.dif >= 0) && (g.dif < fun.tol)
+            converged = (Lp(obj.cur$grad) < grad.tol) && (g.dif >= 0) && (g.dif < fun.tol)
             if ((converged) || (abs(g.dif) < fun.tol)) break
         }
         ans = list(val=obj.cur$g, val.start=g.start,
@@ -1032,10 +1039,10 @@ tvcure = function(formula1, formula2, data,
         theta.cur = theta
         obj.cur = g(theta.cur,Dtheta=TRUE)
         g.start = obj.cur$g ## Function at the iteration start
-        L2grad = L2norm(obj.cur$grad)
-        ## Convergence criterion using L2(grad) and RDM (see e.g. Prague et al, 2013)
+        grad.Lp = Lp(obj.cur$grad)
+        ## Convergence criterion using Lp(grad) and RDM (see e.g. Prague et al, 2013)
         RDM = with(obj.cur, sum(grad * dtheta)) / ntheta
-        ok =  (L2grad < grad.tol) && (abs(RDM) < RDM.tol) ## grad' (-H)^-1 grad / ntheta < tol^2 ?
+        ok =  (grad.Lp < grad.tol) && (abs(RDM) < RDM.tol) ## grad' (-H)^-1 grad / ntheta < tol^2 ?
         iter = 0
         step = 1
         while(!ok){
@@ -1062,15 +1069,15 @@ tvcure = function(formula1, formula2, data,
             g.dif = g.prop - g.cur
             ##
             obj.cur = obj.prop
-            L2grad = L2norm(obj.cur$grad)
-            if (verbose) cat(iter,"> ",step, g.cur, g.prop, "--> g.dif =",g.dif,"  --  L2(grad) = ",L2grad,"\n")
+            grad.Lp = Lp(obj.cur$grad)
+            if (verbose) cat(iter,"> ",step, g.cur, g.prop, "--> g.dif =",g.dif,"  --  Lp(grad) = ",grad.Lp,"\n")
             ## Computre RDM (see e.g. Prague et al, 2013):
             RDM = with(obj.cur, sum(grad * dtheta)) / ntheta ## grad' (-H)^-1 grad / ntheta < tol^2 ?
-            ok = (abs(RDM) < RDM.tol) && (L2grad < grad.tol) && (g.dif >= 0) && (g.dif < fun.tol)
+            ok = (abs(RDM) < RDM.tol) && (grad.Lp < grad.tol) && (g.dif >= 0) && (g.dif < fun.tol)
             if (iter > itermax) break
         }
-        if (verbose) cat(obj.cur$g," (niter = ",iter,")  -  L2(grad) = ",L2grad,"  -  RDM = ",RDM,"\n",sep="")
-        ## if (verbose) cat(obj.cur$g," (niter = ",iter,") - grad = ",L2norm(obj.cur$grad),"\n",sep="")
+        if (verbose) cat(obj.cur$g," (niter = ",iter,")  -  Lp(grad) = ",grad.Lp,"  -  RDM = ",RDM,"\n",sep="")
+        ## if (verbose) cat(obj.cur$g," (niter = ",iter,") - grad = ",Lp(obj.cur$grad),"\n",sep="")
         ans = list(val=obj.cur$g, val.start=g.start, theta=obj.cur$theta, grad=obj.cur$grad,
                    RDM=RDM, iter=iter, converged=ok)
         return(ans)
@@ -1446,7 +1453,7 @@ tvcure = function(formula1, formula2, data,
         ## -------------------------
         if (nogamma) obj.cur$grad.gamma = 0
         grad.cur = with(obj.cur, grad.regr) ##c(grad.beta,grad.gamma))
-        ## grad.L2 = with(obj.cur, c(beta=L2norm(abs(grad.beta)),gamma=L2norm(abs(grad.gamma))))
+        ## grad.Lp = with(obj.cur, c(beta=Lp(grad.beta),gamma=Lp(grad.gamma)))
         ##
         ## Penalized logLik
         ## ----------------
@@ -1494,8 +1501,8 @@ tvcure = function(formula1, formula2, data,
                    BIC.old = BIC
                },
                "gradient" = {
-                   green = (L2norm(grad.cur) < grad.tol) & (iter > 5)
-                   ## green = all(grad.L2 < 10*grad.tol) & (iter > 5)
+                   green = (Lp(grad.cur) < grad.tol) & (iter > 5)
+                   ## green = all(grad.Lp < 10*grad.tol) & (iter > 5)
                }
                )
         ## Necessary & sufficient condition to complete the estimation process:

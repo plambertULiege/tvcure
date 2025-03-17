@@ -165,7 +165,7 @@ print(model)
     ##  logEvid: -2002.41  Dev: 3161.21   AIC: 3192.53   BIC: 3253.09 
     ##  edf: 15.66   nobs: 50672   n: 500 (units)   d: 353 (events)
     ##  Convergence: TRUE  --  Algorithms: NR-LPS / NR-LPS
-    ##  Elapsed time: 7.1 seconds  (13 iterations)
+    ##  Elapsed time: 6.7 seconds  (13 iterations)
     ## ---------------------------------------------------------------
 
 The estimated reference hazard $\mathrm{e}^{\beta_0}f_0(t)$ and the
@@ -240,7 +240,7 @@ print(tail(obj$Sp,n=1)) ## Cure probability
 ```
 
     ##              est       low        up
-    ## [275,] 0.3210158 0.2189705 0.4273861
+    ## [275,] 0.3209875 0.2189295 0.4273745
 
 More details can be found in Lambert & Kreyenfeld (2023) and in the
 documentation of the *tvcure* package.

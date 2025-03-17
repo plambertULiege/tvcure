@@ -19,7 +19,7 @@ tvcure(formula1, formula2, data,
        ci.level=.95,
        criterion=c("logEvid","deviance","lpen","AIC","BIC","gradient"),
        criterion.tol=1e-2, grad.tol=1e-2,
-       RDM.tol=1e-4, fun.tol=1e-3,
+       RDM.tol=1e-4, fun.tol=1e-3, Lnorm=c("Linf","L2"),
        iterlim=50, iter.verbose=FALSE, verbose=FALSE)
 }
 \arguments{
@@ -106,7 +106,7 @@ Baseline S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Baseline F0: \eqn{F(t|x)
 \item \code{deviance} : deviance or -2 log(Likelihood) ;
 \item \code{AIC} : Akaike information criterion ;
 \item \code{BIC} : Bayesian (or Schwarz) information criterion ;
-\item \code{gradient} : L2 norm of the gradient of the log of the joint posterior w.r.t. the regression and spline parameters.}}
+\item \code{gradient} : Lp-norm of the gradient of the log of the joint posterior w.r.t. the regression and spline parameters.}}
 
 \item{criterion.tol}{Maximum absolute difference between the successive values of the \code{criterion} values (when different from "gradient") to declare convergence. (Default: 1e-2).}
 
@@ -115,6 +115,8 @@ Baseline S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Baseline F0: \eqn{F(t|x)
 \item{RDM.tol}{Tolerance thershold for the Relative Damping Measure (= RDM) when monitoring convergence (default: 1e-4).}
 
 \item{fun.tol}{Tolerance threshold for variations in the maximized function during the final iterations of posterior mode computation and convergence monitoring (default: 1e-3).}
+
+\item{Lnorm}{Lp norm used to evaluate the gradient for convergence assessment. Options are "Linf" (default) or "L2".}
 
 \item{iterlim}{Maximum number of iterations. (Default: 50).}
 
