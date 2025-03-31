@@ -165,7 +165,7 @@ print(model)
     ##  logEvid: -2018.52  Dev: 3163.45   AIC: 3190.56   BIC: 3242.98 
     ##  edf: 13.56   nobs: 50672   n: 500 (units)   d: 353 (events)
     ##  Convergence: TRUE  --  Algorithms: NR-LPS / LM-LPS
-    ##  Elapsed time: 6.6 seconds  (16 iterations)
+    ##  Elapsed time: 6.1 seconds  (16 iterations)
     ## ---------------------------------------------------------------
 
 The estimated reference hazard $\mathrm{e}^{\beta_0}f_0(t)$ and the
@@ -295,7 +295,7 @@ covariates influence long- and short-term survival. Biometrical Journal,
 \[6\] Gressani, O. and Lambert P. (2018). Fast Bayesian inference using
 Laplace approximations in a flexible promotion time cure model based on
 P-splines. Computational Statistics and Data Analysis, 124: 151-167.
-[*doi:10.1016/j.csda.2018.02.007*](https://doi.org/j.csda.2018.02.007)
+[*doi:10.1016/j.csda.2018.02.007*](https://doi.org/10.1016/j.csda.2018.02.007)
 
 \[7\] Bremhorst, V., Kreyenfeld M. and Lambert P. (2019). Nonparametric
 double additive cure survival models: an application to the estimation

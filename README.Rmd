@@ -144,7 +144,7 @@ You should have received a copy of the GNU General Public License along with thi
 
 [5] Lambert, P. and Bremhorst, V. (2019). Estimation and identification issues in the promotion time cure model when the same covariates influence long- and short-term survival. Biometrical Journal, 61(2): 275-279. [*doi:10.1002/bimj.201700250*](https://doi.org/10.1002/bimj.201700250)
 
-[6] Gressani, O. and Lambert P. (2018). Fast Bayesian inference using Laplace approximations in a flexible promotion time cure model based on P-splines. Computational Statistics and Data Analysis, 124: 151-167. [*doi:10.1016/j.csda.2018.02.007*](https://doi.org/j.csda.2018.02.007)
+[6] Gressani, O. and Lambert P. (2018). Fast Bayesian inference using Laplace approximations in a flexible promotion time cure model based on P-splines. Computational Statistics and Data Analysis, 124: 151-167. [*doi:10.1016/j.csda.2018.02.007*](https://doi.org/10.1016/j.csda.2018.02.007)
 
 [7] Bremhorst, V., Kreyenfeld M. and Lambert P. (2019). Nonparametric double additive cure survival models: an application to the estimation of the nonlinear effect of age at first parenthood on fertility progression. Statistical Modelling, 19(3): 248-275.  [*doi:10.1177/1471082X18784685*](https://doi.org/10.1177/1471082X18784685)
 

@@ -2,15 +2,15 @@
 #' @description
 #' Predicted values based on a tvcure object.
 #'
-#' @usage \method{predict}{tvcure}(x, newdata, ci.level=.95, ...)
+#' @usage \method{predict}{tvcure}(object, newdata, ci.level=.95, ...)
 #'
-#' @param x A \code{\link{tvcure.object}}.
+#' @param object A \code{\link{tvcure.object}}.
 #' @param newdata A data frame in which to look for the 'id' (distinguishing the different units), 'time' and covariate values for which 'predictions' should be made. Time values for a given 'id' should be a series of consecutive integers starting with 1. If \code{newdata$id} does not exist, then predictions are assumed to concern a single unit with consecutive time values starting with 1.
 #' @param ci.level Credible level for the reported estimates. (Default: 0.95).
 #' @param ... additional generic arguments.
 #'
 #'
-#' @return A list containing, in addition to the optional \code{newdata} entries, the following elements:
+#' @return A data frame containing, in addition to the optional \code{newdata} entries, the following elements:
 #' \itemize{
 #' \item \code{Hp} : Matrix containing estimates of the cumulative population hazard \eqn{H_p(t|x_{1:t})} with its credible interval bounds at time \eqn{t} given the history of covariates.
 #' \item \code{lHp} : Matrix containing estimates of the log cumulative population hazard \eqn{\log H_p(t|x_{1:t})} with its standard error and credible interval bounds at time \eqn{t} given the history of covariates.
@@ -54,12 +54,11 @@
 #' with(subset(pred,id==4), plotRegion(time,Sp,main="Id=4",
 #'                               ylim=c(0,1),xlab="t",ylab="Sp(t)"))
 #' }
-predict.tvcure <- function(x, newdata, ci.level=.95, ...){
-    obj.tvcure = x
+predict.tvcure <- function(object, newdata, ci.level=.95, ...){
+    obj = object
     ## Check that <id> entry in newdata. If missing, create one
     if (is.null(newdata$id)) newdata$id = rep(1,nrow(newdata))
     ##
-    obj = obj.tvcure
     baseline = obj$baseline
     t.grid = obj$fit$t.grid
     ##

@@ -1,6 +1,6 @@
 Package: tvcure
 Type: Package
-Title: Additive cure survival model with time-varying covariates
+Title: Additive Cure Survival Model with Time-Varying Covariates
 Version: 0.6.6
 Authors@R: person("Philippe","Lambert", 
  email="p.lambert@uliege.be", role=c("aut","cre"),

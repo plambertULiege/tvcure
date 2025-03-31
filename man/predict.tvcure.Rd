@@ -4,10 +4,10 @@
 \alias{predict.tvcure}
 \title{Predict method for tvcure model fits}
 \usage{
-\method{predict}{tvcure}(x, newdata, ci.level=.95, ...)
+\method{predict}{tvcure}(object, newdata, ci.level=.95, ...)
 }
 \arguments{
-\item{x}{A \code{\link{tvcure.object}}.}
+\item{object}{A \code{\link{tvcure.object}}.}
 
 \item{newdata}{A data frame in which to look for the 'id' (distinguishing the different units), 'time' and covariate values for which 'predictions' should be made. Time values for a given 'id' should be a series of consecutive integers starting with 1. If \code{newdata$id} does not exist, then predictions are assumed to concern a single unit with consecutive time values starting with 1.}
 
@@ -16,7 +16,7 @@
 \item{...}{additional generic arguments.}
 }
 \value{
-A list containing, in addition to the optional \code{newdata} entries, the following elements:
+A data frame containing, in addition to the optional \code{newdata} entries, the following elements:
 \itemize{
 \item \code{Hp} : Matrix containing estimates of the cumulative population hazard \eqn{H_p(t|x_{1:t})} with its credible interval bounds at time \eqn{t} given the history of covariates.
 \item \code{lHp} : Matrix containing estimates of the log cumulative population hazard \eqn{\log H_p(t|x_{1:t})} with its standard error and credible interval bounds at time \eqn{t} given the history of covariates.
