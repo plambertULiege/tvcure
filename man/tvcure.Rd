@@ -9,9 +9,9 @@ tvcure(formula1, formula2, data,
        baseline=c("S0","F0"), K0=20, pen.order0=2,
        K1=10, pen.order1=2, K2=10, pen.order2=2,
        phi.0=NULL, beta.0=NULL, gamma.0=NULL,
-       a.tau=1, b.tau=1e-6, a.pen=1, b.pen=1e-2,
+       a.tau=1, b.tau=1e-6, a.pen=1, b.pen=1e-4,
        tau.0=NULL, tau.min=1, tau.method = c("LPS","LPS2","Schall","grid","none"),
-       psi.method = c("NR","LM","none"),
+       psi.method = c("LM","NR","none"),
        lambda1.0=NULL, lambda1.min=1, lambda2.0=NULL, lambda2.min=1,
        lambda.method=c("LPS","LPS2","LPS3","nlminb","none"),
        logscale=FALSE,
@@ -65,7 +65,7 @@ Baseline S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Baseline F0: \eqn{F(t|x)
 
 \item{a.pen}{Hyperprior parameter in the Gamma(a.pen,b.pen) priors for the penalty parameters \eqn{\lambda_1} and \eqn{\lambda_2} tuning the smoothness of the additive terms in the long-term (quantum) and short-term (timing) survival submodels. (Default: 1.0).}
 
-\item{b.pen}{Hyperprior parameter in the Gamma(a.pen,b.pen) priors for the penalty parameters \eqn{\lambda_1} and \eqn{\lambda_2} tuning the smoothness of the additive terms in the long-term (quantum) and short-term (timing) survival submodels. (Default: 1e-2).}
+\item{b.pen}{Hyperprior parameter in the Gamma(a.pen,b.pen) priors for the penalty parameters \eqn{\lambda_1} and \eqn{\lambda_2} tuning the smoothness of the additive terms in the long-term (quantum) and short-term (timing) survival submodels. (Default: 1e-4).}
 
 \item{tau.0}{Starting value for \eqn{\tau}.}
 
@@ -73,7 +73,7 @@ Baseline S0: \eqn{S(t|x) = S_0(t)^{\exp^{\gamma'x}}} ;  Baseline F0: \eqn{F(t|x)
 
 \item{tau.method}{Method used to calculate the posterior mode of \eqn{p(\tau|{\cal D})}: "LPS", "LPS2", "Schall" (Fellner-Schall algorithm), "grid" (best choice in a regular grid on the log-scale) or "none" (stick to the initial value tau.0). LPS and LPS2, based on Laplace P-splines, both maximize the marginal posterior of the penalty parameter \eqn{\tau} using a fixed-point method, with LPS relying on the prior calculation of eigenvalues. (Default: "LPS").}
 
-\item{psi.method}{Algorithm used for the computation of the conditional posterior mode of the regression and splines parameters. Possible choices are Newton-Raphson ("NR"), Levenberg-Marquardt ("LM") or "none" (when the coefficients remain fixed at their initial values).}
+\item{psi.method}{Algorithm used for the computation of the conditional posterior mode of the regression and splines parameters. Possible choices are Levenberg-Marquardt ("LM"), Newton-Raphson ("NR") or "none" (when the coefficients remain fixed at their initial values).}
 
 \item{lambda1.0}{(Optional) J1-vector with starting values for the penalty parameters of the additive terms in the long-term survival (or quantum) submodel.}
 
@@ -131,6 +131,7 @@ An object of type \code{\link{tvcure.object}}.
 Fit of a double additive cure survival model with exogenous time-varying covariates.
 }
 \examples{
+\donttest{
 require(tvcure)
 ## Simulated data generation
 beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2)
@@ -142,6 +143,7 @@ model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), data=data,
                tau.0=tau.0, lambda1.0=lambda1.0, lambda2.0=lambda2.0)
 print(model)
 plot(model, pages=1)
+}
 
 }
 \references{

@@ -25,6 +25,7 @@
 #' @export
 #'
 #' @examples
+#' \donttest{
 #' require(tvcure)
 #' ## Simulated data generation
 #' beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2)
@@ -40,6 +41,8 @@
 #' ## par(mfrow=c(1,2))
 #' with(obj$f1.grid$x1, plotRegion(x=x,mat=y.mat,xlab="x1",ylab="f(x1)"))
 #' with(obj$f1.grid$x2, plotRegion(x=x,mat=y.mat,xlab="x2",ylab="f(x2)"))
+#' }
+#'
 plotRegion = function(x,mat,add=FALSE,xlim=range(x),ylim=range(mat),
                       colfill="#D9D9D980",lwd=2,xlab="",ylab="",main="",...){
   f = mat[,1] ; f.low = mat[,2] ; f.up = mat[,3]

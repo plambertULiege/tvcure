@@ -1,4 +1,50 @@
-.Rproj.user
+# RStudio project files
+.Rproj.user/
 .Rhistory
 .RData
 .Ruserdata
+
+# Compiled code
+/*.o
+/*.so
+/*.dll
+
+# Packrat (if used)
+packrat/
+packrat.lock
+
+# Dependency files
+.DS_Store
+Thumbs.db
+
+
+# Installed package-related files
+*.tar.gz
+*.zip
+
+# R CMD CHECK artifacts
+.Rcheck/
+
+# Temporary files
+*.swp
+*.lock
+*.log
+
+# Cache files (if using knitr, rmarkdown, or devtools)
+cache/
+*.html
+*.aux
+*.out
+*.toc
+*.snm
+*.nav
+*.vrb
+
+# Test coverage reports
+coverage/
+*.covr*
+covr.Rout*
+
+# renv (if used for dependency management)
+renv.lock
+renv/

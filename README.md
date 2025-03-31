@@ -124,48 +124,48 @@ print(model)
     ## tvcure(formula1 = ~z1 + z2 + s(x1) + s(x2), formula2 = ~z3 + 
     ##     z4 + s(x3) + s(x4), data = data)
     ## 
-    ## Prior on penalty parameter(s): Gamma(1,0.01)
+    ## Prior on penalty parameter(s): Gamma(1,1e-04)
     ## 
     ## >> log(theta(x)) - Long-term survival (Quantum) <<
     ## Formula: ~z1 + z2 + s(x1) + s(x2) 
     ## 
     ## Parametric coefficients:
     ##                est    se    low    up     Z   Pval    
-    ## (Intercept)  0.508 0.068  0.375 0.641  7.47 <0.001 ***
-    ## z1          -0.108 0.107 -0.319 0.102 -1.01  0.313    
-    ## z2           0.211 0.055  0.104 0.319  3.85 <0.001 ***
+    ## (Intercept)  0.493 0.067  0.362 0.625  7.35 <0.001 ***
+    ## z1          -0.109 0.107 -0.319 0.101 -1.02  0.308    
+    ## z2           0.212 0.055  0.105 0.319  3.87 <0.001 ***
     ## 
     ##    exp(est) exp(-est)   low    up   Pval    
-    ## z1    0.897     1.114 0.727 1.107  0.313    
-    ## z2    1.235     0.810 1.109 1.375 <0.001 ***
+    ## z1    0.897     1.115 0.727 1.106  0.308    
+    ## z2    1.236     0.809 1.110 1.376 <0.001 ***
     ## 
     ## Approximate significance of smooth terms (Wood's <Tr> or Chi2):
     ##         edf    Tr   Pval  Chi2   Pval    
-    ## f1(x1) 2.69  9.75  0.017  9.95  0.014 *  
-    ## f1(x2) 3.26 23.79 <0.001 28.36 <0.001 ***
+    ## f1(x1) 1.63  8.43   0.01  8.60  0.009 ** 
+    ## f1(x2) 3.18 24.46 <0.001 28.65 <0.001 ***
     ## 
     ## >> eta(x) - Short-term survival (Timing) <<
     ## Formula: ~z3 + z4 + s(x3) + s(x4) 
     ## 
     ## Parametric coefficients:
     ##      est    se    low    up    Z  Pval   
-    ## z3 0.215 0.138 -0.054 0.485 1.57 0.117   
-    ## z4 0.182 0.070  0.045 0.319 2.60 0.009 **
+    ## z3 0.216 0.138 -0.053 0.486 1.57 0.116   
+    ## z4 0.185 0.070  0.048 0.322 2.64 0.008 **
     ## 
     ##    exp(est) exp(-est)   low    up  Pval   
-    ## z3     1.24     0.806 0.947 1.624 0.117   
-    ## z4     1.20     0.834 1.046 1.376 0.009 **
+    ## z3    1.241     0.806 0.948 1.626 0.116   
+    ## z4    1.203     0.831 1.049 1.380 0.008 **
     ## 
     ## Approximate significance of smooth terms (Wood's <Tr> or Chi2):
     ##         edf   Tr  Pval Chi2  Pval  
-    ## f2(x3) 2.54 6.79 0.078 6.88 0.053 .
-    ## f2(x4) 2.16 2.63 0.273 2.99 0.251  
+    ## f2(x3) 2.55 9.16 0.021 9.64 0.015 *
+    ## f2(x4) 1.19 3.04 0.112 2.91 0.112  
     ## 
     ## ---------------------------------------------------------------
-    ##  logEvid: -2002.41  Dev: 3161.21   AIC: 3192.53   BIC: 3253.09 
-    ##  edf: 15.66   nobs: 50672   n: 500 (units)   d: 353 (events)
-    ##  Convergence: TRUE  --  Algorithms: NR-LPS / NR-LPS
-    ##  Elapsed time: 6.6 seconds  (13 iterations)
+    ##  logEvid: -2018.52  Dev: 3163.45   AIC: 3190.56   BIC: 3242.98 
+    ##  edf: 13.56   nobs: 50672   n: 500 (units)   d: 353 (events)
+    ##  Convergence: TRUE  --  Algorithms: NR-LPS / LM-LPS
+    ##  Elapsed time: 6.6 seconds  (16 iterations)
     ## ---------------------------------------------------------------
 
 The estimated reference hazard $\mathrm{e}^{\beta_0}f_0(t)$ and the
@@ -239,8 +239,8 @@ credible bounds):
 print(tail(obj$Sp,n=1)) ## Cure probability
 ```
 
-    ##              est       low        up
-    ## [275,] 0.3209875 0.2189295 0.4273745
+    ##              est      low        up
+    ## [275,] 0.3396353 0.241924 0.4396692
 
 More details can be found in Lambert & Kreyenfeld (2025) and in the
 documentation of the *tvcure* package.

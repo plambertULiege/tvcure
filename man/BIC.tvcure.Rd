@@ -21,6 +21,7 @@ Bayesian Information Criterion (BIC) for the fitted tvcure model in a \code{tvcu
 Bayesian (Schwarz) information criterion in a tvcure object, with a penalty calculated using the total effective degrees of freedom and the total number of observed events, -2log(L) + log(d)*ED.tot, smaller values being preferred during model selection.
 }
 \examples{
+\donttest{
 require(tvcure)
 ## Simulated data generation
 beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2)
@@ -31,6 +32,7 @@ tau.0 = 2.7 ; lambda1.0 = c(40,15) ; lambda2.0 = c(25,70) ## Optional
 model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), data=data,
                tau.0=tau.0, lambda1.0=lambda1.0, lambda2.0=lambda2.0)
 BIC(model)
+}
 
 }
 \references{

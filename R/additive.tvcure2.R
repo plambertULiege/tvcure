@@ -33,6 +33,7 @@
 #' \emph{Journal of the Royal Statistical Society, Series A}. <doi:10.1093/jrsssa/qnaf035>
 #'
 #' @examples
+#' \donttest{
 #' require(tvcure)
 #' ## Simulated data generation
 #' beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2)
@@ -46,6 +47,7 @@
 #' ## Extract additive term estimates from tvcure object
 #' obj = additive.tvcure(model)
 #' names(obj)
+#' }
 #'
 #' @export
 #'

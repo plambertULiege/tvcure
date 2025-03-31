@@ -32,6 +32,7 @@
 #' @export
 #'
 #' @examples
+#' \donttest{
 #' require(tvcure)
 #' ## Simulated data generation
 #' beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2)
@@ -52,6 +53,7 @@
 #'                               ylim=c(0,1),xlab="t",ylab="Sp(t)"))
 #' with(subset(pred,id==4), plotRegion(time,Sp,main="Id=4",
 #'                               ylim=c(0,1),xlab="t",ylab="Sp(t)"))
+#' }
 predict.tvcure <- function(x, newdata, ci.level=.95, ...){
     obj.tvcure = x
     ## Check that <id> entry in newdata. If missing, create one

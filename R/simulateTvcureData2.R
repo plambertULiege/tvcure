@@ -94,6 +94,7 @@
 #' @export
 #'
 #' @examples
+#' \donttest{
 #' require(tvcure)
 #' ## Regression parameters
 #' beta = c(beta0=.4, beta1=-.2, beta2=.15) ##  beta0 tunes the cure rate
@@ -107,6 +108,7 @@
 #' head(temp$rawdata) ## Overview of the simulated raw data
 #' head(temp$data.summary) ## Overview of the summarized data
 #' with(temp, c(cure.rate=cure.rate,RC.rate=RC.rate)) ## Cure and RC rates
+#' }
 #'
 simulateTVcureData2 = function(n, seed, Tmax=300,
                         f0F0 = list(f0=function(x) dweibull(x, 2.65, 100), F0=function(x) pweibull(x, 2.65, 100)),

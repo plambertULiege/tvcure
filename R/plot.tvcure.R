@@ -34,6 +34,7 @@
 #' \emph{Journal of the Royal Statistical Society, Series A}. <doi:10.1093/jrsssa/qnaf035>
 #'
 #' @examples
+#' \donttest{
 #' require(tvcure)
 #' ## Simulated data generation
 #' beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2)
@@ -44,6 +45,7 @@
 #' model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), data=data,
 #'                tau.0=tau.0, lambda1.0=lambda1.0, lambda2.0=lambda2.0)
 #' plot(model,pages=1)
+#' }
 #'
 #' @seealso \code{\link{tvcure}}, \code{\link{tvcure.object}}, \code{\link{print.tvcure}}
 #'

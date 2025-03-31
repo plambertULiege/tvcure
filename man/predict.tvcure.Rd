@@ -33,6 +33,7 @@ A list containing, in addition to the optional \code{newdata} entries, the follo
 Predicted values based on a tvcure object.
 }
 \examples{
+\donttest{
 require(tvcure)
 ## Simulated data generation
 beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2)
@@ -53,6 +54,7 @@ with(subset(pred,id==1), plotRegion(time,Sp,main="Id=1",
                               ylim=c(0,1),xlab="t",ylab="Sp(t)"))
 with(subset(pred,id==4), plotRegion(time,Sp,main="Id=4",
                               ylim=c(0,1),xlab="t",ylab="Sp(t)"))
+}
 }
 \references{
 Lambert, P. and Kreyenfeld, M. (2025).

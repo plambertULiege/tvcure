@@ -38,6 +38,7 @@ No returned value (in addition to the plot).
 Generic function to plot a shaded region around values of a scalar function.
 }
 \examples{
+\donttest{
 require(tvcure)
 ## Simulated data generation
 beta = c(beta0=.4, beta1=-.2, beta2=.15) ; gam = c(gam1=.2, gam2=.2)
@@ -53,6 +54,8 @@ obj = additive.tvcure(model) ## Extract additive terms
 ## par(mfrow=c(1,2))
 with(obj$f1.grid$x1, plotRegion(x=x,mat=y.mat,xlab="x1",ylab="f(x1)"))
 with(obj$f1.grid$x2, plotRegion(x=x,mat=y.mat,xlab="x2",ylab="f(x2)"))
+}
+
 }
 \references{
 Lambert, P. and Kreyenfeld, M. (2025).
