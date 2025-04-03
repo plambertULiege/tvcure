@@ -12,7 +12,7 @@
 \item{...}{Optionally more fitted objects.}
 }
 \value{
-The deviance of the fitted tvcure model in \code{x}.
+The deviance as a numeric value, computed according to the model specified in the input \code{object}.
 }
 \description{
 Deviance for the fitted tvcure model in a \code{tvcure.object}.

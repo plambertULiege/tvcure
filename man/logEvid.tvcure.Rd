@@ -12,7 +12,7 @@
 \item{...}{Optionally more tvcure objects.}
 }
 \value{
-The log-evidence of the tvcure model in \code{object}.
+The log-evidence as a numeric value, computed according to the model specified in the input \code{object}.
 }
 \description{
 The log-evidence of the fitted tvcure model in a \code{tvcure.object}.
@@ -21,11 +21,6 @@ The log-evidence of the fitted tvcure model in a \code{tvcure.object}.
 Provides the log-evidence (or log-marginal likelihood) of the fitted tvcure model in a given \code{\link{tvcure.object}}, where the evidence is the marginal posterior of the penalty parameters at their selected values.
 }
 \examples{
-require(tvcure)
-## data(tvcure_Data)
-## fit = tvcure(...)
-## logEvid(fit)
-
 \donttest{
 require(tvcure)
 ## Simulated data generation
@@ -38,6 +33,7 @@ model = tvcure(~z1+z2+s(x1)+s(x2), ~z3+z4+s(x3)+s(x4), data=data,
                tau.0=tau.0, lambda1.0=lambda1.0, lambda2.0=lambda2.0)
 logEvid(model)
 }
+
 }
 \references{
 Lambert, P. and Kreyenfeld, M. (2025).

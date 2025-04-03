@@ -80,8 +80,8 @@ predict.tvcure <- function(object, newdata, ci.level=.95, ...){
         idx = which(id==ids[ii])
         time = data.sub$time
         if (!all(time %in% t.grid) | min(time)!=1 | !all(diff(time) == 1)){
-            cat("<newdata$time> for a given <id> should be a sequence of consecutive integers in ",min(t.grid),":",max(t.grid),"\n",sep="")
-            if (min(time)!=1) cat("In addition, min(newdata$time) for a given <id> must be equal to 1\n")
+            warning("<newdata$time> for a given <id> should be a sequence of consecutive integers in ",min(t.grid),":",max(t.grid),"\n",sep="")
+            if (min(time)!=1) warning("In addition, min(newdata$time) for a given <id> must be equal to 1\n")
             return(NULL)
         }
         ## Estimated regression and spline parameters
@@ -113,13 +113,11 @@ predict.tvcure <- function(object, newdata, ci.level=.95, ...){
                    lhp = eta.1 + eta.2 + (exp(eta.2)-1) * log(F0.grid[time]) + log(f0.grid[time])
                    Hp = cumsum(exp(lHp)*Delta)
                    lHp = log(Hp)
-                   ## lHp = eta.1 + exp(eta.2)*log(F0.grid[time])
                },
                "S0" = {
                    lhp = eta.1 + eta.2 + (exp(eta.2)-1) * log(S0.grid[time]) + log(f0.grid[time]) ## <-- Pack_v2
                    Hp = cumsum(exp(lhp)*Delta)
                    lHp = log(Hp)
-                   ## lHp = eta.1 + log(1-(S0.grid[time]^exp(eta.2))) ## <-- Pack_v2
                }
                )
         ## Computation of se(log(Hp)) & se(log(hp))
@@ -266,8 +264,8 @@ predict.tvcure <- function(object, newdata, ci.level=.95, ...){
 ##         idx = which(id==ids[ii])
 ##         time = data.sub$time
 ##         if (!all(time %in% t.grid) | min(time)!=1 | !all(diff(time) == 1)){
-##             cat("<newdata$time> for a given <id> should be a sequence of consecutive integers in ",min(t.grid),":",max(t.grid),"\n",sep="")
-##             if (min(time)!=1) cat("In addition, min(newdata$time) for a given <id> must be equal to 1\n")
+##             message("<newdata$time> for a given <id> should be a sequence of consecutive integers in ",min(t.grid),":",max(t.grid),"\n",sep="")
+##             if (min(time)!=1) message("In addition, min(newdata$time) for a given <id> must be equal to 1\n")
 ##             return(NULL)
 ##         }
 ##         ## Estimated regression and spline parameters

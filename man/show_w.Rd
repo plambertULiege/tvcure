@@ -6,6 +6,9 @@
 \usage{
 show_w()
 }
+\value{
+No return value, called for its side effects of printing a message.
+}
 \description{
 Displays a notice that the program comes with absolutely no warranty.
 }

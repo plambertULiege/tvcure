@@ -138,8 +138,8 @@ tvcure = function(formula1, formula2, data,
     tau.method = match.arg(tau.method)
     lambda.method = match.arg(lambda.method)
     psi.method = match.arg(psi.method)
-    if (missing(formula1)) {message("Missing model formula <formula1> for long-term survival !") ; return(NULL)}
-    if (missing(formula2)) {message("Missing model formula <formula2> for short-term survival !") ; return(NULL)}
+    if (missing(formula1)) {warning("Missing model formula <formula1> for long-term survival !") ; return(NULL)}
+    if (missing(formula2)) {warning("Missing model formula <formula2> for short-term survival !") ; return(NULL)}
     if (verbose) iter.verbose = verbose
     ## Lp-norm function
     ## ----------------
@@ -155,7 +155,7 @@ tvcure = function(formula1, formula2, data,
     environment(formula1) <- environment(formula2) <- environment()
     ## Check that <id>, <time> and <event> entries in <data>
     ## ---------------------------------------------------
-    if (missing(data)) {message("Missing data frame <data> with <id>, <time>, event indicator <event>, and covariate values !") ; return(NULL)}
+    if (missing(data)) {warning("Missing data frame <data> with <id>, <time>, event indicator <event>, and covariate values !") ; return(NULL)}
     if (!"id" %in% colnames(data)) stop("Missing <id> column in the data frame <data> !!")
     if (!"time" %in% colnames(data)) stop("Missing <time> column in the data frame <data> !!")
     if (!"event" %in% colnames(data)) stop("Missing <event> column in the data frame <data> !!")
@@ -188,7 +188,7 @@ tvcure = function(formula1, formula2, data,
     if (sum(check3) < .1*n.id) stop("<time> should be a sequence of consecutive integers for a given <id> !!")
     if (!all(check3)){
         word = ifelse(sum(!check3)>1, " units", " unit")
-        cat(sum(!check3),word," (out of ",length(unique(data$id)),") with non-consecutive integer values for <time> detected\n",sep="")
+        message(sum(!check3),word," (out of ",length(unique(data$id)),") with non-consecutive integer values for <time> detected\n",sep="")
         fun4 = function(x) as.logical(cumprod(c(TRUE,diff(x)==1)))
         ## Rows with consecutive <time> values within a given <id>
         rows.ok =  as.vector(unlist(tapply2(data$time, data$id, fun4)))
@@ -198,7 +198,7 @@ tvcure = function(formula1, formula2, data,
         temp = tapply2(data$id[!rows.ok],data$id[!rows.ok],function(x) length(x))
 ##        temp = c(by(data$id[!rows.ok],data$id[!rows.ok],function(x) length(x)))
         temp = c(temp,sum(temp)) ; names(temp)[length(temp)] = "Total"
-        cat("Number of discarded time entries (out of ",nrow(data),") per problematic unit <id>:\n",sep="")
+        message("Number of discarded time entries (out of ",nrow(data),") per problematic unit <id>:\n",sep="")
         print(temp)
         data = data[rows.ok,]  ## Only keep rows with consecutive <time> values for a given <id>
     }
@@ -208,9 +208,6 @@ tvcure = function(formula1, formula2, data,
     n = length(id)     ## Number of units
     ## Preliminary NP estimation of S(t)
     ## ---------------------------------
-    ## data2 = array2DF(by(data[,c("id","time","event")], data$id, function(x) x[nrow(x),-1]))[,-1]
-    ## temp = with(data2, survfit(Surv(time,event) ~ 1))
-    ## t.hat = temp$time ; H0.hat = temp$cumhaz
     tab = with(data, table(time,event))
     n.risk = rowSums(tab) ; n.event = tab[,2]
     h0.hat = n.event / n.risk ; H0.hat = cumsum(h0.hat) ; lS0.hat = -H0.hat
@@ -1115,7 +1112,6 @@ tvcure = function(formula1, formula2, data,
     ## ------------------------------------------------------------------------------------
     ##                           START of the estimation process
     ## ------------------------------------------------------------------------------------
-    ## cat("Start of the iterative procedure\n")
     if (noestimation){
         lambda.method = "none" ; tau.method = "none" ; psi.method = "none"
     }

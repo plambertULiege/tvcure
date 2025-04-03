@@ -30,7 +30,7 @@
 #'
 centeredBasis.gen = function(x,knots,cm=NULL,pen.order=2){
   if ((max(x)>max(knots))|(min(x)<min(knots))){
-    cat("The knots do no cover the values of x !!\n")
+    warning("The knots do no cover the values of x !!")
     return(NULL)
   }
   ##

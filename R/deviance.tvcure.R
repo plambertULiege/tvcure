@@ -10,7 +10,7 @@
 #'
 #' @details Deviance -2log(L/L.hat)
 #'
-#' @return The deviance of the fitted tvcure model in \code{x}.
+#' @return The deviance as a numeric value, computed according to the model specified in the input \code{object}.
 #'
 #' @author Philippe Lambert \email{p.lambert@uliege.be}
 #' @references Lambert, P. and Kreyenfeld, M. (2025).

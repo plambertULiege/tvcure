@@ -81,11 +81,11 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL,
         if (c < 1) r = c = 1
         if (c * r < ppp) c = c + 1
         if (c * r < ppp) r = r + 1
-        oldpar = par(mfrow = c(r, c))
+        oldpar = par(mfrow = c(r, c), no.readonly = TRUE)
     }
     else {
         ppp = 1
-        oldpar = par()
+        oldpar = par(no.readonly = TRUE)
     }
     if ((pages == 0 && prod(par("mfcol")) < n.plots && dev.interactive()) ||
         pages > 1 && dev.interactive())
@@ -219,5 +219,6 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL,
         }
     }
     if (pages > 0) par(oldpar)
+##    par(oldpar)
     return(invisible(fhat))
 }

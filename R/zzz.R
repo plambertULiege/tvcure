@@ -13,18 +13,20 @@
 #'
 #' Displays the copyright information for the package in interactive mode.
 #'
+#' @return No return value, called for its side effects of printing a message.
 #' @export
 show_c <- function() {
-  cat("This program is free software; you can redistribute it under certain conditions.\n")
-  cat("For details, see the General Public License (GPL-3).\n")
+  message("This program is free software; you can redistribute it under certain conditions.")
+  message("For details, see the General Public License (GPL-3).\n")
 }
 
 #' Show Warranty Disclaimer
 #'
 #' Displays a notice that the program comes with absolutely no warranty.
-#'
+#' 
+#' @return No return value, called for its side effects of printing a message.
 #' @export
 show_w <- function() {
-  cat("This program comes with ABSOLUTELY NO WARRANTY.\n")
-  cat("For details, see the General Public License (GPL-3).\n")
+  message("This program comes with ABSOLUTELY NO WARRANTY.")
+  message("For details, see the General Public License (GPL-3).\n")
 }

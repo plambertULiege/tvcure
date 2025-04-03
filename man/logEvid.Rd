@@ -11,6 +11,9 @@ logEvid(object, ...)
 
 \item{...}{Additional arguments (not used for now).}
 }
+\value{
+The log-evidence as a numeric value, computed according to the model specified in the input object.
+}
 \description{
 This is a generic function returning the log-evidence for the class of the input object.
 }

@@ -10,7 +10,7 @@
 #'
 #' @details Bayesian (Schwarz) information criterion in a tvcure object, with a penalty calculated using the total effective degrees of freedom and the total number of observed events, -2log(L) + log(d)*ED.tot, smaller values being preferred during model selection.
 #'
-#' @return The BIC of the fitted tvcure model in \code{x}.
+#' @return The BIC as a numeric value, computed according to the model specified in the input \code{object}.
 #'
 #' @author Philippe Lambert \email{p.lambert@uliege.be}
 #' @references Lambert, P. and Kreyenfeld, M. (2025).

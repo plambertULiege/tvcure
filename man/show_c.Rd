@@ -6,6 +6,9 @@
 \usage{
 show_c()
 }
+\value{
+No return value, called for its side effects of printing a message.
+}
 \description{
 Displays the copyright information for the package in interactive mode.
 }

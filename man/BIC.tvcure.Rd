@@ -12,7 +12,7 @@
 \item{...}{Optionally more fitted objects.}
 }
 \value{
-The BIC of the fitted tvcure model in \code{x}.
+The BIC as a numeric value, computed according to the model specified in the input \code{object}.
 }
 \description{
 Bayesian Information Criterion (BIC) for the fitted tvcure model in a \code{tvcure.object}.

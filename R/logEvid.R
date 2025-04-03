@@ -4,6 +4,7 @@
 #'
 #' @param object An object for which log-evidence is to be computed.
 #' @param ... Additional arguments (not used for now).
+#' @return The log-evidence as a numeric value, computed according to the model specified in the input object.
 #' @export
 logEvid <- function(object, ...) {
   UseMethod("logEvid")
@@ -18,22 +19,12 @@ logEvid <- function(object, ...) {
 #' @param ... Optionally more tvcure objects.
 #'
 #' @details Provides the log-evidence (or log-marginal likelihood) of the fitted tvcure model in a given \code{\link{tvcure.object}}, where the evidence is the marginal posterior of the penalty parameters at their selected values.
-#' @return The log-evidence of the tvcure model in \code{object}.
+#' @return The log-evidence as a numeric value, computed according to the model specified in the input \code{object}.
 #'
 #' @author Philippe Lambert \email{p.lambert@uliege.be}
 #' @references Lambert, P. and Kreyenfeld, M. (2025).
 #' Time-varying exogenous covariates with frequently changing values in double additive cure survival model: an application to fertility.
 #' \emph{Journal of the Royal Statistical Society, Series A}. <doi:10.1093/jrsssa/qnaf035>
-#'
-#' @examples
-#' require(tvcure)
-#' ## data(tvcure_Data)
-#' ## fit = tvcure(...)
-#' ## logEvid(fit)
-#'
-#' @seealso \code{\link{tvcure}}, \code{\link{tvcure.object}}, \code{\link{AIC.tvcure}}, \code{\link{BIC.tvcure}}
-#'
-#' @export
 #'
 #' @examples
 #' \donttest{
@@ -48,9 +39,10 @@ logEvid <- function(object, ...) {
 #'                tau.0=tau.0, lambda1.0=lambda1.0, lambda2.0=lambda2.0)
 #' logEvid(model)
 #' }
-
-##logEvid <- function(x, ...) UseMethod("logEvid")
-## logEvid.tvcure <- function(x, ...){
+#'
+#' @seealso \code{\link{tvcure}}, \code{\link{tvcure.object}}, \code{\link{AIC.tvcure}}, \code{\link{BIC.tvcure}}
+#' @export
+#' 
 logEvid.tvcure <- function(object, ...){
     obj = object
   lls = function(obj) return(ans = c(logEvid=obj$fit$logEvid, edf=obj$fit$ED.tot, nobs=obj$fit$nobs))

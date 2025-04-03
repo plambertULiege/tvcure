@@ -49,7 +49,7 @@ DesignFormula = function(formula, data, K=10, pen.order=2, knots.x=NULL, n=NULL,
     stop("Incorrect model formula")
   if ((formula=="~1")&(missing(data))){
     if (is.null(n)){
-      cat("Model with only the intercept: the sample size <n> or a data frame should be provided !\n")
+      warning("Model with only the intercept: the sample size <n> or a data frame should be provided !\n")
       return(NULL)
     }
     XX = model.matrix(~ 1, data = data.frame(rep(1,n)))

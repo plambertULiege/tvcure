@@ -14,7 +14,7 @@
 \item{k}{The penalty per parameter to be used. (Default: k=2 for the classical AIC).}
 }
 \value{
-The AIC of the fitted tvcure model in \code{x}.
+The AIC as a numeric value, computed according to the model specified in the input \code{object}.
 }
 \description{
 Akaike Information Criterion (AIC) for the fitted tvcure model in a \code{tvcure.object}.
