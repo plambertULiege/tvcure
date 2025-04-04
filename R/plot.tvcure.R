@@ -55,8 +55,12 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL,
                        fill=TRUE, pointwise=TRUE, mar=c(4,5,1,1),
                        xlim0=NULL, ylim0=NULL, xlim1=NULL, ylim1=NULL, xlim2=NULL, ylim2=NULL,
                        equal.ylims=TRUE,...){
+    oldpar <- par(no.readonly = TRUE)
+    on.exit(par(oldpar))
+    ##
     obj = x
     add.grid = TRUE
+    ##
     ## Compute additive term + envelope
     ## --------------------------------
     fhat = additive.tvcure(obj,ngrid=ngrid,ci.level=ci.level)
@@ -81,11 +85,10 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL,
         if (c < 1) r = c = 1
         if (c * r < ppp) c = c + 1
         if (c * r < ppp) r = r + 1
-        oldpar = par(mfrow = c(r, c), no.readonly = TRUE)
+        par(mfrow = c(r, c))
     }
     else {
         ppp = 1
-        oldpar = par(no.readonly = TRUE)
     }
     if ((pages == 0 && prod(par("mfcol")) < n.plots && dev.interactive()) ||
         pages > 1 && dev.interactive())
@@ -218,7 +221,5 @@ plot.tvcure = function(x, ngrid=300, ci.level=.95, pages=0, select=NULL,
             }
         }
     }
-    if (pages > 0) par(oldpar)
-##    par(oldpar)
     return(invisible(fhat))
 }
